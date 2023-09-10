@@ -26,15 +26,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'neoroll_client'",
+            "name": "Debug executable 'neoroll_gui'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=neoroll_client",
-                    "--package=neoroll_client"
+                    "--bin=neoroll_gui",
+                    "--package=neoroll_gui"
                 ],
                 "filter": {
-                    "name": "neoroll_client",
+                    "name": "neoroll_gui",
                     "kind": "bin"
                 }
             },
@@ -44,16 +44,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'neoroll_client'",
+            "name": "Debug unit tests in executable 'neoroll_gui'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=neoroll_client",
-                    "--package=neoroll_client"
+                    "--bin=neoroll_gui",
+                    "--package=neoroll_gui"
                 ],
                 "filter": {
-                    "name": "neoroll_client",
+                    "name": "neoroll_gui",
                     "kind": "bin"
                 }
             },

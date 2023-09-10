@@ -2343,7 +2343,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "neoroll_client"
+name = "neoroll_gui"
 version = "0.1.0"
 dependencies = [
  "bevy",

@@ -3,5 +3,5 @@ resolver = "2"
 
 members = [
     "neoroll_world",
-    "neoroll_client"
+    "neoroll_gui"
 ]
