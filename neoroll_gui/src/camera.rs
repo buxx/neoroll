@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct CameraController;
+pub struct Camera;
 
 pub fn move_camera(
-    mut camera: Query<&mut Transform, With<CameraController>>,
+    mut camera: Query<&mut Transform, With<Camera>>,
     button: Res<Input<MouseButton>>,
 ) {
     let mut camera = camera.single_mut();
