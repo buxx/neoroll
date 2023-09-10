@@ -9,7 +9,6 @@ pub fn move_camera(
 ) {
     let mut camera = camera.single_mut();
     if button.just_pressed(MouseButton::Left) {
-        println!("move camera");
-        camera.translation = camera.translation.lerp(Vec3::new(1.0, 1.0, 1.0), 0.2);
+        camera.translation += Vec3::new(1.0, 0.0, 1.0);
     }
 }

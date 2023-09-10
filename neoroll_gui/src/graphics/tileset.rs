@@ -18,7 +18,6 @@ pub fn show_tileset(
 
     if let (Some(_), Some(tileset)) = (&tileset.handle, tilesets.get_by_name("Regions")) {
         let texture = tileset.texture().clone();
-        commands.spawn(Camera2dBundle::default());
         commands.spawn(SpriteBundle {
             texture,
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
