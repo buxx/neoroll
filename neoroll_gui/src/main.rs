@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
 use camera::move_camera;
-use graphics::tileset::{show_tileset, RegionTileset};
+use graphics::tileset::{display_world, RegionTileset};
 use setup::setup_;
 
 pub mod camera;
@@ -14,6 +14,6 @@ fn main() {
         .add_plugins((DefaultPlugins, TilesetPlugin::default()))
         .init_resource::<RegionTileset>()
         .add_systems(Startup, setup_)
-        .add_systems(Update, (show_tileset, move_camera))
+        .add_systems(Update, (display_world, move_camera))
         .run();
 }
