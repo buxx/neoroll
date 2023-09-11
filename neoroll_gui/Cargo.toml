@@ -5,7 +5,8 @@ edition = "2021"
 
 [dependencies]
 neoroll_world = { path = "../neoroll_world" }
-bevy = { version = "0.11.2" }
+# WARNING : remove dynamic_linking feature for production !!
+bevy = { version = "0.11.2", features = ["dynamic_linking"] }
 bevy_tileset = "0.8.0"
 
 # Enable a small amount of optimization in debug mode
