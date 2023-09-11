@@ -2,7 +2,7 @@
     name: Some("Regions"),
     id: 0,
     tiles: {
-        0: "../tiles/region/grassland.ron",
+        0: "../tiles/region/grass_land.ron",
         1: "../tiles/region/forest.ron",
     }
 )

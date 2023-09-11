@@ -1,4 +1,4 @@
-pub struct RowI(usize);
-pub struct ColI(usize);
+pub struct RowI(pub usize);
+pub struct ColI(pub usize);
 
-pub struct RegionCoordinate(RowI, ColI);
+pub struct RegionCoordinate(pub RowI, pub ColI);
