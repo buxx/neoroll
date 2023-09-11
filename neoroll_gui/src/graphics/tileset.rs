@@ -6,11 +6,7 @@ pub struct RegionTileset {
     pub handle: Option<Handle<Tileset>>,
 }
 
-fn tile_sprite_sheet_bundle(
-    atlas: &Handle<TextureAtlas>,
-    tile_index: &TileIndex,
-    point: Vec3,
-) -> SpriteSheetBundle {
+fn spawn(atlas: &Handle<TextureAtlas>, tile_index: &TileIndex, point: Vec3) -> SpriteSheetBundle {
     match tile_index {
         TileIndex::Standard(index) => SpriteSheetBundle {
             transform: Transform {
@@ -37,7 +33,7 @@ pub fn display_world(tilesets: Tilesets, mut commands: Commands, mut has_ran: Lo
             let atlas = tileset.atlas();
             for col in 0..10 {
                 for row in 0..10 {
-                    commands.spawn(tile_sprite_sheet_bundle(
+                    commands.spawn(spawn(
                         atlas,
                         tile_index,
                         Vec3::new(col as f32 * 16.0, row as f32 * 16.0, 0.0),
