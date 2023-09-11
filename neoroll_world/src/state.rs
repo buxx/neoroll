@@ -4,6 +4,9 @@ use crate::{
     tile::RegionTile,
 };
 
+pub const REGION_TILE_WIDTH: usize = 16;
+pub const REGION_TILE_HEIGHT: usize = 16;
+
 pub struct Region {
     tile: RegionTile,
 }
@@ -13,6 +16,8 @@ pub struct World {
     regions: Vec<Region>,
     lines: usize,
     columns: usize,
+    tile_width: usize,
+    tile_height: usize,
 }
 
 impl World {
@@ -20,6 +25,8 @@ impl World {
         let mut world = World {
             lines,
             columns,
+            tile_width: REGION_TILE_WIDTH,
+            tile_height: REGION_TILE_HEIGHT,
             ..Default::default()
         };
 
@@ -49,6 +56,14 @@ impl World {
     pub fn region(&self, row: RowI, col: ColI) -> &Region {
         let i = row.0 * self.columns + col.0;
         &self.regions[i]
+    }
+
+    pub fn tile_width(&self) -> usize {
+        self.tile_width
+    }
+
+    pub fn tile_height(&self) -> usize {
+        self.tile_height
     }
 }
 

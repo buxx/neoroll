@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
+use camera::debug_camera;
 use graphics::tileset::RegionTileset;
 use input::{inputs, InputState};
 use setup::setup_;
@@ -20,6 +21,6 @@ fn main() {
         .init_resource::<WorldContainer>()
         .add_systems(Startup, setup_)
         .add_systems(Update, (init_world, inputs))
-        .add_systems(FixedUpdate, remove_world)
+        .add_systems(FixedUpdate, (remove_world, debug_camera))
         .run();
 }
