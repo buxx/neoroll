@@ -11,5 +11,5 @@ pub fn setup_(
 ) {
     commands.spawn((Camera2dBundle::default(), PlayerCamera));
     tileset.handle = Some(asset_server.load("tilesets/regions.ron"));
-    world.0 = World::from_random(500, 500);
+    world.0 = World::from_random(100, 100);
 }

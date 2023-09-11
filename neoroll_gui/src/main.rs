@@ -4,7 +4,7 @@ use bevy_tileset::prelude::*;
 use graphics::tileset::RegionTileset;
 use input::{inputs, InputState};
 use setup::setup_;
-use world::{display_world, WorldContainer};
+use world::{init_world, remove_world, WorldContainer};
 
 pub mod camera;
 pub mod graphics;
@@ -19,6 +19,7 @@ fn main() {
         .init_resource::<RegionTileset>()
         .init_resource::<WorldContainer>()
         .add_systems(Startup, setup_)
-        .add_systems(Update, (display_world, inputs))
+        .add_systems(Update, (init_world, inputs))
+        .add_systems(FixedUpdate, remove_world)
         .run();
 }
