@@ -30,10 +30,21 @@ impl World {
             ..Default::default()
         };
 
-        for col in 0..columns {
-            for row in 0..lines {
+        // Determine grass land center
+        let center_lines = (lines / 10).clamp(0, 50);
+        let center_columns = (columns / 10).clamp(0, 50);
+        let mut center = vec![];
+        for row in -(center_lines as isize / 2)..(center_lines as isize / 2) {
+            for col in -(center_columns as isize / 2)..(center_columns as isize / 2) {
+                center.push(RegionCoordinate(RowI(row), ColI(col)))
+            }
+        }
+
+        let generator = DummyWorldGenerator::default().forced_grass_lands(center);
+        for row in -(lines as isize / 2)..(lines as isize / 2) {
+            for col in -(columns as isize / 2)..(columns as isize / 2) {
                 world.regions.push(Region::new(
-                    DummyWorldGenerator.region(&world, RegionCoordinate(RowI(row), ColI(col))),
+                    generator.region(&world, RegionCoordinate(RowI(row), ColI(col))),
                 ))
             }
         }
@@ -54,8 +65,8 @@ impl World {
     }
 
     pub fn region(&self, row: RowI, col: ColI) -> &Region {
-        let i = row.0 * self.columns + col.0;
-        &self.regions[i]
+        let i = row.0 * self.columns as isize + col.0;
+        &self.regions[i as usize]
     }
 
     pub fn tile_width(&self) -> usize {

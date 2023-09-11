@@ -1,4 +1,8 @@
-pub struct RowI(pub usize);
-pub struct ColI(pub usize);
+#[derive(Debug, Eq, PartialEq)]
+pub struct RowI(pub isize);
 
+#[derive(Debug, Eq, PartialEq)]
+pub struct ColI(pub isize);
+
+#[derive(Debug, Eq, PartialEq)]
 pub struct RegionCoordinate(pub RowI, pub ColI);

@@ -34,9 +34,13 @@ pub fn display_world(world: Res<WorldContainer>, tileset: &Tileset, mut commands
     let atlas = tileset.atlas();
     for row in 0..world.0.lines() {
         for col in 0..world.0.columns() {
-            if let Some((tile_index, _)) =
-                &tileset.select_tile(&world.0.region(RowI(row), ColI(col)).tile().to_string())
-            {
+            if let Some((tile_index, _)) = &tileset.select_tile(
+                &world
+                    .0
+                    .region(RowI(row as isize), ColI(col as isize))
+                    .tile()
+                    .to_string(),
+            ) {
                 commands.spawn(spawn(
                     atlas,
                     tile_index,
