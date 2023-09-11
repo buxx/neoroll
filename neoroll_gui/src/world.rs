@@ -40,7 +40,7 @@ pub fn display_world(world: Res<WorldContainer>, tileset: &Tileset, mut commands
                 commands.spawn(spawn(
                     atlas,
                     tile_index,
-                    Vec3::new(col as f32 * 16.0, row as f32 * 16.0, 0.0),
+                    Vec3::new(col as f32 * 16.0, -(row as f32 * 16.0), 0.0),
                 ));
             }
         }
