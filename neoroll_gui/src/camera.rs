@@ -50,3 +50,31 @@ pub fn camera_world_area(target: UVec2, translation: Vec3) -> WorldArea {
         end_tile.x as usize - start_tile.x as usize,
     )
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rstest::*;
+
+    #[rstest]
+    #[case(UVec2::new(32, 32), Vec3::new(0., 0., 0.), (0, 0), 1, 1)]
+    #[case(UVec2::new(32, 32), Vec3::new(16., -16., 0.), (0, 0), 2, 2)]
+    #[case(UVec2::new(64, 64), Vec3::new(0., 0., 0.), (0, 0), 2, 2)]
+    #[case(UVec2::new(64, 64), Vec3::new(32., -32., 0.), (0, 0), 4, 4)]
+    fn test_camera_world_area(
+        #[case] target: UVec2,
+        #[case] translation: Vec3,
+        #[case] start: (usize, usize),
+        #[case] lines: usize,
+        #[case] columns: usize,
+    ) {
+        let area = camera_world_area(target, translation);
+
+        assert_eq!(
+            area.start(),
+            AbsoluteWorldPoint(AbsoluteWorldRowI(start.0), AbsoluteWorldColI(start.1))
+        );
+        assert_eq!(area.lines(), lines);
+        assert_eq!(area.columns(), columns);
+    }
+}
