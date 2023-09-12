@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use neoroll_world::state::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH};
 
 use crate::world::WorldContainer;
 
@@ -26,12 +27,12 @@ pub fn debug_camera(
         );
 
         let start_tile = Vec2::new(
-            start_pixel.x / world.0.tile_width() as f32,
-            start_pixel.y / world.0.tile_height() as f32,
+            start_pixel.x / REGION_TILE_WIDTH as f32,
+            start_pixel.y / REGION_TILE_HEIGHT as f32,
         );
         let end_tile = Vec2::new(
-            end_pixel.x / world.0.tile_width() as f32,
-            end_pixel.y / world.0.tile_height() as f32,
+            end_pixel.x / REGION_TILE_WIDTH as f32,
+            end_pixel.y / REGION_TILE_HEIGHT as f32,
         );
 
         info!("start({:?}), end({:?})", start_tile, end_tile);
