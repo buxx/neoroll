@@ -1,7 +1,7 @@
-use crate::{space::RegionCoordinate, state::World, tile::RegionTile};
+use crate::{space::AbsoluteWorldPoint, state::EntireWorld, tile::RegionTile};
 
 pub mod dummy;
 
 pub trait WorldGenerator {
-    fn region(&self, world: &World, at: RegionCoordinate) -> RegionTile;
+    fn region(&self, world: &EntireWorld, at: AbsoluteWorldPoint) -> RegionTile;
 }

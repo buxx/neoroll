@@ -3,13 +3,17 @@ use bevy_tileset::prelude::*;
 
 use camera::debug_camera;
 use graphics::tileset::RegionTileset;
-use input::{inputs, InputState};
+use input::{inputs, manual_refresh_world_part_container, InputState};
 use setup::setup_;
-use world::{init_world, remove_world, WorldContainer};
+use world::{
+    init_world, refresh_world_display, refresh_world_part_container, WorldPartContainer,
+    WorldPartContainerNeedRefresh, WorldPartContainerRefreshed, WorldReader,
+};
 
 pub mod camera;
 pub mod graphics;
 pub mod input;
+pub mod scene;
 pub mod setup;
 pub mod world;
 
@@ -18,9 +22,21 @@ fn main() {
         .add_plugins((DefaultPlugins, TilesetPlugin::default()))
         .init_resource::<InputState>()
         .init_resource::<RegionTileset>()
-        .init_resource::<WorldContainer>()
+        .init_resource::<WorldReader>()
+        .init_resource::<WorldPartContainer>()
+        .add_event::<WorldPartContainerNeedRefresh>()
+        .add_event::<WorldPartContainerRefreshed>()
         .add_systems(Startup, setup_)
-        .add_systems(Update, (init_world, inputs))
-        .add_systems(FixedUpdate, (remove_world, debug_camera))
+        .add_systems(
+            Update,
+            (
+                inputs,
+                init_world,
+                refresh_world_part_container,
+                refresh_world_display,
+                manual_refresh_world_part_container,
+                debug_camera,
+            ),
+        )
         .run();
 }

@@ -1,15 +1,24 @@
 use bevy::prelude::*;
-use neoroll_world::state::World;
+use neoroll_world::state::EntireWorld;
 
-use crate::{camera::PlayerCamera, graphics::tileset::RegionTileset, world::WorldContainer};
+use crate::{camera::PlayerCamera, graphics::tileset::RegionTileset, world::WorldReader};
 
 pub fn setup_(
     mut tileset: ResMut<RegionTileset>,
-    mut world: ResMut<WorldContainer>,
+    mut world_reader: ResMut<WorldReader>,
     asset_server: Res<AssetServer>,
     mut commands: Commands,
 ) {
     commands.spawn((Camera2dBundle::default(), PlayerCamera));
     tileset.handle = Some(asset_server.load("tilesets/regions.ron"));
-    world.0 = World::from_random(100, 100);
+
+    // TODO : this part will be "server side" and network stuff
+    let entire_world = EntireWorld::from_random(64, 64);
+    info!(
+        "Generated world: {} lines, {} columns, {} tiles",
+        entire_world.lines(),
+        entire_world.columns(),
+        entire_world.regions().len()
+    );
+    world_reader.world = Some(entire_world);
 }

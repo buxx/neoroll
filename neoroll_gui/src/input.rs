@@ -3,6 +3,8 @@ use bevy::{
     prelude::*,
 };
 
+use crate::world::WorldPartContainerNeedRefresh;
+
 #[derive(Resource, Default)]
 pub struct InputState {
     cursor: Vec2,
@@ -30,9 +32,9 @@ impl InputState {
 pub fn inputs(
     mut input_state: ResMut<InputState>,
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
-    // mut mouse_wheel_events: EventReader<MouseWheel>,
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut camera: Query<&mut Transform, With<Camera>>,
+    mut world_part_container_need_change: EventWriter<WorldPartContainerNeedRefresh>,
 ) {
     let mut camera = camera.single_mut();
 
@@ -51,11 +53,6 @@ pub fn inputs(
         }
     }
 
-    // // Wheel
-    // for event in mouse_wheel_events.iter() {
-    //     camera.scale += event.y;
-    // }
-
     // Motion
     for event in cursor_moved_events.iter() {
         if input_state.click.is_some() {
@@ -67,8 +64,18 @@ pub fn inputs(
             );
             camera.translation.x -= vector.x;
             camera.translation.y += vector.y;
+            world_part_container_need_change.send(WorldPartContainerNeedRefresh)
         }
 
         input_state.cursor = event.position
+    }
+}
+
+pub fn manual_refresh_world_part_container(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut world_part_container_need_change: EventWriter<WorldPartContainerNeedRefresh>,
+) {
+    if keyboard_input.just_released(KeyCode::F5) {
+        world_part_container_need_change.send(WorldPartContainerNeedRefresh)
     }
 }
