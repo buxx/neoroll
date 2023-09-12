@@ -61,6 +61,7 @@ mod test {
     #[case(UVec2::new(32, 32), Vec3::new(16., -16., 0.), (0, 0), 2, 2)]
     #[case(UVec2::new(64, 64), Vec3::new(0., 0., 0.), (0, 0), 2, 2)]
     #[case(UVec2::new(64, 64), Vec3::new(32., -32., 0.), (0, 0), 4, 4)]
+    #[case(UVec2::new(160, 160), Vec3::new(160., -160., 0.), (5, 5), 10, 10)]
     fn test_camera_world_area(
         #[case] target: UVec2,
         #[case] translation: Vec3,
