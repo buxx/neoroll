@@ -3,7 +3,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::world::WorldPartContainerNeedRefresh;
+use crate::world::container::WorldPartContainerNeedRefresh;
 
 #[derive(Resource, Default)]
 pub struct InputState {

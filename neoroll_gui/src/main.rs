@@ -2,13 +2,17 @@ use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
 use camera::debug_camera;
-use graphics::tileset::RegionTileset;
+use graphics::{tileset::RegionTileset, world::refresh_world_display};
 use input::{inputs, manual_refresh_world_part_container, InputState};
 use setup::setup_;
 use window::on_window_resize;
 use world::{
-    init_world, refresh_world_display, refresh_world_part_container, WorldPartContainer,
-    WorldPartContainerNeedRefresh, WorldPartContainerRefreshed, WorldReader,
+    container::{
+        refresh_world_part_container, WorldPartContainer, WorldPartContainerNeedRefresh,
+        WorldPartContainerRefreshed,
+    },
+    init_world,
+    reader::WorldReader,
 };
 
 pub mod camera;
