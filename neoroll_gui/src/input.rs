@@ -47,8 +47,6 @@ pub fn inputs(
             }
             ButtonState::Released => {
                 input_state.end_click();
-                // Avoid ugly pixels by translate only on entire pixels
-                camera.translation = camera.translation.round();
             }
         }
     }
@@ -64,6 +62,9 @@ pub fn inputs(
             );
             camera.translation.x -= vector.x;
             camera.translation.y += vector.y;
+            // Avoid ugly pixels by translate only on entire pixels
+            camera.translation = camera.translation.round();
+
             world_part_container_need_change.send(WorldPartContainerNeedRefresh)
         }
 

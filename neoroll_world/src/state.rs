@@ -53,16 +53,32 @@ impl WorldArea {
         self.columns
     }
 
+    pub fn start_row(&self) -> AbsoluteWorldRowI {
+        AbsoluteWorldRowI(self.start().row_i().0)
+    }
+
+    pub fn end_row(&self) -> AbsoluteWorldRowI {
+        AbsoluteWorldRowI(self.start_row().0 + self.lines() as isize)
+    }
+
+    pub fn start_col(&self) -> AbsoluteWorldColI {
+        AbsoluteWorldColI(self.start().col_i().0)
+    }
+
+    pub fn end_col(&self) -> AbsoluteWorldColI {
+        AbsoluteWorldColI(self.start_col().0 + self.columns() as isize)
+    }
+
     pub fn rows(&self) -> Vec<AbsoluteWorldRowI> {
-        (self.start().row_i().0..self.lines())
-            .map(AbsoluteWorldRowI)
-            .collect()
+        let from = self.start_row().0;
+        let to = self.end_row().0;
+        (from..to).map(AbsoluteWorldRowI).collect()
     }
 
     pub fn cols(&self) -> Vec<AbsoluteWorldColI> {
-        (self.start().col_i().0..self.columns())
-            .map(AbsoluteWorldColI)
-            .collect()
+        let from = self.start_col().0;
+        let to = self.end_col().0;
+        (from..to).map(AbsoluteWorldColI).collect()
     }
 }
 
@@ -70,17 +86,9 @@ impl WorldPart {
     pub fn from_world(world: &EntireWorld, area: WorldArea) -> Self {
         let mut regions: Vec<Option<Region>> = vec![];
 
-        println!(
-            "Build WorldPart from area: start({},{}), lines({}), columns({})",
-            area.start().0 .0,
-            area.start().1 .0,
-            area.lines(),
-            area.columns()
-        );
-
         for row in area.rows() {
             for col in area.cols() {
-                regions.push(world.region(row, col).cloned());
+                regions.push(world.region(AbsoluteWorldPoint(row, col)).cloned());
             }
         }
 
@@ -102,14 +110,27 @@ impl WorldPart {
     }
 
     pub fn region(&self, point: AbsoluteWorldPoint) -> &Option<Region> {
-        let relative_point = RelativeWorldPoint::from_absolute(point, &self.area);
-        let i = relative_point.row_i().0 * self.area.columns() + relative_point.col_i().0;
-
-        if i >= self.regions.len() {
-            // println!("WARN1 : {} >= {}", i, self.regions.len());
+        // Outside
+        if point.row_i().0 >= self.area.end_row().0
+            || point.row_i().0 < self.area.start_row().0
+            || point.col_i().0 >= self.area.end_col().0
+            || point.col_i().0 < self.area.start_col().0
+        {
             return &None;
         }
 
+        let relative_point = RelativeWorldPoint::from_absolute(point, &self.area);
+        let row_i = relative_point.row_i().0;
+        let col_i = relative_point.col_i().0;
+        assert!(row_i >= 0);
+        assert!(col_i >= 0);
+        let row_i = row_i as usize;
+        let col_i = col_i as usize;
+
+        let i = row_i * self.area.columns() + col_i;
+        if i >= self.regions.len() {
+            println!("oups");
+        }
         &self.regions[i]
     }
 
@@ -134,8 +155,8 @@ impl EntireWorld {
         for row in (center_row - width)..(center_row + width) {
             for col in (center_col - width)..(center_col + width) {
                 center.push(AbsoluteWorldPoint(
-                    AbsoluteWorldRowI(row),
-                    AbsoluteWorldColI(col),
+                    AbsoluteWorldRowI(row as isize),
+                    AbsoluteWorldColI(col as isize),
                 ))
             }
         }
@@ -143,7 +164,10 @@ impl EntireWorld {
         let generator = DummyWorldGenerator::default().forced_grass_lands(center);
         for row in 0..lines {
             for col in 0..columns {
-                let point = AbsoluteWorldPoint(AbsoluteWorldRowI(row), AbsoluteWorldColI(col));
+                let point = AbsoluteWorldPoint(
+                    AbsoluteWorldRowI(row as isize),
+                    AbsoluteWorldColI(col as isize),
+                );
                 let new_tile = generator.region(&world, point);
                 let new_region = Region::new(new_tile);
                 world.regions.push(new_region);
@@ -161,13 +185,20 @@ impl EntireWorld {
         self.columns
     }
 
-    pub fn region(&self, row: AbsoluteWorldRowI, col: AbsoluteWorldColI) -> Option<&Region> {
-        let i = row.0 * self.columns + col.0;
-
-        if i >= self.regions.len() {
-            // println!("WARN2 : {} >= {}", i, self.regions.len());
+    pub fn region(&self, point: AbsoluteWorldPoint) -> Option<&Region> {
+        // Outside
+        if point.row_i().0 >= self.lines as isize
+            || point.row_i().0 < 0
+            || point.col_i().0 >= self.columns as isize
+            || point.col_i().0 < 0
+        {
             return None;
         }
+
+        let row_i = point.row_i().0 as usize;
+        let col_i = point.col_i().0 as usize;
+
+        let i = row_i * self.columns + col_i;
 
         Some(&self.regions[i])
     }
@@ -184,5 +215,106 @@ impl Region {
 
     pub fn tile(&self) -> &RegionTile {
         &self.tile
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rstest::*;
+
+    #[cfg(test)]
+    #[fixture]
+    fn entire_world() -> EntireWorld {
+        let lines = 5;
+        let columns = 5;
+        let regions = (0..25)
+            .map(|_| Region::new(RegionTile::GrassLand))
+            .collect();
+        EntireWorld {
+            regions,
+            lines,
+            columns,
+        }
+    }
+
+    #[rstest]
+    #[case(
+        (0, 0),
+        5,
+        5,
+        vec![
+            1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1,
+        ]
+    )]
+    #[case(
+        (0, 0),
+        2,
+        5,
+        vec![
+            1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1,
+        ]
+    )]
+    #[case(
+        (0, 0),
+        2,
+        2,
+        vec![
+            1, 1,
+            1, 1,
+        ]
+    )]
+    #[case(
+        (0, 0),
+        6,
+        6,
+        vec![
+            1, 1, 1, 1, 1, 0,
+            1, 1, 1, 1, 1, 0,
+            1, 1, 1, 1, 1, 0,
+            1, 1, 1, 1, 1, 0,
+            1, 1, 1, 1, 1, 0,
+            0, 0, 0, 0, 0, 0,
+        ]
+    )]
+    #[case(
+        (-1, -1),
+        5,
+        5,
+        vec![
+            0, 0, 0, 0, 0,
+            0, 1, 1, 1, 1,
+            0, 1, 1, 1, 1,
+            0, 1, 1, 1, 1,
+            0, 1, 1, 1, 1,
+        ]
+    )]
+    fn test_world_part(
+        entire_world: EntireWorld,
+        #[case] start: (isize, isize),
+        #[case] lines: usize,
+        #[case] columns: usize,
+        #[case] expected: Vec<usize>,
+    ) {
+        let (start_row, start_col) = start;
+        let area = WorldArea::new(
+            AbsoluteWorldPoint(AbsoluteWorldRowI(start_row), AbsoluteWorldColI(start_col)),
+            lines,
+            columns,
+        );
+
+        let world_part = WorldPart::from_world(&entire_world, area);
+
+        let regions: Vec<usize> = world_part
+            .regions()
+            .iter()
+            .map(|(_, r)| r.is_some() as usize)
+            .collect();
+        assert_eq!(regions, expected)
     }
 }

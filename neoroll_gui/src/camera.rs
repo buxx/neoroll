@@ -41,10 +41,18 @@ pub fn camera_world_area(target: UVec2, translation: Vec3) -> WorldArea {
         end_pixel.y / REGION_TILE_HEIGHT as f32,
     );
 
+    info!(
+        "({}, {}) {} {}",
+        start_tile.x,
+        start_tile.y,
+        end_tile.y as usize - start_tile.y as usize,
+        end_tile.x as usize - start_tile.x as usize
+    );
+
     WorldArea::new(
         AbsoluteWorldPoint(
-            AbsoluteWorldRowI(start_tile.y as usize),
-            AbsoluteWorldColI(start_tile.x as usize),
+            AbsoluteWorldRowI(start_tile.y as isize),
+            AbsoluteWorldColI(start_tile.x as isize),
         ),
         end_tile.y as usize - start_tile.y as usize,
         end_tile.x as usize - start_tile.x as usize,
@@ -57,15 +65,15 @@ mod test {
     use rstest::*;
 
     #[rstest]
-    #[case(UVec2::new(32, 32), Vec3::new(0., 0., 0.), (0, 0), 1, 1)]
+    #[case(UVec2::new(32, 32), Vec3::new(0., 0., 0.), (-1, -1), 1, 1)]
     #[case(UVec2::new(32, 32), Vec3::new(16., -16., 0.), (0, 0), 2, 2)]
-    #[case(UVec2::new(64, 64), Vec3::new(0., 0., 0.), (0, 0), 2, 2)]
+    #[case(UVec2::new(64, 64), Vec3::new(0., 0., 0.), (-2, -2), 2, 2)]
     #[case(UVec2::new(64, 64), Vec3::new(32., -32., 0.), (0, 0), 4, 4)]
     #[case(UVec2::new(160, 160), Vec3::new(160., -160., 0.), (5, 5), 10, 10)]
     fn test_camera_world_area(
         #[case] target: UVec2,
         #[case] translation: Vec3,
-        #[case] start: (usize, usize),
+        #[case] start: (isize, isize),
         #[case] lines: usize,
         #[case] columns: usize,
     ) {

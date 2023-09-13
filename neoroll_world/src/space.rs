@@ -1,10 +1,10 @@
 use crate::state::WorldArea;
 
 #[derive(Debug, Eq, PartialEq, Default, Clone, Copy)]
-pub struct AbsoluteWorldRowI(pub usize);
+pub struct AbsoluteWorldRowI(pub isize);
 
 #[derive(Debug, Eq, PartialEq, Default, Clone, Copy)]
-pub struct AbsoluteWorldColI(pub usize);
+pub struct AbsoluteWorldColI(pub isize);
 
 #[derive(Debug, Eq, PartialEq, Default, Clone, Copy)]
 pub struct AbsoluteWorldPoint(pub AbsoluteWorldRowI, pub AbsoluteWorldColI);
@@ -21,10 +21,10 @@ impl AbsoluteWorldPoint {
 
 //.....?????
 #[derive(Debug, Eq, PartialEq, Default, Clone, Copy)]
-pub struct RelativeWorldRowI(pub usize);
+pub struct RelativeWorldRowI(pub isize);
 
 #[derive(Debug, Eq, PartialEq, Default, Clone, Copy)]
-pub struct RelativeWorldColI(pub usize);
+pub struct RelativeWorldColI(pub isize);
 
 #[derive(Debug, Eq, PartialEq, Default, Clone, Copy)]
 pub struct RelativeWorldPoint(pub RelativeWorldRowI, pub RelativeWorldColI);

@@ -69,7 +69,7 @@ pub fn refresh_world_part_container(
         let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
         let translation = transform.translation;
         let area = camera_world_area(target, translation);
-        dbg!(&area);
+
         world_reader.update(&mut world_part_container, area);
         world_part_container_change.send(WorldPartContainerRefreshed);
     }

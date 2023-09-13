@@ -13,7 +13,7 @@ pub fn setup_(
     tileset.handle = Some(asset_server.load("tilesets/regions.ron"));
 
     // TODO : this part will be "server side" and network stuff
-    let entire_world = EntireWorld::from_random(64, 64);
+    let entire_world = EntireWorld::from_random(100, 100);
     info!(
         "Generated world: {} lines, {} columns, {} tiles",
         entire_world.lines(),
