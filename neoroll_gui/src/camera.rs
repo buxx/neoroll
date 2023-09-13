@@ -7,21 +7,6 @@ use neoroll_world::{
 #[derive(Component, Default, Debug)]
 pub struct PlayerCamera;
 
-pub fn debug_camera(
-    keyboard_input: Res<Input<KeyCode>>,
-    player_camera: Query<(&PlayerCamera, &Camera, &mut Transform)>,
-) {
-    if keyboard_input.just_pressed(KeyCode::F12) {
-        let (_, camera, transform) = player_camera.single();
-
-        let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
-        let translation = transform.translation;
-        let area = camera_world_area(target, translation);
-
-        info!("area({:?})", area);
-    }
-}
-
 pub fn camera_world_area(target: UVec2, translation: Vec3) -> WorldArea {
     let start_pixel = Vec2::new(
         -(target.x as f32 / 2.) + translation.x,

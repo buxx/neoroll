@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
-use camera::debug_camera;
 use graphics::{tileset::RegionTileset, world::refresh_world_display};
 use input::{inputs, manual_refresh_world_part_container, InputState};
 use setup::setup_;
@@ -42,7 +41,6 @@ fn main() {
                 refresh_world_display,
                 manual_refresh_world_part_container,
                 on_window_resize,
-                debug_camera,
             ),
         )
         .run();
