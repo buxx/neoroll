@@ -27,35 +27,22 @@ pub fn camera_world_area(target: UVec2, translation: Vec3) -> WorldArea {
         -(target.x as f32 / 2.) + translation.x,
         -(target.y as f32 / 2.) - translation.y,
     );
-    let end_pixel = Vec2::new(
-        start_pixel.x + target.x as f32,
-        start_pixel.y + target.y as f32,
-    );
 
     let start_tile = Vec2::new(
         start_pixel.x / REGION_TILE_WIDTH as f32,
         start_pixel.y / REGION_TILE_HEIGHT as f32,
     );
-    let end_tile = Vec2::new(
-        end_pixel.x / REGION_TILE_WIDTH as f32,
-        end_pixel.y / REGION_TILE_HEIGHT as f32,
-    );
 
-    info!(
-        "({}, {}) {} {}",
-        start_tile.x,
-        start_tile.y,
-        end_tile.y as usize - start_tile.y as usize,
-        end_tile.x as usize - start_tile.x as usize
-    );
+    let columns = target.x as usize / REGION_TILE_WIDTH;
+    let lines = target.y as usize / REGION_TILE_HEIGHT;
 
     WorldArea::new(
         AbsoluteWorldPoint(
             AbsoluteWorldRowI(start_tile.y as isize),
             AbsoluteWorldColI(start_tile.x as isize),
         ),
-        end_tile.y as usize - start_tile.y as usize,
-        end_tile.x as usize - start_tile.x as usize,
+        lines,
+        columns,
     )
 }
 
