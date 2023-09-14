@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use self::container::WorldPartContainerNeedRefresh;
 
 pub mod container;
-pub mod reader;
 pub mod region;
+pub mod updater;
 
 // TODO : Better way to run once ? Do it in setup_ ? But how to access player_camera ?
 pub fn init_world(

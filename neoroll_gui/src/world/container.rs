@@ -3,7 +3,7 @@ use neoroll_world::state::WorldPart;
 
 use crate::camera::{camera_world_area, PlayerCamera};
 
-use super::reader::WorldReader;
+use super::updater::WorldUpdater;
 
 #[derive(Event)]
 pub struct WorldPartContainerRefreshed;
@@ -21,7 +21,7 @@ impl WorldPartContainer {
 
 pub fn refresh_world_part_container(
     player_camera: Query<(&PlayerCamera, &Camera, &mut Transform)>,
-    world_reader: ResMut<WorldReader>,
+    world_updater: ResMut<WorldUpdater>,
     mut world_part_container: ResMut<WorldPartContainer>,
     mut world_part_container_need_change: EventReader<WorldPartContainerNeedRefresh>,
     mut world_part_container_change: EventWriter<WorldPartContainerRefreshed>,
@@ -34,7 +34,7 @@ pub fn refresh_world_part_container(
         let translation = transform.translation;
         let area = camera_world_area(target, translation);
 
-        world_reader.update(&mut world_part_container, area);
+        world_updater.update(&mut world_part_container, area);
         world_part_container_change.send(WorldPartContainerRefreshed);
     }
 }

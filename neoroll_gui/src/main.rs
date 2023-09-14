@@ -11,7 +11,7 @@ use world::{
         WorldPartContainerRefreshed,
     },
     init_world,
-    reader::WorldReader,
+    updater::WorldUpdater,
 };
 
 pub mod camera;
@@ -27,7 +27,7 @@ fn main() {
         .add_plugins((DefaultPlugins, TilesetPlugin::default()))
         .init_resource::<InputState>()
         .init_resource::<RegionTileset>()
-        .init_resource::<WorldReader>()
+        .init_resource::<WorldUpdater>()
         .init_resource::<WorldPartContainer>()
         .add_event::<WorldPartContainerNeedRefresh>()
         .add_event::<WorldPartContainerRefreshed>()

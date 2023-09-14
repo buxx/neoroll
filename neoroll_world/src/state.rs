@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
     generator::{dummy::DummyWorldGenerator, WorldGenerator},
     space::{AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI, RelativeWorldPoint},
@@ -80,16 +82,33 @@ impl WorldArea {
         let to = self.end_col().0;
         (from..to).map(AbsoluteWorldColI).collect()
     }
+
+    pub fn points(&self) -> Vec<AbsoluteWorldPoint> {
+        let mut points = vec![];
+
+        for row in self.rows() {
+            for col in self.cols() {
+                points.push(AbsoluteWorldPoint(row, col));
+            }
+        }
+
+        points
+    }
+
+    fn contains(&self, point: &AbsoluteWorldPoint) -> bool {
+        !(point.row_i().0 >= self.end_row().0
+            || point.row_i().0 < self.start_row().0
+            || point.col_i().0 >= self.end_col().0
+            || point.col_i().0 < self.start_col().0)
+    }
 }
 
 impl WorldPart {
     pub fn from_world(world: &EntireWorld, area: WorldArea) -> Self {
         let mut regions: Vec<Option<Region>> = vec![];
 
-        for row in area.rows() {
-            for col in area.cols() {
-                regions.push(world.region(AbsoluteWorldPoint(row, col)).cloned());
-            }
+        for point in area.points() {
+            regions.push(world.region(&point).cloned());
         }
 
         Self { regions, area }
@@ -98,24 +117,17 @@ impl WorldPart {
     pub fn regions(&self) -> Vec<(AbsoluteWorldPoint, &Option<Region>)> {
         let mut regions = vec![];
 
-        for row in self.area().rows() {
-            for col in self.area().cols() {
-                let point = AbsoluteWorldPoint(row, col);
-                let region = self.region(point);
-                regions.push((point, region));
-            }
+        for point in self.area().points() {
+            let region = self.region(&point);
+            regions.push((point, region));
         }
 
         regions
     }
 
-    pub fn region(&self, point: AbsoluteWorldPoint) -> &Option<Region> {
+    pub fn region(&self, point: &AbsoluteWorldPoint) -> &Option<Region> {
         // Outside
-        if point.row_i().0 >= self.area.end_row().0
-            || point.row_i().0 < self.area.start_row().0
-            || point.col_i().0 >= self.area.end_col().0
-            || point.col_i().0 < self.area.start_col().0
-        {
+        if !self.area.contains(point) {
             return &None;
         }
 
@@ -128,14 +140,27 @@ impl WorldPart {
         let col_i = col_i as usize;
 
         let i = row_i * self.area.columns() + col_i;
-        if i >= self.regions.len() {
-            println!("oups");
-        }
+        assert!(i < self.regions.len());
         &self.regions[i]
     }
 
     pub fn area(&self) -> &WorldArea {
         &self.area
+    }
+
+    pub fn switch(&mut self, new_regions: NewRegions, area: WorldArea) {
+        let mut regions = vec![];
+
+        for point in area.points() {
+            regions.push(
+                self.region(&point)
+                    .clone()
+                    .or_else(|| new_regions.get(&point).cloned()),
+            );
+        }
+
+        self.regions = regions;
+        self.area = area;
     }
 }
 
@@ -185,7 +210,7 @@ impl EntireWorld {
         self.columns
     }
 
-    pub fn region(&self, point: AbsoluteWorldPoint) -> Option<&Region> {
+    pub fn region(&self, point: &AbsoluteWorldPoint) -> Option<&Region> {
         // Outside
         if point.row_i().0 >= self.lines as isize
             || point.row_i().0 < 0
@@ -199,7 +224,6 @@ impl EntireWorld {
         let col_i = point.col_i().0 as usize;
 
         let i = row_i * self.columns + col_i;
-
         Some(&self.regions[i])
     }
 
@@ -215,6 +239,39 @@ impl Region {
 
     pub fn tile(&self) -> &RegionTile {
         &self.tile
+    }
+}
+
+pub struct NewRegions {
+    regions: HashMap<AbsoluteWorldPoint, Region>,
+}
+
+impl NewRegions {
+    pub fn from_world_area(world: &EntireWorld, area: &WorldArea, ignore: &WorldArea) -> Self {
+        let mut regions = HashMap::new();
+
+        for point in area.points() {
+            if !ignore.contains(&point) {
+                if let Some(region) = world.region(&point) {
+                    regions.insert(point, region.clone());
+                }
+            }
+        }
+
+        Self { regions }
+    }
+
+    pub fn get(&self, point: &AbsoluteWorldPoint) -> Option<&Region> {
+        self.regions.get(point)
+    }
+
+    pub fn len(&self) -> usize {
+        self.regions.len()
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 
