@@ -2,11 +2,11 @@ use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
 use crate::{
-    scene::ScenePoint,
-    world::{
+    plugins::world::{
         container::{WorldPartContainer, WorldPartContainerRefreshed},
         region::RegionTile,
     },
+    scene::ScenePoint,
 };
 
 use super::tileset::{spawn, REGION_TILESET_NAME};

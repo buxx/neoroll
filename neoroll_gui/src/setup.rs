@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use neoroll_world::state::EntireWorld;
 
-use crate::{camera::PlayerCamera, graphics::tileset::RegionTileset, world::updater::WorldUpdater};
+use crate::{
+    camera::PlayerCamera, graphics::tileset::RegionTileset, plugins::world::updater::WorldUpdater,
+};
 
 pub fn setup_(
     mut tileset: ResMut<RegionTileset>,

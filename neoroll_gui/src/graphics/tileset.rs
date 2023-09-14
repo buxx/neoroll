@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
-use crate::world::region::RegionTile;
+use crate::plugins::world::region::RegionTile;
 
 pub const REGION_TILESET_NAME: &str = "Regions";
 

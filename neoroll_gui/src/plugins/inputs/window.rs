@@ -1,8 +1,8 @@
 use bevy::{prelude::*, window::WindowResized};
 
-use crate::world::container::WorldPartContainerNeedRefresh;
+use crate::plugins::world::container::WorldPartContainerNeedRefresh;
 
-pub fn on_window_resize(
+pub fn refresh_world_on_window_resize(
     mut resize_reader: EventReader<WindowResized>,
     mut refresh_writer: EventWriter<WorldPartContainerNeedRefresh>,
 ) {
