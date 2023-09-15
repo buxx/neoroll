@@ -7,19 +7,22 @@ use neoroll_world::{
 #[derive(Component, Default, Debug)]
 pub struct PlayerCamera;
 
-pub fn camera_world_area(target: UVec2, translation: Vec3) -> WorldArea {
-    let start_pixel = Vec2::new(
-        -(target.x as f32 / 2.) + translation.x,
-        -(target.y as f32 / 2.) - translation.y,
+pub fn camera_world_area(target: UVec2, translation: Vec3, scale: Vec3) -> WorldArea {
+    let width = target.x as f32 * scale.x;
+    let height = target.y as f32 * scale.y;
+
+    let start_point = Vec2::new(
+        -(width / 2.) + translation.x,
+        -(height / 2.) - translation.y,
     );
 
     let start_tile = Vec2::new(
-        start_pixel.x / REGION_TILE_WIDTH as f32,
-        start_pixel.y / REGION_TILE_HEIGHT as f32,
+        start_point.x / REGION_TILE_WIDTH as f32,
+        start_point.y / REGION_TILE_HEIGHT as f32,
     );
 
-    let columns = target.x as usize / REGION_TILE_WIDTH;
-    let lines = target.y as usize / REGION_TILE_HEIGHT;
+    let columns = width as usize / REGION_TILE_WIDTH;
+    let lines = height as usize / REGION_TILE_HEIGHT;
 
     WorldArea::new(
         AbsoluteWorldPoint(

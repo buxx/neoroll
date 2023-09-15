@@ -32,7 +32,8 @@ pub fn refresh_world_part_container(
         let (_, camera, transform) = player_camera.single();
         let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
         let translation = transform.translation;
-        let area = camera_world_area(target, translation);
+        let scale = transform.scale;
+        let area = camera_world_area(target, translation, scale);
 
         world_updater.update(&mut world_part_container, area);
         world_part_container_change.send(WorldPartContainerRefreshed);
