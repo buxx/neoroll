@@ -5,5 +5,8 @@
         "rstest",
         "tileset",
         "tilesets"
+    ],
+    "rust-analyzer.linkedProjects": [
+        "./neoroll_world/Cargo.toml"
     ]
 }

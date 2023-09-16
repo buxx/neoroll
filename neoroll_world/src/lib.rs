@@ -1,7 +1,7 @@
+pub mod entity;
 pub mod generator;
 pub mod scale;
 pub mod space;
-pub mod state;
 pub mod tile;
 
 pub fn add(left: usize, right: usize) -> usize {

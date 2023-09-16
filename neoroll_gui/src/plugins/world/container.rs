@@ -1,5 +1,10 @@
 use bevy::prelude::*;
-use neoroll_world::state::WorldPart;
+use neoroll_world::space::{
+    area::WorldArea,
+    layer::CompositeLayer,
+    part::{LayersPart, WorldPart},
+    AbsoluteWorldPoint,
+};
 
 use crate::camera::{camera_world_area, PlayerCamera};
 
@@ -10,8 +15,14 @@ pub struct WorldPartContainerRefreshed;
 #[derive(Event)]
 pub struct WorldPartContainerNeedRefresh;
 
-#[derive(Resource, Default)]
+#[derive(Resource)]
 pub struct WorldPartContainer(pub WorldPart);
+
+impl Default for WorldPartContainer {
+    fn default() -> Self {
+        Self(WorldPart::empty())
+    }
+}
 
 impl WorldPartContainer {
     pub fn world_part(&self) -> &WorldPart {

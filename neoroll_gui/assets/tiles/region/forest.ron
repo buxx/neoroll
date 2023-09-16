@@ -1,4 +1,0 @@
-(
-    name: "Forest",
-    tile: Standard("tiles/region/forest.png")
-)

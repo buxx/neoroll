@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use neoroll_world::{
-    space::{AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
-    state::{WorldArea, REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
+use neoroll_world::space::{
+    area::WorldArea, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI,
 };
+
+use crate::graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH};
 
 #[derive(Component, Default, Debug)]
 pub struct PlayerCamera;

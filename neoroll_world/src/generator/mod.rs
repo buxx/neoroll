@@ -1,7 +1,7 @@
-use crate::{space::AbsoluteWorldPoint, state::EntireWorld, tile::RegionTile};
+use crate::space::world::EntireWorld;
 
 pub mod dummy;
 
 pub trait WorldGenerator {
-    fn region(&self, world: &EntireWorld, at: AbsoluteWorldPoint) -> RegionTile;
+    fn generate(&self) -> EntireWorld;
 }

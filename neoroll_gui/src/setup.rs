@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use neoroll_world::state::EntireWorld;
+use neoroll_world::generator::{dummy::DummyWorldGenerator, WorldGenerator};
 
 use crate::{
     camera::PlayerCamera, graphics::tileset::RegionTileset, plugins::world::updater::WorldUpdater,
@@ -15,12 +15,12 @@ pub fn setup_(
     tileset.handle = Some(asset_server.load("tilesets/regions.ron"));
 
     // TODO : this part will be "server side" and network stuff
-    let entire_world = EntireWorld::from_random(500, 500);
+    let entire_world = DummyWorldGenerator::new(500, 500).generate();
     info!(
-        "Generated world: {} lines, {} columns, {} tiles",
+        "Generated world: {} lines, {} columns, so {} tiles",
         entire_world.lines(),
         entire_world.columns(),
-        entire_world.regions().len()
+        entire_world.lines() * entire_world.columns()
     );
     world_reader.world = Some(entire_world);
 }
