@@ -9,7 +9,10 @@ use crate::{
     scene::ScenePoint,
 };
 
-use super::tileset::{spawn, REGION_TILESET_NAME};
+use super::{
+    resolver::LayersResolver,
+    tileset::{spawn, REGION_TILESET_NAME},
+};
 
 pub fn refresh_world_display(
     mut world_part_container_change: EventReader<WorldPartContainerRefreshed>,
@@ -39,10 +42,16 @@ pub fn re_spawn_world(
         .iter()
         .for_each(|e| commands.entity(e).despawn());
 
-    for (world_point, region) in world_part.regions() {
-        if let Some(region) = region {
-            if let Some((tile_index, _)) = &tileset.select_tile(&region.tile().to_string()) {
-                let scene_point = ScenePoint::from_world_point(world_point);
+    for (((point, ground), (_, floor)), (_, structure)) in world_part
+        .grounds()
+        .iter()
+        .zip(world_part.floors().iter())
+        .zip(world_part.structures())
+    {
+        let tiles = LayersResolver.resolve(ground, floor, structure);
+        for tile in tiles {
+            if let Some((tile_index, _)) = &tileset.select_tile(&tile.0) {
+                let scene_point = ScenePoint::from_world_point(point);
                 commands.spawn(spawn(atlas, tile_index, scene_point.into()));
             }
         }

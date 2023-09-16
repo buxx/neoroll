@@ -1,31 +1,61 @@
-use rand::seq::SliceRandom;
+use weighted_rand::builder::{NewBuilder, WalkerTableBuilder};
 
-use crate::{space::AbsoluteWorldPoint, state::EntireWorld, tile::RegionTile};
+use crate::{
+    entity::{floor::Floor, ground::Ground, structure::Structure},
+    space::{
+        layer::{CompositeLayer, FilledLayer, Layers},
+        world::EntireWorld,
+    },
+};
 
 use super::WorldGenerator;
 
 #[derive(Default)]
 pub struct DummyWorldGenerator {
-    forced_grass_lands: Vec<AbsoluteWorldPoint>,
+    lines: usize,
+    columns: usize,
 }
 
 impl DummyWorldGenerator {
-    pub fn forced_grass_lands(mut self, value: Vec<AbsoluteWorldPoint>) -> Self {
-        self.forced_grass_lands = value;
-        self
+    pub fn new(lines: usize, columns: usize) -> Self {
+        Self { lines, columns }
+    }
+
+    fn floor(&self) -> Floor {
+        let choices = [Floor::ShortGrass, Floor::Nothing];
+        let index_weights = [80, 20];
+        choices[WalkerTableBuilder::new(&index_weights).build().next()].clone()
+    }
+
+    fn structure(&self) -> Option<Structure> {
+        let choices = [Some(Structure::BigLeafTree), None];
+        let index_weights = [80, 20];
+        choices[WalkerTableBuilder::new(&index_weights).build().next()].clone()
     }
 }
 
 impl WorldGenerator for DummyWorldGenerator {
-    // Draw a grassland squad in the middle
+    fn generate(&self) -> EntireWorld {
+        let mut grounds = vec![];
+        let mut floors = vec![];
+        let mut structures = vec![];
 
-    fn region(&self, _world: &EntireWorld, at: AbsoluteWorldPoint) -> RegionTile {
-        if self.forced_grass_lands.contains(&at) {
-            return RegionTile::GrassLand;
+        for _ in 0..self.lines {
+            for _ in 0..self.columns {
+                grounds.push(Ground::Soil);
+                floors.push(self.floor());
+                structures.push(self.structure());
+            }
         }
 
-        *[RegionTile::Forest, RegionTile::GrassLand]
-            .choose(&mut rand::thread_rng())
-            .unwrap_or(&RegionTile::GrassLand)
+        EntireWorld::new(
+            Layers::new(
+                FilledLayer::new(grounds),
+                FilledLayer::new(floors),
+                CompositeLayer::new(structures),
+            ),
+            self.lines,
+            self.columns,
+        )
     }
 }

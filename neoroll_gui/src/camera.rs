@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use neoroll_world::{
-    space::{AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
-    state::{WorldArea, REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
+use neoroll_world::space::{
+    area::WorldArea, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI,
 };
+
+use crate::graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH};
 
 #[derive(Component, Default, Debug)]
 pub struct PlayerCamera;
@@ -52,7 +53,8 @@ mod test {
         #[case] lines: usize,
         #[case] columns: usize,
     ) {
-        let area = camera_world_area(target, translation);
+        // TODO : Test with scale
+        let area = camera_world_area(target, translation, Vec3::new(1., 1., 1.));
 
         assert_eq!(
             area.start(),
