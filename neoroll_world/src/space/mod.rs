@@ -1,3 +1,5 @@
+use crate::map::{AbsoluteMapPoint, MAP_TILE_FACTOR};
+
 use self::area::WorldArea;
 
 pub mod area;
@@ -26,6 +28,15 @@ impl AbsoluteWorldPoint {
 
     pub fn col_i(&self) -> &AbsoluteWorldColI {
         &self.1
+    }
+}
+
+impl From<AbsoluteMapPoint> for AbsoluteWorldPoint {
+    fn from(val: AbsoluteMapPoint) -> Self {
+        AbsoluteWorldPoint(
+            AbsoluteWorldRowI(val.0 .0 * MAP_TILE_FACTOR as isize),
+            AbsoluteWorldColI(val.1 .0 * MAP_TILE_FACTOR as isize),
+        )
     }
 }
 

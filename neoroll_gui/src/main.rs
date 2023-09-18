@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
-use plugins::{inputs::UserInputsPlugin, world::WorldDisplayPlugin};
+use plugins::{inputs::UserInputsPlugin, map::MapDisplayPlugin, world::WorldDisplayPlugin};
 use setup::setup_;
 
 mod camera;
@@ -17,6 +17,7 @@ fn main() {
             TilesetPlugin::default(),
             UserInputsPlugin,
             WorldDisplayPlugin,
+            MapDisplayPlugin,
         ))
         .add_systems(Startup, setup_)
         .run();

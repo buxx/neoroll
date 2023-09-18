@@ -1,0 +1,7 @@
+(
+    name: Some("Map"),
+    id: 1,
+    tiles: {
+        0: "../tiles/map/tree.ron",
+    }
+)

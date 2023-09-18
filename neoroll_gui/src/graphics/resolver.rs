@@ -1,7 +1,7 @@
 use neoroll_world::entity::{floor::Floor, ground::Ground, structure::Structure};
 
 use super::{
-    tileset::{floor_tile_name, ground_tile_name, structure_tile_name},
+    tileset::world::{floor_tile_name, ground_tile_name, structure_tile_name},
     TileName,
 };
 

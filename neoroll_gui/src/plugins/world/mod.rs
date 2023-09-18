@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::graphics::{tileset::RegionTileset, world::refresh_world_display};
+use crate::graphics::{tileset::world::WorldTileset, world::refresh_world_display};
 
 use self::{
     container::{
@@ -22,7 +22,7 @@ pub struct WorldDisplayPlugin;
 
 impl Plugin for WorldDisplayPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<RegionTileset>()
+        app.init_resource::<WorldTileset>()
             .init_resource::<WorldUpdater>()
             .init_resource::<WorldPartContainer>()
             .add_event::<WorldPartContainerNeedRefresh>()

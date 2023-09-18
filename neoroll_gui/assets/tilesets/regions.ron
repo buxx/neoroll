@@ -1,9 +1,0 @@
-(
-    name: Some("Regions"),
-    id: 0,
-    tiles: {
-        0: "../tiles/region/soil.ron",
-        1: "../tiles/region/short_grass.ron",
-        2: "../tiles/region/big_leaf_tree.ron",
-    }
-)

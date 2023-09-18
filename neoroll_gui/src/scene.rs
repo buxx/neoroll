@@ -15,6 +15,13 @@ impl ScenePoint {
             y: world_point.row_i().0 as f32 * REGION_TILE_HEIGHT as f32,
         }
     }
+
+    pub fn apply(&self, x: f32, y: f32) -> Self {
+        Self {
+            x: self.x + x,
+            y: self.y + y,
+        }
+    }
 }
 
 impl From<ScenePoint> for Vec3 {

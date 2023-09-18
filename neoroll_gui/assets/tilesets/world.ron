@@ -1,0 +1,9 @@
+(
+    name: Some("World"),
+    id: 0,
+    tiles: {
+        0: "../tiles/world/soil.ron",
+        1: "../tiles/world/short_grass.ron",
+        2: "../tiles/world/big_leaf_tree.ron",
+    }
+)

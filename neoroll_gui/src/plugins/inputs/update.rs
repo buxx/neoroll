@@ -6,7 +6,9 @@ use bevy::{
     prelude::*,
 };
 
-use crate::plugins::world::container::WorldPartContainerNeedRefresh;
+use crate::plugins::{
+    map::container::MapPartContainerNeedRefresh, world::container::WorldPartContainerNeedRefresh,
+};
 
 use super::{drag::DraggedScreen, state::InputState};
 
@@ -17,6 +19,7 @@ pub fn update_inputs(
     mut cursor_moved_events: EventReader<CursorMoved>,
     mut camera: Query<&mut Transform, With<Camera>>,
     mut world_part_container_need_change: EventWriter<WorldPartContainerNeedRefresh>,
+    mut map_part_container_need_change: EventWriter<MapPartContainerNeedRefresh>,
     mut dragged_screen: EventWriter<DraggedScreen>,
 ) {
     let mut camera = camera.single_mut();
@@ -37,9 +40,10 @@ pub fn update_inputs(
     // Wheel
     for event in mouse_wheel_input_events.iter() {
         camera.scale -= event.y / 5.;
-        camera.scale.x = camera.scale.x.clamp(0.25, 5.);
-        camera.scale.y = camera.scale.y.clamp(0.25, 5.);
-        world_part_container_need_change.send(WorldPartContainerNeedRefresh)
+        camera.scale.x = camera.scale.x.clamp(0.25, 8.);
+        camera.scale.y = camera.scale.y.clamp(0.25, 8.);
+        world_part_container_need_change.send(WorldPartContainerNeedRefresh);
+        map_part_container_need_change.send(MapPartContainerNeedRefresh);
     }
 
     // Motion
@@ -57,7 +61,8 @@ pub fn update_inputs(
             // Avoid ugly pixels by translate only on entire pixels
             camera.translation = camera.translation.round();
 
-            world_part_container_need_change.send(WorldPartContainerNeedRefresh)
+            world_part_container_need_change.send(WorldPartContainerNeedRefresh);
+            map_part_container_need_change.send(MapPartContainerNeedRefresh);
         }
 
         *input_state.cursor_mut() = event.position

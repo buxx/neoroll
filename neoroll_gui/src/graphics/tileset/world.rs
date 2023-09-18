@@ -2,11 +2,9 @@ use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 use neoroll_world::entity::{floor::Floor, ground::Ground, structure::Structure};
 
-use crate::plugins::world::region::RegionTile;
+use crate::{graphics::TileName, plugins::world::region::RegionTile};
 
-use super::TileName;
-
-pub const REGION_TILESET_NAME: &str = "Regions";
+pub const WORLD_TILESET_NAME: &str = "World";
 
 pub fn ground_tile_name(ground: &Ground) -> TileName {
     match ground {
@@ -28,7 +26,7 @@ pub fn structure_tile_name(structure: &Structure) -> TileName {
 }
 
 #[derive(Resource, Default)]
-pub struct RegionTileset {
+pub struct WorldTileset {
     pub handle: Option<Handle<Tileset>>,
 }
 
@@ -36,19 +34,24 @@ pub fn spawn(
     atlas: &Handle<TextureAtlas>,
     tile_index: &TileIndex,
     point: Vec3,
+    color: Color,
 ) -> (RegionTile, SpriteSheetBundle) {
     (
         RegionTile,
         match tile_index {
-            TileIndex::Standard(index) => SpriteSheetBundle {
-                transform: Transform {
-                    translation: point,
+            TileIndex::Standard(index) => {
+                let mut sprite = TextureAtlasSprite::new(*index);
+                sprite.color = color;
+                SpriteSheetBundle {
+                    transform: Transform {
+                        translation: point,
+                        ..Default::default()
+                    },
+                    sprite,
+                    texture_atlas: atlas.clone(),
                     ..Default::default()
-                },
-                sprite: TextureAtlasSprite::new(*index),
-                texture_atlas: atlas.clone(),
-                ..Default::default()
-            },
+                }
+            }
             TileIndex::Animated(_start, _end, _speed) => {
                 todo!()
             }

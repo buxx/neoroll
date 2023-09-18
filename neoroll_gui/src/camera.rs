@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use neoroll_world::space::{
-    area::WorldArea, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI,
+use neoroll_world::{
+    map::{area::MapArea, AbsoluteMapColI, AbsoluteMapPoint, AbsoluteMapRowI, MAP_TILE_FACTOR},
+    space::{area::WorldArea, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
 };
 
 use crate::graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH};
@@ -29,6 +30,33 @@ pub fn camera_world_area(target: UVec2, translation: Vec3, scale: Vec3) -> World
         AbsoluteWorldPoint(
             AbsoluteWorldRowI(start_tile.y as isize),
             AbsoluteWorldColI(start_tile.x as isize),
+        ),
+        lines,
+        columns,
+    )
+}
+
+pub fn camera_map_area(target: UVec2, translation: Vec3, scale: Vec3) -> MapArea {
+    let width = target.x as f32 * scale.x;
+    let height = target.y as f32 * scale.y;
+
+    let start_point = Vec2::new(
+        -(width / 2.) + translation.x,
+        -(height / 2.) - translation.y,
+    );
+
+    let start_tile = Vec2::new(
+        start_point.x / (REGION_TILE_WIDTH * MAP_TILE_FACTOR) as f32,
+        start_point.y / (REGION_TILE_HEIGHT * MAP_TILE_FACTOR) as f32,
+    );
+
+    let columns = width as usize / (REGION_TILE_WIDTH * MAP_TILE_FACTOR);
+    let lines = height as usize / (REGION_TILE_HEIGHT * MAP_TILE_FACTOR);
+
+    MapArea::new(
+        AbsoluteMapPoint(
+            AbsoluteMapRowI(start_tile.y as isize),
+            AbsoluteMapColI(start_tile.x as isize),
         ),
         lines,
         columns,

@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::plugins::world::container::WorldPartContainerNeedRefresh;
+use crate::plugins::{
+    map::container::MapPartContainerNeedRefresh, world::container::WorldPartContainerNeedRefresh,
+};
 
 #[derive(Event)]
 pub struct DraggedScreen(pub Vec3);
@@ -9,6 +11,7 @@ pub fn on_dragged_screen(
     mut camera: Query<&mut Transform, With<Camera>>,
     mut dragged_screen: EventReader<DraggedScreen>,
     mut world_part_container_need_change: EventWriter<WorldPartContainerNeedRefresh>,
+    mut map_part_container_need_change: EventWriter<MapPartContainerNeedRefresh>,
 ) {
     let mut camera = camera.single_mut();
     let mut need_refresh = false;
@@ -23,6 +26,7 @@ pub fn on_dragged_screen(
         // Avoid ugly pixels by translate only on entire pixels
         camera.translation = camera.translation.round();
         // Trigger world refresh
-        world_part_container_need_change.send(WorldPartContainerNeedRefresh)
+        world_part_container_need_change.send(WorldPartContainerNeedRefresh);
+        map_part_container_need_change.send(MapPartContainerNeedRefresh);
     }
 }
