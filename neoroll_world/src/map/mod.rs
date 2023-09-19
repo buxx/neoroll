@@ -7,7 +7,7 @@ pub mod part;
 pub mod patch;
 pub mod sector;
 
-pub const MAP_TILE_FACTOR: usize = 32;
+pub const MAP_TILE_FACTOR: usize = 16;
 
 pub struct Map {
     sectors: Vec<Sector>,

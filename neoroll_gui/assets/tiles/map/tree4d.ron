@@ -1,0 +1,4 @@
+(
+    name: "Tree4d",
+    tile: Standard("tiles/map/tree4d.png")
+)

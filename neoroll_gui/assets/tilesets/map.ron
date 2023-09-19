@@ -2,6 +2,17 @@
     name: Some("Map"),
     id: 1,
     tiles: {
-        0: "../tiles/map/tree.ron",
+        0: "../tiles/map/tree1a.ron",
+        1: "../tiles/map/tree1b.ron",
+        2: "../tiles/map/tree1c.ron",
+        3: "../tiles/map/tree2a.ron",
+        4: "../tiles/map/tree2b.ron",
+        5: "../tiles/map/tree3a.ron",
+        6: "../tiles/map/tree3b.ron",
+        7: "../tiles/map/tree3c.ron",
+        8: "../tiles/map/tree4a.ron",
+        9: "../tiles/map/tree4b.ron",
+        10: "../tiles/map/tree4c.ron",
+        11: "../tiles/map/tree4d.ron",
     }
 )

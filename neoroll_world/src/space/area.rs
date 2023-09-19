@@ -82,4 +82,52 @@ impl WorldArea {
             columns: 0,
         }
     }
+
+    pub fn resize(&self, lines: isize, columns: isize) -> Self {
+        Self {
+            start: AbsoluteWorldPoint(
+                AbsoluteWorldRowI(self.start.0 .0 - lines),
+                AbsoluteWorldColI(self.start.1 .0 - columns),
+            ),
+            lines: (self.lines as isize + lines * 2) as usize,
+            columns: (self.columns as isize + columns * 2) as usize,
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rstest::*;
+
+    #[rstest]
+    #[case((-10, -10), 20, 20, 5, (-15, -15), 30, 30)]
+    #[case((-10, -10), 20, 20, 100, (-110, -110), 220, 220)]
+    fn test_world_area_resize(
+        #[case] start: (isize, isize),
+        #[case] lines: usize,
+        #[case] columns: usize,
+        #[case] resize: isize,
+        #[case] new_start: (isize, isize),
+        #[case] new_lines: usize,
+        #[case] new_columns: usize,
+    ) {
+        let area = WorldArea::new(
+            AbsoluteWorldPoint(AbsoluteWorldRowI(start.0), AbsoluteWorldColI(start.1)),
+            lines,
+            columns,
+        );
+
+        let new_area = area.resize(resize, resize);
+
+        assert_eq!(
+            new_area.start(),
+            AbsoluteWorldPoint(
+                AbsoluteWorldRowI(new_start.0),
+                AbsoluteWorldColI(new_start.1)
+            )
+        );
+        assert_eq!(new_area.lines(), new_lines);
+        assert_eq!(new_area.columns(), new_columns);
+    }
 }

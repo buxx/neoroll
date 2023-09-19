@@ -24,7 +24,7 @@ pub fn setup_(
     map_tileset.handle = Some(asset_server.load("tilesets/map.ron"));
 
     // TODO : this part will be "server side" and network stuff
-    let world = DummyWorldGenerator::new(500, 500).generate();
+    let world = DummyWorldGenerator::new(1000, 1000).generate();
     let map = WorldMapBuilder::new(&world).build();
     info!(
         "Generated world: {} lines, {} columns, so {} tiles",

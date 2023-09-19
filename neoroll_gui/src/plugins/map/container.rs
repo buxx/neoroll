@@ -40,6 +40,7 @@ pub fn refresh_map_part_container(
         let translation = transform.translation;
         let scale = transform.scale;
         let area = camera_map_area(target, translation, scale);
+        let area = area.resize(2, 2);
 
         map_updater.update(&mut map_part_container, area);
         map_part_container_change.send(MapPartContainerRefreshed);

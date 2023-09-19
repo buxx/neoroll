@@ -9,7 +9,18 @@ pub const MAP_TILESET_NAME: &str = "Map";
 
 pub fn element_tile_name(element: &MapElement) -> TileName {
     match element {
-        MapElement::Tree => TileName("Tree".to_string()),
+        MapElement::Tree1a => TileName("Tree1a".to_string()),
+        MapElement::Tree1b => TileName("Tree1b".to_string()),
+        MapElement::Tree1c => TileName("Tree1c".to_string()),
+        MapElement::Tree2a => TileName("Tree2a".to_string()),
+        MapElement::Tree2b => TileName("Tree2b".to_string()),
+        MapElement::Tree3a => TileName("Tree3a".to_string()),
+        MapElement::Tree3b => TileName("Tree3b".to_string()),
+        MapElement::Tree3c => TileName("Tree3c".to_string()),
+        MapElement::Tree4a => TileName("Tree4a".to_string()),
+        MapElement::Tree4b => TileName("Tree4b".to_string()),
+        MapElement::Tree4c => TileName("Tree4c".to_string()),
+        MapElement::Tree4d => TileName("Tree4d".to_string()),
     }
 }
 

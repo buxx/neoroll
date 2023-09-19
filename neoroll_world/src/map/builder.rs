@@ -1,11 +1,11 @@
-use crate::space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI};
-use rand::Rng;
-
 use super::{
     element::Element,
     sector::{Sector, SectorRelativePoint},
     Map, MAP_TILE_FACTOR,
 };
+use crate::space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI};
+use rand::seq::SliceRandom;
+use rand::Rng;
 
 pub struct WorldMapBuilder<'a> {
     world: &'a EntireWorld,
@@ -48,12 +48,43 @@ impl<'a> WorldMapBuilder<'a> {
         // This zone of code is very simple for now
         let mut items = vec![];
         let ratio = structures.len() as f32 / (MAP_TILE_FACTOR * MAP_TILE_FACTOR) as f32;
-        for _ in 0..(ratio * 15.) as usize {
-            items.push((
-                SectorRelativePoint(rng.gen::<f32>(), rng.gen::<f32>()),
-                Element::Tree,
-            ));
-        }
+
+        let new_items = if ratio > 0.60 {
+            vec![(
+                SectorRelativePoint(rng.gen_range(0.35..0.55), rng.gen_range(0.35..0.55)),
+                [
+                    Element::Tree3a,
+                    Element::Tree3b,
+                    Element::Tree3c,
+                    Element::Tree4a,
+                    Element::Tree4b,
+                    Element::Tree4c,
+                    Element::Tree4d,
+                ]
+                .choose(&mut rng)
+                .unwrap_or(&Element::Tree4a)
+                .clone(),
+            )]
+        } else if ratio > 0.50 {
+            vec![(
+                SectorRelativePoint(rng.gen_range(0.25..0.65), rng.gen_range(0.25..0.65)),
+                [Element::Tree2a, Element::Tree2b]
+                    .choose(&mut rng)
+                    .unwrap_or(&Element::Tree2a)
+                    .clone(),
+            )]
+        } else if ratio > 0.30 {
+            vec![(
+                SectorRelativePoint(rng.gen_range(0.25..0.65), rng.gen_range(0.25..0.65)),
+                [Element::Tree1a, Element::Tree1b, Element::Tree1c]
+                    .choose(&mut rng)
+                    .unwrap_or(&Element::Tree1a)
+                    .clone(),
+            )]
+        } else {
+            vec![]
+        };
+        items.extend(new_items);
 
         Sector::new(items)
     }

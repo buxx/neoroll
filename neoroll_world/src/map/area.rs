@@ -82,4 +82,15 @@ impl MapArea {
             columns: 0,
         }
     }
+
+    pub fn resize(&self, lines: isize, columns: isize) -> Self {
+        Self {
+            start: AbsoluteMapPoint(
+                AbsoluteMapRowI(self.start.0 .0 - lines),
+                AbsoluteMapColI(self.start.1 .0 - columns),
+            ),
+            lines: (self.lines as isize + lines * 2) as usize,
+            columns: (self.columns as isize + columns * 2) as usize,
+        }
+    }
 }

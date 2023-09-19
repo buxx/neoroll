@@ -40,7 +40,10 @@ pub fn refresh_world_part_container(
         let translation = transform.translation;
         let scale = transform.scale;
         let area = camera_world_area(target, translation, scale);
+        let area = area.resize(30, 30);
 
+        // FIXME BS NOW : fix a max area size to retrieve only needed area when on
+        // map (to be able to compute path finding without download all world ...)
         world_updater.update(&mut world_part_container, area);
         world_part_container_change.send(WorldPartContainerRefreshed);
     }
