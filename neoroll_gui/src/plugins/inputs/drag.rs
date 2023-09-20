@@ -1,14 +1,18 @@
 use bevy::prelude::*;
 
-use crate::plugins::{
-    map::container::MapPartContainerNeedRefresh, world::container::WorldPartContainerNeedRefresh,
+use crate::{
+    camera::{BackgroundCamera, SceneItemsCamera},
+    plugins::{
+        map::container::MapPartContainerNeedRefresh,
+        world::container::WorldPartContainerNeedRefresh,
+    },
 };
 
 #[derive(Event)]
 pub struct DraggedScreen(pub Vec3);
 
 pub fn on_dragged_screen(
-    mut camera: Query<&mut Transform, With<Camera>>,
+    mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
     mut dragged_screen: EventReader<DraggedScreen>,
     mut world_part_container_need_change: EventWriter<WorldPartContainerNeedRefresh>,
     mut map_part_container_need_change: EventWriter<MapPartContainerNeedRefresh>,

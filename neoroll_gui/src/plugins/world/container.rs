@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use neoroll_world::space::part::WorldPart;
 
-use crate::camera::{camera_world_area, PlayerCamera};
+use crate::camera::{camera_world_area, SceneItemsCamera};
 
 use super::updater::WorldUpdater;
 
@@ -26,7 +26,7 @@ impl WorldPartContainer {
 }
 
 pub fn refresh_world_part_container(
-    player_camera: Query<(&PlayerCamera, &Camera, &mut Transform)>,
+    player_camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
     world_updater: ResMut<WorldUpdater>,
     mut world_part_container: ResMut<WorldPartContainer>,
     mut world_part_container_need_change: EventReader<WorldPartContainerNeedRefresh>,

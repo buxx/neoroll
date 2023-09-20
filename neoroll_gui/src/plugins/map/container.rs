@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use neoroll_world::map::part::MapPart;
 
-use crate::camera::{camera_map_area, PlayerCamera};
+use crate::camera::{camera_map_area, BackgroundCamera, SceneItemsCamera};
 
 use super::updater::MapUpdater;
 
@@ -26,7 +26,12 @@ impl MapPartContainer {
 }
 
 pub fn refresh_map_part_container(
-    player_camera: Query<(&PlayerCamera, &Camera, &mut Transform)>,
+    player_camera: Query<(
+        &SceneItemsCamera,
+        &Camera,
+        &mut Transform,
+        (With<SceneItemsCamera>, Without<BackgroundCamera>),
+    )>,
     map_updater: ResMut<MapUpdater>,
     mut map_part_container: ResMut<MapPartContainer>,
     mut map_part_container_need_change: EventReader<MapPartContainerNeedRefresh>,
@@ -35,7 +40,7 @@ pub fn refresh_map_part_container(
     if !map_part_container_need_change.is_empty() {
         map_part_container_need_change.clear();
 
-        let (_, camera, transform) = player_camera.single();
+        let (_, camera, transform, _) = player_camera.single();
         let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
         let translation = transform.translation;
         let scale = transform.scale;

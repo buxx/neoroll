@@ -7,7 +7,10 @@ use neoroll_world::{
 use crate::graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH};
 
 #[derive(Component, Default, Debug)]
-pub struct PlayerCamera;
+pub struct SceneItemsCamera;
+
+#[derive(Component, Default, Debug)]
+pub struct BackgroundCamera;
 
 pub fn camera_world_area(target: UVec2, translation: Vec3, scale: Vec3) -> WorldArea {
     let width = target.x as f32 * scale.x;
