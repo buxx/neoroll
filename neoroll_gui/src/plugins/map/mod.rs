@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 
-use crate::graphics::{map::refresh_map_display, tileset::map::MapResources};
-
 use self::{
     container::{
         refresh_map_part_container, MapPartContainer, MapPartContainerNeedRefresh,
         MapPartContainerRefreshed,
     },
+    display::refresh_map_display,
     init::init_map,
+    tileset::MapResources,
     updater::MapUpdater,
 };
 
@@ -15,8 +15,10 @@ use super::inputs::window::refresh_map_on_window_resize;
 
 pub mod background;
 pub mod container;
+pub mod display;
 pub mod element;
 pub mod init;
+pub mod tileset;
 pub mod updater;
 
 pub struct MapDisplayPlugin;

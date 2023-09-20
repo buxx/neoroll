@@ -1,21 +1,24 @@
 use bevy::prelude::*;
 
-use crate::graphics::{tileset::world::WorldTileset, world::refresh_world_display};
-
 use self::{
     container::{
         refresh_world_part_container, WorldPartContainer, WorldPartContainerNeedRefresh,
         WorldPartContainerRefreshed,
     },
+    display::refresh_world_display,
     init::init_world,
+    tileset::WorldTileset,
     updater::WorldUpdater,
 };
 
 use super::inputs::window::refresh_world_on_window_resize;
 
 pub mod container;
+pub mod display;
 pub mod init;
 pub mod region;
+pub mod resolver;
+pub mod tileset;
 pub mod updater;
 
 pub struct WorldDisplayPlugin;

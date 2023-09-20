@@ -1,12 +1,11 @@
-pub mod map;
+use bevy::prelude::Color;
+
 pub mod resolver;
-pub mod tileset;
-pub mod world;
 
 pub const REGION_TILE_WIDTH: usize = 16;
 pub const REGION_TILE_HEIGHT: usize = 16;
 
-pub struct TileName(String);
+pub struct TileName(pub String);
 
 pub struct AlphaByScale {
     limit: f32,
@@ -42,7 +41,13 @@ impl AlphaByScale {
         !self.invert
     }
 
-    pub fn alpha(&self, scale: f32) -> f32 {
-        ((self.limit - scale) / (self.limit - self.from)).clamp(0., 1.)
+    pub fn color(&self, scale: f32) -> Color {
+        let alpha = ((self.limit - scale) / (self.limit - self.from)).clamp(0., 1.);
+        Color::Rgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha,
+        }
     }
 }

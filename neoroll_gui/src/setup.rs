@@ -5,9 +5,10 @@ use neoroll_world::{
     map::builder::WorldMapBuilder,
 };
 
+use crate::plugins::map::tileset::MapResources;
+use crate::plugins::world::tileset::WorldTileset;
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
-    graphics::tileset::{map::MapResources, world::WorldTileset},
     layer::{LAYER_BACKGROUND, LAYER_SCENE_ITEMS},
     plugins::{
         map::{background::Background, updater::MapUpdater},
@@ -15,6 +16,8 @@ use crate::{
     },
 };
 
+// TODO: dispatch setup into plugins when world & map
+// generation will be server side for real
 pub fn setup_(
     mut world_tileset: ResMut<WorldTileset>,
     mut map_resources: ResMut<MapResources>,
