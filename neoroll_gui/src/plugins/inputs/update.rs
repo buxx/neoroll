@@ -6,8 +6,12 @@ use bevy::{
     prelude::*,
 };
 
-use crate::plugins::{
-    map::container::MapPartContainerNeedRefresh, world::container::WorldPartContainerNeedRefresh,
+use crate::{
+    camera::{BackgroundCamera, SceneItemsCamera},
+    plugins::{
+        map::container::MapPartContainerNeedRefresh,
+        world::container::WorldPartContainerNeedRefresh,
+    },
 };
 
 use super::{drag::DraggedScreen, state::InputState};
@@ -17,7 +21,7 @@ pub fn update_inputs(
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut mouse_wheel_input_events: EventReader<MouseWheel>,
     mut cursor_moved_events: EventReader<CursorMoved>,
-    mut camera: Query<&mut Transform, With<Camera>>,
+    mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
     mut world_part_container_need_change: EventWriter<WorldPartContainerNeedRefresh>,
     mut map_part_container_need_change: EventWriter<MapPartContainerNeedRefresh>,
     mut dragged_screen: EventWriter<DraggedScreen>,

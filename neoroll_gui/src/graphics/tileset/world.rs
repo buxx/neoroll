@@ -1,8 +1,8 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_tileset::prelude::*;
 use neoroll_world::entity::{floor::Floor, ground::Ground, structure::Structure};
 
-use crate::{graphics::TileName, plugins::world::region::RegionTile};
+use crate::{graphics::TileName, layer::LAYER_SCENE_ITEMS, plugins::world::region::RegionTile};
 
 pub const WORLD_TILESET_NAME: &str = "World";
 
@@ -35,7 +35,7 @@ pub fn spawn(
     tile_index: &TileIndex,
     point: Vec3,
     color: Color,
-) -> (RegionTile, SpriteSheetBundle) {
+) -> (RegionTile, SpriteSheetBundle, RenderLayers) {
     (
         RegionTile,
         match tile_index {
@@ -56,5 +56,6 @@ pub fn spawn(
                 todo!()
             }
         },
+        RenderLayers::layer(LAYER_SCENE_ITEMS),
     )
 }

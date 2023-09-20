@@ -1,9 +1,9 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::RenderLayers};
 
 use bevy_tileset::prelude::{TileIndex, Tileset};
 use neoroll_world::map::element::Element as MapElement;
 
-use crate::{graphics::TileName, plugins::map::element::Element};
+use crate::{graphics::TileName, layer::LAYER_SCENE_ITEMS, plugins::map::element::Element};
 
 pub const MAP_TILESET_NAME: &str = "Map";
 
@@ -25,8 +25,9 @@ pub fn element_tile_name(element: &MapElement) -> TileName {
 }
 
 #[derive(Resource, Default)]
-pub struct MapTileset {
-    pub handle: Option<Handle<Tileset>>,
+pub struct MapResources {
+    pub tileset: Option<Handle<Tileset>>,
+    pub background: Option<Handle<Image>>,
 }
 
 pub fn spawn(
@@ -34,7 +35,7 @@ pub fn spawn(
     tile_index: &TileIndex,
     point: Vec3,
     color: Color,
-) -> (Element, SpriteSheetBundle) {
+) -> (Element, SpriteSheetBundle, RenderLayers) {
     (
         Element,
         match tile_index {
@@ -55,5 +56,6 @@ pub fn spawn(
                 todo!()
             }
         },
+        RenderLayers::layer(LAYER_SCENE_ITEMS),
     )
 }

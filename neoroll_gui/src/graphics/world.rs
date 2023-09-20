@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_tileset::prelude::*;
 
 use crate::{
-    camera::PlayerCamera,
+    camera::SceneItemsCamera,
     graphics::AlphaByScale,
     plugins::world::{
         container::{WorldPartContainer, WorldPartContainerRefreshed},
@@ -17,7 +17,7 @@ use super::{
 };
 
 pub fn refresh_world_display(
-    player_camera: Query<(&PlayerCamera, &Camera, &mut Transform)>,
+    player_camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
     mut world_part_container_change: EventReader<WorldPartContainerRefreshed>,
     region_tiles_query: Query<Entity, With<RegionTile>>,
     tilesets: Tilesets,

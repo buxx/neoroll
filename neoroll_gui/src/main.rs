@@ -6,6 +6,7 @@ use setup::setup_;
 
 mod camera;
 mod graphics;
+mod layer;
 mod plugins;
 mod scene;
 mod setup;
