@@ -1,5 +1,8 @@
+use std::fs;
+
 use bevy::render::view::visibility::RenderLayers;
 use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*};
+use neoroll_world::space::world::EntireWorld;
 use neoroll_world::{
     generator::{dummy::DummyWorldGenerator, WorldGenerator},
     map::builder::WorldMapBuilder,
@@ -67,7 +70,7 @@ pub fn setup_(
     ));
 
     // TODO : this part will be "server side" and network stuff
-    let world = DummyWorldGenerator::new(500, 500).generate();
+    let world = bincode::deserialize::<EntireWorld>(&fs::read("world.bin").unwrap()).unwrap();
     let map = WorldMapBuilder::new(&world).build();
     info!(
         "Generated world: {} lines, {} columns, so {} tiles",

@@ -1,6 +1,7 @@
 use super::Entity;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone)]
+#[derive(Clone, Deserialize, Serialize)]
 pub enum Floor {
     Nothing,
     ShortGrass,

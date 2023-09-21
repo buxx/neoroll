@@ -11,5 +11,10 @@ strum = "0.25"
 strum_macros = "0.25.2"
 weighted_rand = "0.4"
 glam = "0.24.1"
+worldgen = "0.5.3"
+structopt = "0.3.26"
+anyhow = "1.0.75"
+bincode = "1.3.3"
+serde = { version = "1", features = ["derive"] }
 # tests
 rstest = "0.18.1"

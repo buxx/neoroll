@@ -9,6 +9,7 @@ pub const WORLD_TILESET_NAME: &str = "World";
 pub fn ground_tile_name(ground: &Ground) -> TileName {
     match ground {
         Ground::Soil => TileName("Soil".to_string()),
+        Ground::FreshWater => TileName("FreshWater".to_string()),
     }
 }
 pub fn floor_tile_name(ground: &Floor) -> TileName {

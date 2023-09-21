@@ -1,7 +1,9 @@
 use crate::entity::{floor::Floor, ground::Ground, structure::Structure};
+use serde::{Deserialize, Serialize};
 
 use super::{layer::Layers, AbsoluteWorldPoint};
 
+#[derive(Deserialize, Serialize)]
 pub struct EntireWorld {
     layers: Layers,
     lines: usize,

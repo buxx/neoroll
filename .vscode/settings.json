@@ -1,10 +1,15 @@
 {
     "cSpell.words": [
+        "bincode",
         "despawn",
         "neoroll",
+        "noisemap",
+        "perlin",
+        "Perlin",
         "rstest",
         "tileset",
-        "tilesets"
+        "tilesets",
+        "worldgen"
     ],
     "rust-analyzer.linkedProjects": [
         "./neoroll_world/Cargo.toml"

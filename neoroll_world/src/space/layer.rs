@@ -1,5 +1,8 @@
 use crate::entity::{floor::Floor, ground::Ground, structure::Structure, Entity};
 
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
 pub struct Layers {
     grounds: FilledLayer<Ground>,
     floors: FilledLayer<Floor>,
@@ -32,6 +35,7 @@ impl Layers {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct FilledLayer<T: Entity> {
     items: Vec<T>,
 }
@@ -54,6 +58,7 @@ impl<T: Entity> FilledLayer<T> {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct CompositeLayer<T: Entity> {
     items: Vec<Option<T>>,
 }
