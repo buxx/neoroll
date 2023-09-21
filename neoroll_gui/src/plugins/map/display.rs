@@ -13,31 +13,28 @@ use crate::{
     scene::ScenePoint,
 };
 
-use super::tileset::{element_tile_name, spawn, MapResources, MAP_TILESET_NAME};
+use super::tileset::{element_tile_name, spawn, MAP_TILESET_NAME};
 
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::type_complexity)]
 pub fn refresh_map_display(
-    player_camera: Query<
+    scene_items_camera: Query<
         (&SceneItemsCamera, &Camera, &mut Transform),
         (With<SceneItemsCamera>, Without<BackgroundCamera>),
     >,
     mut map_part_container_change: EventReader<MapPartContainerRefreshed>,
     element_tiles_query: Query<Entity, With<Element>>,
     mut background_query: Query<
-        (&mut Visibility, &mut Transform),
+        (&mut Visibility, &mut Sprite),
         (With<Background>, Without<Camera>),
     >,
     tilesets: Tilesets,
     map_part_container: ResMut<MapPartContainer>,
-    map_resources: Res<MapResources>,
     mut commands: Commands,
-    images: Res<Assets<Image>>,
 ) {
-    let (_, camera, camera_transform) = player_camera.single();
+    let (_, _, camera_transform) = scene_items_camera.single();
     let scale = camera_transform.scale;
-    let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
-    let (mut background_visibility, mut background_transform) = background_query.single_mut();
+    let (mut background_visibility, mut background_sprite) = background_query.single_mut();
 
     if let Some(tileset) = tilesets.get_by_name(MAP_TILESET_NAME) {
         if !map_part_container_change.is_empty() {
@@ -53,29 +50,17 @@ pub fn refresh_map_display(
                 .for_each(|e| commands.entity(e).despawn());
 
             let alpha = AlphaByScale::map();
+            let color = alpha.color(scale.x);
 
             if !alpha.display(scale.x) {
                 *background_visibility = Visibility::Hidden;
                 return;
             }
 
-            if *background_visibility == Visibility::Hidden {
-                *background_visibility = Visibility::Visible;
-
-                if let Some(background_handle) = &map_resources.background {
-                    if let Some(background_image) = images.get(background_handle) {
-                        let background_scale = Vec3::new(
-                            target.x as f32 / background_image.size().x,
-                            target.y as f32 / background_image.size().y,
-                            1.,
-                        );
-                        background_transform.scale = background_scale;
-                    }
-                }
-            }
+            *background_visibility = Visibility::Visible;
+            background_sprite.color = color;
 
             // Elements
-            let color = alpha.color(scale.x);
             for (point, sector) in map_part.sectors() {
                 if let Some(sector) = sector {
                     for (relative_point, element) in sector.elements() {
