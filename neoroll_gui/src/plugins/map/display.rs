@@ -13,17 +13,20 @@ use crate::{
     scene::ScenePoint,
 };
 
-use super::tileset::{element_tile_name, spawn, MAP_TILESET_NAME};
+use super::{
+    background::MapBackgroundNeedResize,
+    tileset::{element_tile_name, spawn, MapResources, MAP_TILESET_NAME},
+};
 
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::type_complexity)]
 pub fn refresh_map_display(
-    scene_items_camera: Query<
+    camera: Query<
         (&SceneItemsCamera, &Camera, &mut Transform),
         (With<SceneItemsCamera>, Without<BackgroundCamera>),
     >,
-    mut map_part_container_change: EventReader<MapPartContainerRefreshed>,
-    element_tiles_query: Query<Entity, With<Element>>,
+    mut map_container_refreshed: EventReader<MapPartContainerRefreshed>,
+    elements_query: Query<Entity, With<Element>>,
     mut background_query: Query<
         (&mut Visibility, &mut Sprite),
         (With<Background>, Without<Camera>),
@@ -32,20 +35,20 @@ pub fn refresh_map_display(
     map_part_container: ResMut<MapPartContainer>,
     mut commands: Commands,
 ) {
-    let (_, _, camera_transform) = scene_items_camera.single();
+    let (_, _, camera_transform) = camera.single();
     let scale = camera_transform.scale;
     let (mut background_visibility, mut background_sprite) = background_query.single_mut();
 
     if let Some(tileset) = tilesets.get_by_name(MAP_TILESET_NAME) {
-        if !map_part_container_change.is_empty() {
-            map_part_container_change.clear();
-
-            //////////////
-
+        if !map_container_refreshed
+            .iter()
+            .collect::<Vec<&MapPartContainerRefreshed>>()
+            .is_empty()
+        {
             let atlas = tileset.atlas();
             let map_part = map_part_container.map_part();
 
-            element_tiles_query
+            elements_query
                 .iter()
                 .for_each(|e| commands.entity(e).despawn());
 
@@ -76,6 +79,33 @@ pub fn refresh_map_display(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+pub fn resize_background(
+    mut resize: EventReader<MapBackgroundNeedResize>,
+    map: Res<MapResources>,
+    images: Res<Assets<Image>>,
+    mut background: Query<&mut Transform, (With<Background>, Without<Camera>)>,
+) {
+    if let Some(event) = resize
+        .iter()
+        .collect::<Vec<&MapBackgroundNeedResize>>()
+        .last()
+    {
+        if let Some(background_handle) = &map.background {
+            if let Some(background_image) = images.get(background_handle) {
+                let mut background_transform = background.single_mut();
+                let target = &event.0;
+
+                let background_scale = Vec3::new(
+                    target.width / background_image.size().x,
+                    target.height / background_image.size().y,
+                    1.,
+                );
+                background_transform.scale = background_scale;
             }
         }
     }

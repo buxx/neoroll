@@ -17,21 +17,25 @@ use super::{
 };
 
 pub fn refresh_world_display(
-    player_camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
-    mut world_part_container_change: EventReader<WorldPartContainerRefreshed>,
-    region_tiles_query: Query<Entity, With<RegionTile>>,
+    camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
+    mut world_container_refreshed: EventReader<WorldPartContainerRefreshed>,
+    tiles: Query<Entity, With<RegionTile>>,
     tilesets: Tilesets,
-    world_part_container: ResMut<WorldPartContainer>,
+    world_container: ResMut<WorldPartContainer>,
     commands: Commands,
 ) {
-    let (_, _, camera_transform) = player_camera.single();
+    let (_, _, camera_transform) = camera.single();
 
     if let Some(tileset) = tilesets.get_by_name(WORLD_TILESET_NAME) {
-        if !world_part_container_change.is_empty() {
-            world_part_container_change.clear();
+        if world_container_refreshed
+            .iter()
+            .collect::<Vec<&WorldPartContainerRefreshed>>()
+            .last()
+            .is_some()
+        {
             re_spawn_world(
-                region_tiles_query,
-                world_part_container,
+                tiles,
+                world_container,
                 tileset,
                 commands,
                 camera_transform.scale,
@@ -41,18 +45,16 @@ pub fn refresh_world_display(
 }
 
 pub fn re_spawn_world(
-    region_tiles_query: Query<Entity, With<RegionTile>>,
-    world_part_container: ResMut<WorldPartContainer>,
+    tiles: Query<Entity, With<RegionTile>>,
+    world_container: ResMut<WorldPartContainer>,
     tileset: &Tileset,
     mut commands: Commands,
     scale: Vec3,
 ) {
     let atlas = tileset.atlas();
-    let world_part = world_part_container.world_part();
+    let world_part = world_container.world_part();
 
-    region_tiles_query
-        .iter()
-        .for_each(|e| commands.entity(e).despawn());
+    tiles.iter().for_each(|e| commands.entity(e).despawn());
 
     let alpha = AlphaByScale::world();
 

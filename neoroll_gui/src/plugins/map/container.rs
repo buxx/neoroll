@@ -25,29 +25,33 @@ impl MapPartContainer {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn refresh_map_part_container(
-    player_camera: Query<(
+    camera: Query<(
         &SceneItemsCamera,
         &Camera,
         &mut Transform,
         (With<SceneItemsCamera>, Without<BackgroundCamera>),
     )>,
     map_updater: ResMut<MapUpdater>,
-    mut map_part_container: ResMut<MapPartContainer>,
-    mut map_part_container_need_change: EventReader<MapPartContainerNeedRefresh>,
-    mut map_part_container_change: EventWriter<MapPartContainerRefreshed>,
+    mut map_container: ResMut<MapPartContainer>,
+    mut map_container_need_refresh: EventReader<MapPartContainerNeedRefresh>,
+    mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
 ) {
-    if !map_part_container_need_change.is_empty() {
-        map_part_container_need_change.clear();
-
-        let (_, camera, transform, _) = player_camera.single();
+    if !map_container_need_refresh
+        .iter()
+        .collect::<Vec<&MapPartContainerNeedRefresh>>()
+        .is_empty()
+    {
+        let (_, camera, transform, _) = camera.single();
         let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
         let translation = transform.translation;
         let scale = transform.scale;
         let area = camera_map_area(target, translation, scale);
         let area = area.resize(2, 2);
 
-        map_updater.update(&mut map_part_container, area);
-        map_part_container_change.send(MapPartContainerRefreshed);
+        map_updater.update(&mut map_container, area);
+        map_container_refreshed.send(MapPartContainerRefreshed);
     }
 }

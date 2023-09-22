@@ -11,8 +11,6 @@ use self::{
     updater::WorldUpdater,
 };
 
-use super::inputs::window::refresh_world_on_window_resize;
-
 pub mod container;
 pub mod display;
 pub mod init;
@@ -36,7 +34,6 @@ impl Plugin for WorldDisplayPlugin {
                     init_world,
                     refresh_world_part_container,
                     refresh_world_display,
-                    refresh_world_on_window_resize,
                 ),
             );
     }

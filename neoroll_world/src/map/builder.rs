@@ -7,25 +7,31 @@ use crate::space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, Ab
 use rand::seq::SliceRandom;
 use rand::Rng;
 
-pub struct WorldMapBuilder<'a> {
+pub struct MapBuilder<'a> {
     world: &'a EntireWorld,
 }
 
-impl<'a> WorldMapBuilder<'a> {
+impl<'a> MapBuilder<'a> {
     pub fn new(world: &'a EntireWorld) -> Self {
         Self { world }
     }
 
     pub fn build(&self) -> Map {
         let mut sectors = vec![];
-        let lines = self.world.lines() / MAP_TILE_FACTOR;
-        let columns = self.world.columns() / MAP_TILE_FACTOR;
+        let world_lines = self.world.lines();
+        let world_columns = self.world.columns();
 
-        for line in 0..lines {
-            for column in 0..columns {
+        for line in (0..world_lines).step_by(MAP_TILE_FACTOR) {
+            for column in (0..world_columns).step_by(MAP_TILE_FACTOR) {
                 sectors.push(self.sector(line, column));
             }
         }
+
+        // If number of lines/columns is not divisible by MAP_TILE_FACTOR
+        // a "not finished" sector will represent last part. So,
+        // lines/columns count must count it
+        let lines = (world_lines as f32 / MAP_TILE_FACTOR as f32).ceil() as usize;
+        let columns = (world_columns as f32 / MAP_TILE_FACTOR as f32).ceil() as usize;
 
         Map::new(sectors, lines, columns)
     }
@@ -73,7 +79,7 @@ impl<'a> WorldMapBuilder<'a> {
                     .unwrap_or(&Element::Tree2a)
                     .clone(),
             )]
-        } else if ratio > 0.30 {
+        } else if ratio > 0.05 {
             vec![(
                 SectorRelativePoint(rng.gen_range(0.25..0.65), rng.gen_range(0.25..0.65)),
                 [Element::Tree1a, Element::Tree1b, Element::Tree1c]

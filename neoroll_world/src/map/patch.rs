@@ -7,12 +7,12 @@ pub struct NewSectors {
 }
 
 impl NewSectors {
-    pub fn from_map_area(world: &Map, area: &MapArea, ignore: &MapArea) -> Self {
+    pub fn from_map_area(map: &Map, area: &MapArea, ignore: &MapArea) -> Self {
         let mut sectors = HashMap::new();
 
         for point in area.points() {
             if !ignore.contains(&point) {
-                if let Some(sector) = world.sector(&point) {
+                if let Some(sector) = map.sector(&point) {
                     sectors.insert(point, sector.clone());
                 }
             }
