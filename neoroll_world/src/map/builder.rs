@@ -3,7 +3,11 @@ use super::{
     sector::{Sector, SectorRelativePoint},
     Map, MAP_TILE_FACTOR,
 };
-use crate::space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI};
+use crate::{
+    entity::ground::Ground,
+    space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
+    utils::Direction,
+};
 use rand::seq::SliceRandom;
 use rand::Rng;
 
@@ -93,5 +97,113 @@ impl<'a> MapBuilder<'a> {
         items.extend(new_items);
 
         Sector::new(items)
+    }
+
+    fn lakes(&self) -> Vec<Vec<AbsoluteWorldPoint>> {
+        let mut lakes = vec![];
+
+        // FIXME BS NOW : temp // Will must return the coats line
+        let mut lake = vec![];
+
+        for row in 0..self.world.lines() {
+            for col in 0..self.world.columns() {
+                let point = AbsoluteWorldPoint(
+                    AbsoluteWorldRowI(row as isize),
+                    AbsoluteWorldColI(col as isize),
+                );
+                if self.world.ground(&point) == Some(&Ground::FreshWater) {
+                    // All 4 neighbor must be water too
+                    if ![
+                        self.world.ground(&point.next(&Direction::North)),
+                        self.world.ground(&point.next(&Direction::Est)),
+                        self.world.ground(&point.next(&Direction::West)),
+                        self.world.ground(&point.next(&Direction::South)),
+                    ]
+                    .iter()
+                    .all(|g| g == &Some(&Ground::FreshWater))
+                    {
+                        lake.push(point);
+                    }
+                }
+            }
+        }
+
+        // FIXME BS NOW : temp
+        lakes.push(lake);
+
+        lakes
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        entity::{floor::Floor, ground::Ground},
+        space::layer::{CompositeLayer, FilledLayer, Layers},
+    };
+
+    use super::*;
+    use rstest::*;
+
+    pub struct WorldFromStrBuilder<'a> {
+        raw: &'a str,
+    }
+
+    impl<'a> WorldFromStrBuilder<'a> {
+        pub fn new(raw: &'a str) -> Self {
+            Self { raw }
+        }
+
+        pub fn build(&self) -> EntireWorld {
+            let lines = self.raw.lines().collect::<Vec<&str>>();
+            let columns = lines.first().unwrap_or(&"").len();
+            let mut grounds = vec![];
+
+            for line in &lines {
+                for char in line.trim().chars() {
+                    if char == '1' {
+                        grounds.push(Ground::FreshWater)
+                    } else {
+                        grounds.push(Ground::Soil)
+                    }
+                }
+            }
+
+            EntireWorld::new(
+                Layers::new(
+                    FilledLayer::new(grounds),
+                    FilledLayer::new(vec![Floor::Nothing; lines.len() * columns]),
+                    CompositeLayer::new(vec![None; lines.len() * columns]),
+                ),
+                lines.len(),
+                columns,
+            )
+        }
+    }
+
+    #[rstest]
+    #[case(
+        "00000
+         01110
+         01110
+         01110
+         00000",
+         // FIXME BS NOW : algo is not finished !!! See https://gamedev.stackexchange.com/questions/207307/generate-coastal-line-from-water-tiles
+         vec![vec![(1, 1), (2, 1), (3, 1), (1,2), (3,2), (1, 3), (2, 3), (3, 3)]]
+    )]
+    fn test_camera_world_area(#[case] map: &str, #[case] expected: Vec<Vec<(isize, isize)>>) {
+        let world = WorldFromStrBuilder::new(map).build();
+
+        let lakes = MapBuilder::new(&world).lakes();
+
+        let expected = expected
+            .iter()
+            .map(|lake| {
+                lake.iter()
+                    .map(|(x, y)| AbsoluteWorldPoint(AbsoluteWorldRowI(*y), AbsoluteWorldColI(*x)))
+                    .collect::<Vec<AbsoluteWorldPoint>>()
+            })
+            .collect::<Vec<Vec<AbsoluteWorldPoint>>>();
+        debug_assert_eq!(lakes, expected)
     }
 }

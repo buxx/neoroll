@@ -1,4 +1,7 @@
-use crate::map::{AbsoluteMapPoint, MAP_TILE_FACTOR};
+use crate::{
+    map::{AbsoluteMapPoint, MAP_TILE_FACTOR},
+    utils::Direction,
+};
 
 use self::area::WorldArea;
 
@@ -28,6 +31,14 @@ impl AbsoluteWorldPoint {
 
     pub fn col_i(&self) -> &AbsoluteWorldColI {
         &self.1
+    }
+
+    pub fn next(&self, direction: &Direction) -> Self {
+        let modifier = direction.modifier();
+        Self(
+            AbsoluteWorldRowI(self.0 .0 + modifier.1 as isize),
+            AbsoluteWorldColI(self.1 .0 + modifier.0 as isize),
+        )
     }
 }
 
