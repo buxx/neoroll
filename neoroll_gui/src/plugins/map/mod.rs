@@ -17,6 +17,7 @@ pub mod container;
 pub mod display;
 pub mod element;
 pub mod init;
+pub mod lake;
 pub mod tileset;
 pub mod updater;
 

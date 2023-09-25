@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 use neoroll_world::map::MAP_TILE_FACTOR;
+use rand::Rng;
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
@@ -15,6 +17,7 @@ use crate::{
 
 use super::{
     background::MapBackgroundNeedResize,
+    lake::Lake,
     tileset::{element_tile_name, spawn, MapResources, MAP_TILESET_NAME},
 };
 
@@ -27,6 +30,7 @@ pub fn refresh_map_display(
     >,
     mut map_container_refreshed: EventReader<MapPartContainerRefreshed>,
     elements_query: Query<Entity, With<Element>>,
+    lakes_query: Query<Entity, With<Lake>>,
     mut background_query: Query<
         (&mut Visibility, &mut Sprite),
         (With<Background>, Without<Camera>),
@@ -49,6 +53,9 @@ pub fn refresh_map_display(
             let map_part = map_part_container.map_part();
 
             elements_query
+                .iter()
+                .for_each(|e| commands.entity(e).despawn());
+            lakes_query
                 .iter()
                 .for_each(|e| commands.entity(e).despawn());
 
@@ -79,6 +86,26 @@ pub fn refresh_map_display(
                         }
                     }
                 }
+            }
+
+            // Lakes
+            // FIXME BS NOW : code for test now, will be according to area
+            let mut rng = rand::thread_rng();
+            for lake in map_part_container.0.lakes() {
+                let mut path_builder = PathBuilder::new();
+                path_builder.move_to(ScenePoint::from_world_point(lake.first().unwrap()).into());
+                for point in lake {
+                    path_builder.line_to(ScenePoint::from_world_point(point).into());
+                }
+                path_builder.close();
+                let path = path_builder.build();
+                let (r, g, b) = (rng.gen(), rng.gen(), rng.gen());
+                commands.spawn((
+                    ShapeBundle { path, ..default() },
+                    Stroke::new(Color::rgb(r, g, b), 5.0),
+                    // Fill::color(Color::BLUE),
+                    Lake,
+                ));
             }
         }
     }

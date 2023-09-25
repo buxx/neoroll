@@ -29,3 +29,9 @@ impl From<ScenePoint> for Vec3 {
         Vec3::new(val.x, -val.y, 0.)
     }
 }
+
+impl From<ScenePoint> for Vec2 {
+    fn from(val: ScenePoint) -> Self {
+        Vec2::new(val.x, -val.y)
+    }
+}

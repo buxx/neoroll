@@ -1,3 +1,5 @@
+use crate::space::AbsoluteWorldPoint;
+
 use self::{area::MapArea, sector::Sector};
 
 pub mod area;
@@ -11,6 +13,8 @@ pub const MAP_TILE_FACTOR: usize = 16;
 
 pub struct Map {
     sectors: Vec<Sector>,
+    // FIXME BS NOW : identify sectors where lake is to transmit only required
+    lakes: Vec<Vec<AbsoluteWorldPoint>>,
     lines: usize,
     columns: usize,
 }
@@ -19,14 +23,21 @@ impl Map {
     pub fn empty() -> Map {
         Map {
             sectors: vec![],
+            lakes: vec![],
             lines: 0,
             columns: 0,
         }
     }
 
-    fn new(sectors: Vec<Sector>, lines: usize, columns: usize) -> Map {
+    fn new(
+        sectors: Vec<Sector>,
+        lines: usize,
+        columns: usize,
+        lakes: Vec<Vec<AbsoluteWorldPoint>>,
+    ) -> Map {
         Map {
             sectors,
+            lakes,
             lines,
             columns,
         }
@@ -47,6 +58,10 @@ impl Map {
 
         let i = row_i * self.columns + col_i;
         Some(&self.sectors[i])
+    }
+
+    pub fn lakes(&self) -> &Vec<Vec<AbsoluteWorldPoint>> {
+        &self.lakes
     }
 }
 

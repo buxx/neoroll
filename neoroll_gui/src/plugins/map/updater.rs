@@ -18,7 +18,8 @@ impl MapUpdater {
             let new_sectors = NewSectors::from_map_area(map, &area, current_area);
             // Fake server part end ;; Receive from Sever
             info!("Received {} sectors", new_sectors.len());
-            map_part.0.switch(new_sectors, area);
+            // FIXME BS NOW: hardcoded lakes for now
+            map_part.0.switch(new_sectors, map.lakes().clone(), area);
         }
     }
 }

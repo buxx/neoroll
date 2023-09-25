@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 
 use plugins::{inputs::UserInputsPlugin, map::MapDisplayPlugin, world::WorldDisplayPlugin};
@@ -15,6 +16,7 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
+            ShapePlugin,
             TilesetPlugin::default(),
             UserInputsPlugin,
             WorldDisplayPlugin,

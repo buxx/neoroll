@@ -6,10 +6,11 @@ use super::{
 use crate::{
     entity::ground::Ground,
     space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
-    utils::Direction,
+    utils::{BlindFoldedMazesResolver, Direction},
 };
 use rand::seq::SliceRandom;
 use rand::Rng;
+use strum::IntoEnumIterator;
 
 pub struct MapBuilder<'a> {
     world: &'a EntireWorld,
@@ -36,8 +37,9 @@ impl<'a> MapBuilder<'a> {
         // lines/columns count must count it
         let lines = (world_lines as f32 / MAP_TILE_FACTOR as f32).ceil() as usize;
         let columns = (world_columns as f32 / MAP_TILE_FACTOR as f32).ceil() as usize;
+        let lakes = self.lakes();
 
-        Map::new(sectors, lines, columns)
+        Map::new(sectors, lines, columns, lakes)
     }
 
     fn sector(&self, start_world_row: usize, start_world_col: usize) -> Sector {
@@ -99,11 +101,13 @@ impl<'a> MapBuilder<'a> {
         Sector::new(items)
     }
 
-    fn lakes(&self) -> Vec<Vec<AbsoluteWorldPoint>> {
-        let mut lakes = vec![];
+    pub fn lakes(&self) -> Vec<Vec<AbsoluteWorldPoint>> {
+        let coasts = self.coasts();
+        BlindFoldedMazesResolver::new(&coasts).resolve_all()
+    }
 
-        // FIXME BS NOW : temp // Will must return the coats line
-        let mut lake = vec![];
+    pub fn coasts(&self) -> Vec<AbsoluteWorldPoint> {
+        let mut coasts = vec![];
 
         for row in 0..self.world.lines() {
             for col in 0..self.world.columns() {
@@ -112,74 +116,40 @@ impl<'a> MapBuilder<'a> {
                     AbsoluteWorldColI(col as isize),
                 );
                 if self.world.ground(&point) == Some(&Ground::FreshWater) {
-                    // All 4 neighbor must be water too
-                    if ![
-                        self.world.ground(&point.next(&Direction::North)),
-                        self.world.ground(&point.next(&Direction::Est)),
-                        self.world.ground(&point.next(&Direction::West)),
-                        self.world.ground(&point.next(&Direction::South)),
+                    let all_neighbor_is_water = [
+                        self.world.ground(&point.next(&Direction::Front)),
+                        self.world.ground(&point.next(&Direction::Left)),
+                        self.world.ground(&point.next(&Direction::Right)),
+                        self.world.ground(&point.next(&Direction::Rear)),
                     ]
                     .iter()
-                    .all(|g| g == &Some(&Ground::FreshWater))
-                    {
-                        lake.push(point);
+                    .all(|g| g == &Some(&Ground::FreshWater));
+
+                    if !all_neighbor_is_water {
+                        let surrounded_by_water_count = Direction::iter()
+                            .map(|direction| point.next(&direction))
+                            .map(|point| self.world.ground(&point))
+                            .filter(|ground| ground == &Some(&Ground::FreshWater))
+                            .count();
+
+                        if surrounded_by_water_count >= 3 {
+                            coasts.push(point);
+                        }
                     }
                 }
             }
         }
 
-        // FIXME BS NOW : temp
-        lakes.push(lake);
-
-        lakes
+        coasts
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{
-        entity::{floor::Floor, ground::Ground},
-        space::layer::{CompositeLayer, FilledLayer, Layers},
-    };
+    use crate::tests::str_map::WorldFromStrBuilder;
 
     use super::*;
     use rstest::*;
-
-    pub struct WorldFromStrBuilder<'a> {
-        raw: &'a str,
-    }
-
-    impl<'a> WorldFromStrBuilder<'a> {
-        pub fn new(raw: &'a str) -> Self {
-            Self { raw }
-        }
-
-        pub fn build(&self) -> EntireWorld {
-            let lines = self.raw.lines().collect::<Vec<&str>>();
-            let columns = lines.first().unwrap_or(&"").len();
-            let mut grounds = vec![];
-
-            for line in &lines {
-                for char in line.trim().chars() {
-                    if char == '1' {
-                        grounds.push(Ground::FreshWater)
-                    } else {
-                        grounds.push(Ground::Soil)
-                    }
-                }
-            }
-
-            EntireWorld::new(
-                Layers::new(
-                    FilledLayer::new(grounds),
-                    FilledLayer::new(vec![Floor::Nothing; lines.len() * columns]),
-                    CompositeLayer::new(vec![None; lines.len() * columns]),
-                ),
-                lines.len(),
-                columns,
-            )
-        }
-    }
 
     #[rstest]
     #[case(
@@ -188,22 +158,26 @@ mod test {
          01110
          01110
          00000",
-         // FIXME BS NOW : algo is not finished !!! See https://gamedev.stackexchange.com/questions/207307/generate-coastal-line-from-water-tiles
-         vec![vec![(1, 1), (2, 1), (3, 1), (1,2), (3,2), (1, 3), (2, 3), (3, 3)]]
+         vec![(1, 1), (1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2), (3, 3)]
     )]
-    fn test_camera_world_area(#[case] map: &str, #[case] expected: Vec<Vec<(isize, isize)>>) {
+    #[case(
+        "110
+         110
+         000",
+         vec![(0, 0), (0, 1), (1, 0), (1, 1)]
+    )]
+    fn test_map_coasts(#[case] map: &str, #[case] expected: Vec<(isize, isize)>) {
+        // Given
         let world = WorldFromStrBuilder::new(map).build();
 
-        let lakes = MapBuilder::new(&world).lakes();
+        // When
+        let coasts = MapBuilder::new(&world).coasts();
 
-        let expected = expected
+        // Then
+        let result = coasts
             .iter()
-            .map(|lake| {
-                lake.iter()
-                    .map(|(x, y)| AbsoluteWorldPoint(AbsoluteWorldRowI(*y), AbsoluteWorldColI(*x)))
-                    .collect::<Vec<AbsoluteWorldPoint>>()
-            })
-            .collect::<Vec<Vec<AbsoluteWorldPoint>>>();
-        debug_assert_eq!(lakes, expected)
+            .map(|p| (p.0 .0, p.1 .0))
+            .collect::<Vec<(isize, isize)>>();
+        debug_assert_eq!(result, expected)
     }
 }

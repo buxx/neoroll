@@ -1,3 +1,5 @@
+use glam::Vec2;
+
 use crate::{
     map::{AbsoluteMapPoint, MAP_TILE_FACTOR},
     utils::Direction,
@@ -36,8 +38,8 @@ impl AbsoluteWorldPoint {
     pub fn next(&self, direction: &Direction) -> Self {
         let modifier = direction.modifier();
         Self(
-            AbsoluteWorldRowI(self.0 .0 + modifier.1 as isize),
-            AbsoluteWorldColI(self.1 .0 + modifier.0 as isize),
+            AbsoluteWorldRowI(self.0 .0 + modifier.0 as isize),
+            AbsoluteWorldColI(self.1 .0 + modifier.1 as isize),
         )
     }
 }
@@ -48,6 +50,12 @@ impl From<AbsoluteMapPoint> for AbsoluteWorldPoint {
             AbsoluteWorldRowI(val.0 .0 * MAP_TILE_FACTOR as isize),
             AbsoluteWorldColI(val.1 .0 * MAP_TILE_FACTOR as isize),
         )
+    }
+}
+
+impl From<&AbsoluteWorldPoint> for Vec2 {
+    fn from(value: &AbsoluteWorldPoint) -> Self {
+        Self::new(value.1 .0 as f32, value.0 .0 as f32)
     }
 }
 

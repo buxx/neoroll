@@ -1,19 +1,28 @@
-use crate::map::RelativeMapPoint;
+use crate::{map::RelativeMapPoint, space::AbsoluteWorldPoint};
 
 use super::{area::MapArea, patch::NewSectors, sector::Sector, AbsoluteMapPoint};
 
 pub struct MapPart {
     sectors: Vec<Option<Sector>>,
+    lakes: Vec<Vec<AbsoluteWorldPoint>>,
     area: MapArea,
 }
 
 impl MapPart {
-    pub fn new(sectors: Vec<Option<Sector>>, area: MapArea) -> Self {
-        Self { sectors, area }
+    pub fn new(
+        sectors: Vec<Option<Sector>>,
+        lakes: Vec<Vec<AbsoluteWorldPoint>>,
+        area: MapArea,
+    ) -> Self {
+        Self {
+            sectors,
+            lakes,
+            area,
+        }
     }
 
     pub fn empty() -> Self {
-        Self::new(vec![], MapArea::zero())
+        Self::new(vec![], vec![], MapArea::zero())
     }
 
     fn index(&self, point: &AbsoluteMapPoint) -> usize {
@@ -53,7 +62,7 @@ impl MapPart {
         &self.area
     }
 
-    pub fn switch(&mut self, new: NewSectors, area: MapArea) {
+    pub fn switch(&mut self, new: NewSectors, lakes: Vec<Vec<AbsoluteWorldPoint>>, area: MapArea) {
         let mut sectors = vec![];
 
         for point in area.points() {
@@ -65,6 +74,11 @@ impl MapPart {
         }
 
         self.sectors = sectors;
+        self.lakes = lakes;
         self.area = area;
+    }
+
+    pub fn lakes(&self) -> &Vec<Vec<AbsoluteWorldPoint>> {
+        &self.lakes
     }
 }
