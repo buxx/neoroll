@@ -2,9 +2,12 @@ use std::fs;
 
 use bevy::render::view::visibility::RenderLayers;
 use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*};
+use neoroll_world::entity::ground::Ground;
 use neoroll_world::map::builder::MapBuilder;
+use neoroll_world::map::Map;
 use neoroll_world::space::world::EntireWorld;
 
+use crate::debug::WorldToTxt;
 use crate::plugins::map::tileset::MapResources;
 use crate::plugins::world::tileset::WorldTileset;
 use crate::{
@@ -69,7 +72,8 @@ pub fn setup_(
 
     // TODO : this part will be "server side" and network stuff
     let world = bincode::deserialize::<EntireWorld>(&fs::read("world.bin").unwrap()).unwrap();
-    let map = MapBuilder::new(&world).build();
+    let map = bincode::deserialize::<Map>(&fs::read("map.bin").unwrap()).unwrap();
+
     info!(
         "Generated world: {} lines, {} columns, so {} tiles",
         world.lines(),

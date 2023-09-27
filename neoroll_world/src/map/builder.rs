@@ -14,11 +14,20 @@ use strum::IntoEnumIterator;
 
 pub struct MapBuilder<'a> {
     world: &'a EntireWorld,
+    build_lakes: bool,
 }
 
 impl<'a> MapBuilder<'a> {
     pub fn new(world: &'a EntireWorld) -> Self {
-        Self { world }
+        Self {
+            world,
+            build_lakes: false,
+        }
+    }
+
+    pub fn build_lakes(mut self, value: bool) -> Self {
+        self.build_lakes = value;
+        self
     }
 
     pub fn build(&self) -> Map {
@@ -37,7 +46,11 @@ impl<'a> MapBuilder<'a> {
         // lines/columns count must count it
         let lines = (world_lines as f32 / MAP_TILE_FACTOR as f32).ceil() as usize;
         let columns = (world_columns as f32 / MAP_TILE_FACTOR as f32).ceil() as usize;
-        let lakes = self.lakes();
+        let lakes = if self.build_lakes {
+            self.lakes()
+        } else {
+            vec![]
+        };
 
         Map::new(sectors, lines, columns, lakes)
     }
@@ -103,7 +116,7 @@ impl<'a> MapBuilder<'a> {
 
     pub fn lakes(&self) -> Vec<Vec<AbsoluteWorldPoint>> {
         let coasts = self.coasts();
-        BlindFoldedMazesResolver::new(&coasts).resolve_all()
+        BlindFoldedMazesResolver::new(self.world, &coasts).resolve_all()
     }
 
     pub fn coasts(&self) -> Vec<AbsoluteWorldPoint> {
@@ -116,25 +129,12 @@ impl<'a> MapBuilder<'a> {
                     AbsoluteWorldColI(col as isize),
                 );
                 if self.world.ground(&point) == Some(&Ground::FreshWater) {
-                    let all_neighbor_is_water = [
-                        self.world.ground(&point.next(&Direction::Front)),
-                        self.world.ground(&point.next(&Direction::Left)),
-                        self.world.ground(&point.next(&Direction::Right)),
-                        self.world.ground(&point.next(&Direction::Rear)),
-                    ]
-                    .iter()
-                    .all(|g| g == &Some(&Ground::FreshWater));
+                    let all_neighbor_is_water = Direction::iter()
+                        .map(|direction| self.world.ground(&point.next(&direction)))
+                        .all(|g| g == Some(&Ground::FreshWater));
 
                     if !all_neighbor_is_water {
-                        let surrounded_by_water_count = Direction::iter()
-                            .map(|direction| point.next(&direction))
-                            .map(|point| self.world.ground(&point))
-                            .filter(|ground| ground == &Some(&Ground::FreshWater))
-                            .count();
-
-                        if surrounded_by_water_count >= 3 {
-                            coasts.push(point);
-                        }
+                        coasts.push(point);
                     }
                 }
             }
@@ -159,6 +159,14 @@ mod test {
          01110
          00000",
          vec![(1, 1), (1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2), (3, 3)]
+    )]
+    #[case(
+        "00000
+         01110
+         11111
+         01110
+         00000",
+         vec![(1, 1), (1, 2), (1, 3), (2, 0), (2, 1), (2, 3), (2, 4), (3, 1), (3, 2), (3, 3)]
     )]
     #[case(
         "110

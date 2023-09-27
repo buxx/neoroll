@@ -1,4 +1,5 @@
 use glam::Vec2;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     map::{AbsoluteMapPoint, MAP_TILE_FACTOR},
@@ -13,13 +14,13 @@ pub mod part;
 pub mod patch;
 pub mod world;
 
-#[derive(Debug, Eq, PartialEq, Default, Clone, Copy, Hash)]
+#[derive(Debug, Eq, PartialEq, Default, Clone, Copy, Hash, Deserialize, Serialize)]
 pub struct AbsoluteWorldRowI(pub isize);
 
-#[derive(Debug, Eq, PartialEq, Default, Clone, Copy, Hash)]
+#[derive(Debug, Eq, PartialEq, Default, Clone, Copy, Hash, Deserialize, Serialize)]
 pub struct AbsoluteWorldColI(pub isize);
 
-#[derive(Debug, Eq, PartialEq, Default, Clone, Copy, Hash)]
+#[derive(Debug, Eq, PartialEq, Default, Clone, Copy, Hash, Deserialize, Serialize)]
 pub struct AbsoluteWorldPoint(pub AbsoluteWorldRowI, pub AbsoluteWorldColI);
 
 impl AbsoluteWorldPoint {

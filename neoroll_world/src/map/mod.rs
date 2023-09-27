@@ -1,6 +1,6 @@
-use crate::space::AbsoluteWorldPoint;
-
 use self::{area::MapArea, sector::Sector};
+use crate::space::AbsoluteWorldPoint;
+use serde::{Deserialize, Serialize};
 
 pub mod area;
 pub mod builder;
@@ -11,6 +11,7 @@ pub mod sector;
 
 pub const MAP_TILE_FACTOR: usize = 16;
 
+#[derive(Deserialize, Serialize)]
 pub struct Map {
     sectors: Vec<Sector>,
     // FIXME BS NOW : identify sectors where lake is to transmit only required

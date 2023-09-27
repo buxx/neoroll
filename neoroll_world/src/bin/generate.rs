@@ -2,8 +2,10 @@ use std::fs;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use neoroll_world::generator::perlin_noise_simple::PerlinNoiseSimpleGenerator;
 use neoroll_world::generator::WorldGenerator;
+use neoroll_world::{
+    generator::perlin_noise_simple::PerlinNoiseSimpleGenerator, map::builder::MapBuilder,
+};
 use rand::{distributions::Alphanumeric, Rng};
 
 use structopt::StructOpt;
@@ -13,6 +15,9 @@ use structopt::StructOpt;
 pub struct Opt {
     #[structopt(long = "--seed")]
     seed: Option<String>,
+
+    #[structopt(short, long)]
+    lakes: bool,
 
     #[structopt()]
     lines: i64,
@@ -36,7 +41,10 @@ pub struct Opt {
     nm2_factor: i64,
 
     #[structopt(parse(from_os_str))]
-    output: PathBuf,
+    world_output: PathBuf,
+
+    #[structopt(parse(from_os_str))]
+    map_output: PathBuf,
 }
 
 fn main() -> Result<()> {
@@ -60,10 +68,14 @@ fn main() -> Result<()> {
         opt.nm2_factor,
     )
     .generate();
+    let map = MapBuilder::new(&world).build_lakes(opt.lakes).build();
 
-    let output_display = opt.output.display().to_string();
-    fs::write(opt.output, bincode::serialize(&world)?)
-        .context(format!("Write world into file '{}'", &output_display))?;
+    let world_output_display = opt.world_output.display().to_string();
+    let map_output_display = opt.map_output.display().to_string();
+    fs::write(opt.world_output, bincode::serialize(&world)?)
+        .context(format!("Write world into file '{}'", &world_output_display))?;
+    fs::write(opt.map_output, bincode::serialize(&map)?)
+        .context(format!("Write map into file '{}'", &map_output_display))?;
 
     Ok(())
 }

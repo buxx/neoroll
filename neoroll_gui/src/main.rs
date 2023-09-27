@@ -6,6 +6,7 @@ use plugins::{inputs::UserInputsPlugin, map::MapDisplayPlugin, world::WorldDispl
 use setup::setup_;
 
 mod camera;
+mod debug;
 mod graphics;
 mod layer;
 mod plugins;

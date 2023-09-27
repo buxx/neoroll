@@ -31,6 +31,7 @@ pub struct PerlinNoiseSimpleGenerator {
     nm2_factor: i64,
 }
 
+#[allow(clippy::too_many_arguments)]
 impl PerlinNoiseSimpleGenerator {
     pub fn new(
         seed: &str,

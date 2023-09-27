@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 use neoroll_world::map::MAP_TILE_FACTOR;
-use rand::Rng;
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
@@ -90,7 +89,6 @@ pub fn refresh_map_display(
 
             // Lakes
             // FIXME BS NOW : code for test now, will be according to area
-            let mut rng = rand::thread_rng();
             for lake in map_part_container.0.lakes() {
                 let mut path_builder = PathBuilder::new();
                 path_builder.move_to(ScenePoint::from_world_point(lake.first().unwrap()).into());
@@ -99,11 +97,10 @@ pub fn refresh_map_display(
                 }
                 path_builder.close();
                 let path = path_builder.build();
-                let (r, g, b) = (rng.gen(), rng.gen(), rng.gen());
                 commands.spawn((
                     ShapeBundle { path, ..default() },
-                    Stroke::new(Color::rgb(r, g, b), 5.0),
-                    // Fill::color(Color::BLUE),
+                    Stroke::new(Color::BLUE, 5.0),
+                    Fill::color(Color::BLUE),
                     Lake,
                 ));
             }

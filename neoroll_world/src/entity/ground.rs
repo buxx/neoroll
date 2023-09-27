@@ -1,7 +1,7 @@
 use super::Entity;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Deserialize, Serialize, PartialEq, Eq, Hash, Debug)]
 pub enum Ground {
     FreshWater,
     Soil,
