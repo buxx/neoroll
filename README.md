@@ -1,8 +1,6 @@
 A world generator and explorer. With client and server part. Progressive load and adaptive scale.
 
-![scale1](./medias/neoroll1.png)
-![scale2](./medias/neoroll2.png)
-![scale3](./medias/neoroll3.png)
+![neoroll demo](./medias/demo.gif)
 
 ## Dev
 
