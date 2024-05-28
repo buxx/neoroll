@@ -19,7 +19,7 @@ impl MapUpdater {
             // Fake server part end ;; Receive from Sever
             info!("Received {} sectors", new_sectors.len());
             // FIXME BS NOW: hardcoded lakes for now
-            map_part.0.switch(new_sectors, map.lakes().clone(), area);
+            map_part.0.switch(new_sectors, vec![].clone(), area);
         }
     }
 }

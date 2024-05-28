@@ -2,6 +2,7 @@
 resolver = "2"
 
 members = [
+    "neoroll_server",
     "neoroll_world",
     "neoroll_gui"
 ]
