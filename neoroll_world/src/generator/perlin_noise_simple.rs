@@ -116,6 +116,7 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
             ),
             self.lines as usize,
             self.columns as usize,
+            vec![],
         )
     }
 }

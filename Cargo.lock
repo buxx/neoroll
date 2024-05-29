@@ -2567,6 +2567,7 @@ dependencies = [
  "neoroll_world",
  "num_cpus",
  "rayon",
+ "serde",
  "uuid",
 ]
 
@@ -2583,6 +2584,7 @@ dependencies = [
  "structopt",
  "strum",
  "strum_macros",
+ "uuid",
  "weighted_rand",
  "worldgen",
 ]

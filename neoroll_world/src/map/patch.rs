@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use super::{area::MapArea, sector::Sector, AbsoluteMapPoint, Map};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct NewSectors {
     sectors: HashMap<AbsoluteMapPoint, Sector>,
 }

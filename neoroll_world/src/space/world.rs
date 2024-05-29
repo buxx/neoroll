@@ -1,21 +1,34 @@
-use crate::entity::{floor::Floor, ground::Ground, structure::Structure};
+use std::collections::HashMap;
+
+use crate::{
+    entity::{
+        creature::{Creature, CreatureChange, CreatureId},
+        floor::Floor,
+        ground::Ground,
+        structure::Structure,
+    },
+    space::{layer::Layers, AbsoluteWorldPoint},
+};
 use serde::{Deserialize, Serialize};
 
-use super::{layer::Layers, AbsoluteWorldPoint};
-
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct World {
     layers: Layers,
     lines: usize,
     columns: usize,
+    creatures: HashMap<CreatureId, Creature>,
 }
 
 impl World {
-    pub fn new(layers: Layers, lines: usize, columns: usize) -> Self {
+    pub fn new(layers: Layers, lines: usize, columns: usize, creatures: Vec<Creature>) -> Self {
         Self {
             layers,
             lines,
             columns,
+            creatures: creatures
+                .into_iter()
+                .map(|c| (*c.id(), c))
+                .collect::<HashMap<CreatureId, Creature>>(),
         }
     }
 
@@ -77,14 +90,16 @@ impl World {
         let i = row_i * self.columns + col_i;
         self.layers.structures().get(i)
     }
+
+    pub fn creatures(&self) -> &HashMap<CreatureId, Creature> {
+        &self.creatures
+    }
+
+    pub fn creatures_mut(&mut self) -> &mut HashMap<CreatureId, Creature> {
+        &mut self.creatures
+    }
 }
 
-impl Default for World {
-    fn default() -> Self {
-        Self {
-            layers: Default::default(),
-            lines: Default::default(),
-            columns: Default::default(),
-        }
-    }
+pub enum WorldChange {
+    Creature(CreatureId, CreatureChange),
 }

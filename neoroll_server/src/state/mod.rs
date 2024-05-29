@@ -1,12 +1,21 @@
+pub mod world;
 use std::{
     collections::HashMap,
     ops::{Add, AddAssign},
     sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
-use neoroll_world::{map::Map, space::world::World};
+use neoroll_world::{
+    map::Map,
+    space::world::{World, WorldChange},
+};
+use world::WorldModifier;
 
-use crate::action::{Action, ActionChange, ActionId, NextTick};
+use crate::{
+    action::{Action, ActionChange, ActionId, NextTick},
+    gateway::Gateways,
+    subscriptions::Subscriptions,
+};
 
 pub struct State {
     frame_i: FrameI,
@@ -41,10 +50,6 @@ impl State {
         self.map.read().unwrap()
     }
 
-    fn map_mut(&self) -> RwLockWriteGuard<Map> {
-        self.map.write().unwrap()
-    }
-
     /// Return actions to tick for current state
     pub fn actions(&self) -> impl Iterator<Item = (&ActionId, &Action)> {
         self.actions
@@ -57,7 +62,12 @@ impl State {
         self.frame_i += FrameI(1);
     }
 
-    pub fn apply(&mut self, changes: Vec<StateChange>) {
+    pub fn apply(
+        &mut self,
+        gateways: &Arc<RwLock<Gateways>>,
+        subscriptions: &Arc<RwLock<Subscriptions>>,
+        changes: Vec<StateChange>,
+    ) {
         for change in changes {
             match change {
                 StateChange::Action(id, ActionChange::New(action)) => {
@@ -72,6 +82,9 @@ impl State {
                 }
                 StateChange::Action(id, ActionChange::Remove) => {
                     self.actions.remove(&id);
+                }
+                StateChange::World(change) => {
+                    WorldModifier::new(gateways, subscriptions, &mut self.world_mut()).apply(change)
                 }
             };
         }
@@ -91,6 +104,7 @@ impl Default for State {
 
 pub enum StateChange {
     Action(ActionId, ActionChange),
+    World(WorldChange),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

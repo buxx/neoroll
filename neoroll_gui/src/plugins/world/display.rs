@@ -4,22 +4,25 @@ use bevy_tileset::prelude::*;
 use crate::{
     camera::SceneItemsCamera,
     graphics::AlphaByScale,
-    plugins::world::{container::WorldPartContainer, region::RegionTile},
+    plugins::world::{container::WorldPartContainer, region::TileComponent},
     scene::ScenePoint,
 };
 
 use super::{
     container::WorldPartContainerRefreshed,
+    creature::{spawn_creature, CreatureComponent, CreaturesMap},
     resolver::LayersResolver,
-    tileset::{spawn, WORLD_TILESET_NAME},
+    tileset::{spawn_tile, WORLD_TILESET_NAME},
 };
 
 pub fn refresh_world_display(
+    world_part: Res<WorldPartContainer>,
+    mut creatures_map: ResMut<CreaturesMap>,
     camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
     mut world_container_refreshed: EventReader<WorldPartContainerRefreshed>,
-    tiles: Query<Entity, With<RegionTile>>,
+    tiles: Query<Entity, With<TileComponent>>,
+    creatures: Query<Entity, With<CreatureComponent>>,
     tilesets: Tilesets,
-    world_container: Res<WorldPartContainer>,
     commands: Commands,
 ) {
     let (_, _, camera_transform) = camera.single();
@@ -32,8 +35,10 @@ pub fn refresh_world_display(
             .is_some()
         {
             re_spawn_world(
+                world_part,
+                creatures_map,
                 tiles,
-                world_container,
+                creatures,
                 tileset,
                 commands,
                 camera_transform.scale,
@@ -43,16 +48,21 @@ pub fn refresh_world_display(
 }
 
 pub fn re_spawn_world(
-    tiles: Query<Entity, With<RegionTile>>,
-    world_container: Res<WorldPartContainer>,
+    world_part: Res<WorldPartContainer>,
+    mut creatures_map: ResMut<CreaturesMap>,
+    tiles: Query<Entity, With<TileComponent>>,
+    creatures: Query<Entity, With<CreatureComponent>>,
     tileset: &Tileset,
     mut commands: Commands,
     scale: Vec3,
 ) {
     let atlas = tileset.atlas();
-    let world_part = world_container.world_part();
+    let world_part = world_part.world_part();
 
+    // Creatures mapping will be completely refilled
+    creatures_map.clear();
     tiles.iter().for_each(|e| commands.entity(e).despawn());
+    creatures.iter().for_each(|e| commands.entity(e).despawn());
 
     let alpha = AlphaByScale::world();
 
@@ -71,11 +81,22 @@ pub fn re_spawn_world(
         for tile in tiles {
             if let Some((tile_index, _)) = &tileset.select_tile(&tile.0) {
                 let scene_point = ScenePoint::from_world_point(point);
-                commands.spawn(spawn(atlas, tile_index, scene_point.into(), color));
+                commands.spawn(spawn_tile(atlas, tile_index, scene_point.into(), color));
             }
         }
     }
 
-    let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
-    commands.spawn(spawn(atlas, human_tile_index, (0., 0., 0.).into(), color));
+    for creature in world_part.creatures().values() {
+        let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
+        let scene_point = ScenePoint::from_world_point(creature.point());
+
+        let entity = commands.spawn(spawn_creature(
+            *creature.id(),
+            atlas,
+            human_tile_index,
+            scene_point.into(),
+            color,
+        )).id();
+        creatures_map.insert(*creature.id(), entity);
+    }
 }

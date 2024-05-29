@@ -1,6 +1,6 @@
 use super::{AbsoluteMapColI, AbsoluteMapPoint, AbsoluteMapRowI};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct MapArea {
     start: AbsoluteMapPoint,
     lines: usize,

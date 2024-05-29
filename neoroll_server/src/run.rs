@@ -1,35 +1,83 @@
 use std::{
-    sync::mpsc::{channel, Receiver, Sender},
+    sync::{
+        mpsc::{channel, Receiver, Sender},
+        Arc, RwLock,
+    },
     thread,
     time::Duration,
 };
 
+use neoroll_world::{
+    entity::creature::{Creature, CreatureChange, CreatureId},
+    space::{world::WorldChange, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
+};
 use rayon::{ThreadPool, ThreadPoolBuilder};
 
 use crate::{
-    action::{Action, ActionChange, ActionId},
+    action::{move_::MoveCreatureBuilder, Action, ActionChange, ActionId},
+    gateway::Gateways,
     state::{State, StateChange},
+    subscriptions::Subscriptions,
 };
 
 pub struct Runner {
+    gateways: Arc<RwLock<Gateways>>,
+    subscriptions: Arc<RwLock<Subscriptions>>,
     workers_count: usize,
     state: State,
 }
 
 impl Runner {
-    pub fn new(state: State) -> Self {
+    pub fn new(
+        gateways: Arc<RwLock<Gateways>>,
+        subscriptions: Arc<RwLock<Subscriptions>>,
+        state: State,
+    ) -> Self {
         Runner {
+            gateways,
+            subscriptions,
             workers_count: num_cpus::get(),
             state,
         }
     }
 
     pub fn run(&mut self) {
+        // HACK
+        for line in 0..20 {
+            for column in 0..20 {
+                let creature_id = CreatureId::new();
+                let creature_point =
+                    AbsoluteWorldPoint(AbsoluteWorldRowI(line), AbsoluteWorldColI(column));
+                let move_to = AbsoluteWorldPoint(
+                    AbsoluteWorldRowI(line + 30),
+                    AbsoluteWorldColI(column + 30),
+                );
+
+                self.state.apply(
+                    &self.gateways,
+                    &self.subscriptions,
+                    vec![
+                        StateChange::World(WorldChange::Creature(
+                            creature_id,
+                            CreatureChange::New(Creature::new(creature_id, creature_point)),
+                        )),
+                        StateChange::Action(
+                            ActionId::new(),
+                            ActionChange::New(
+                                MoveCreatureBuilder::new(creature_id, move_to).build(),
+                            ),
+                        ),
+                    ],
+                );
+            }
+        }
+
         loop {
             let mut state_changes = vec![];
             state_changes.extend(self.tick_actions());
 
-            self.state.apply(state_changes);
+            self.state
+                .apply(&self.gateways, &self.subscriptions, state_changes);
             self.state.increment();
 
             println!("tick");
@@ -95,12 +143,18 @@ impl Runner {
 }
 
 pub struct RunnerBuilder {
+    gateways: Arc<RwLock<Gateways>>,
+    subscriptions: Arc<RwLock<Subscriptions>>,
     actions: Vec<(ActionId, Action)>,
 }
 
 impl RunnerBuilder {
-    pub fn new() -> Self {
-        Self { actions: vec![] }
+    pub fn new(gateways: Arc<RwLock<Gateways>>, subscriptions: Arc<RwLock<Subscriptions>>) -> Self {
+        Self {
+            gateways,
+            subscriptions,
+            actions: vec![],
+        }
     }
 
     pub fn actions(mut self, value: Vec<(ActionId, Action)>) -> Self {
@@ -110,18 +164,13 @@ impl RunnerBuilder {
 
     pub fn build(self, mut state: State) -> Runner {
         for (action_id, action) in self.actions {
-            state.apply(vec![StateChange::Action(
-                action_id,
-                ActionChange::New(action),
-            )]);
+            state.apply(
+                &self.gateways,
+                &self.subscriptions,
+                vec![StateChange::Action(action_id, ActionChange::New(action))],
+            );
         }
 
-        Runner::new(state)
-    }
-}
-
-impl Default for RunnerBuilder {
-    fn default() -> Self {
-        Self::new()
+        Runner::new(self.gateways, self.subscriptions, state)
     }
 }

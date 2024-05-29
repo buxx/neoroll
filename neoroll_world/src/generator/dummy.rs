@@ -56,6 +56,7 @@ impl WorldGenerator for DummyWorldGenerator {
             ),
             self.lines,
             self.columns,
+            vec![],
         )
     }
 }

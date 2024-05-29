@@ -1,4 +1,6 @@
 pub mod hello;
+pub mod move_;
+use move_::{MoveCreature, MoveCreatureChange};
 use uuid::Uuid;
 
 use crate::state::{FrameI, State, StateChange};
@@ -8,19 +10,28 @@ use self::hello::{SayHello, SayHelloChange};
 #[derive(Debug, PartialEq)]
 pub enum Action {
     SayHello(SayHello),
+    MoveCreature(MoveCreature),
 }
 
 impl Action {
     pub fn tick(&self, id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
         match self {
-            Self::SayHello(body) => body.tick(id, state),
+            Action::SayHello(body) => body.tick(id, state),
+            Action::MoveCreature(body) => body.tick(id, state),
         }
     }
 
     pub fn apply(&mut self, change: UpdateAction) {
-        match (self, change) {
-            (Self::SayHello(body), UpdateAction::SayHello(action_change)) => {
-                body.apply(action_change)
+        match self {
+            Action::SayHello(body) => {
+                if let UpdateAction::SayHello(change) = change {
+                    body.apply(change)
+                }
+            }
+            Action::MoveCreature(body) => {
+                if let UpdateAction::MoveCreature(change) = change {
+                    body.apply(change)
+                }
             }
         }
     }
@@ -28,9 +39,16 @@ impl Action {
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ActionId(Uuid);
+
 impl ActionId {
     pub fn new() -> Self {
         Self(Uuid::new_v4())
+    }
+}
+
+impl Default for ActionId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -43,10 +61,11 @@ pub enum ActionChange {
 
 pub enum UpdateAction {
     SayHello(SayHelloChange),
+    MoveCreature(MoveCreatureChange),
 }
 
 pub trait BodyTick<T> {
-    fn tick(&self, id: ActionId, _state: &State) -> (NextTick, Vec<StateChange>);
+    fn tick(&self, id: ActionId, state: &State) -> (NextTick, Vec<StateChange>);
     fn apply(&mut self, change: T);
 }
 

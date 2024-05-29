@@ -1,6 +1,6 @@
 use super::{AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct WorldArea {
     start: AbsoluteWorldPoint,
     lines: usize,
@@ -92,6 +92,13 @@ impl WorldArea {
             lines: (self.lines as isize + lines * 2) as usize,
             columns: (self.columns as isize + columns * 2) as usize,
         }
+    }
+
+    pub fn include(&self, point: &AbsoluteWorldPoint) -> bool {
+        point.0 .0 >= self.start.0 .0
+            && point.1 .0 >= self.start.1 .0
+            && point.0 .0 < self.start.0 .0 + self.lines as isize
+            && point.1 .0 < self.start.1 .0 + self.columns as isize
     }
 }
 

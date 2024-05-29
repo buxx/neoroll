@@ -38,6 +38,7 @@ impl<'a> WorldFromStrBuilder<'a> {
             ),
             lines.len(),
             columns,
+            vec![],
         )
     }
 }

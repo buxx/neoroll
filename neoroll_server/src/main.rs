@@ -1,14 +1,12 @@
 use std::sync::{Arc, RwLock};
 
-use action::{hello::SayHelloActionBuilder, ActionId};
-use neoroll_world::{map::Map, space::world::World};
-use run::RunnerBuilder;
-use state::State;
-
-pub mod action;
-pub mod run;
-pub mod server;
-mod state;
+use neoroll_server::{
+    action::{hello::SayHelloActionBuilder, ActionId},
+    gateway::Gateways,
+    run::RunnerBuilder,
+    state::State,
+    subscriptions::Subscriptions,
+};
 
 fn main() {
     let mut actions = vec![];
@@ -16,7 +14,10 @@ fn main() {
         actions.push((ActionId::new(), SayHelloActionBuilder::new().build()));
     }
 
-    RunnerBuilder::new()
+    let subscriptions = Arc::new(RwLock::new(Subscriptions::new()));
+    let gateways = Arc::new(RwLock::new(Gateways::new()));
+
+    RunnerBuilder::new(gateways, subscriptions)
         .actions(actions)
         .build(State::default())
         .run();

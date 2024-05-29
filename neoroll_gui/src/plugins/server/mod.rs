@@ -1,35 +1,24 @@
 pub mod listener;
-use crossbeam::channel::{Receiver, Sender};
 
 use bevy::prelude::*;
-use gateway::Gateway;
-use neoroll_server::server::{ClientMessage, ServerMessage};
+use gateway::GatewayWrapper;
+use neoroll_server::gateway::Gateway;
 
 pub mod gateway;
 
 pub struct ServerGatewayPlugin {
-    server_receiver: Receiver<ServerMessage>,
-    client_sender: Sender<ClientMessage>,
+    gateway: Gateway,
 }
 
 impl ServerGatewayPlugin {
-    pub fn new(
-        server_receiver: Receiver<ServerMessage>,
-        client_sender: Sender<ClientMessage>,
-    ) -> Self {
-        Self {
-            server_receiver,
-            client_sender,
-        }
+    pub fn new(gateway: Gateway) -> Self {
+        Self { gateway }
     }
 }
 
 impl Plugin for ServerGatewayPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Gateway::new(
-            self.server_receiver.clone(),
-            self.client_sender.clone(),
-        ))
-        .add_systems(Update, (listener::listen,));
+        app.insert_resource(GatewayWrapper::new(self.gateway.clone()))
+            .add_systems(Update, (listener::listen,));
     }
 }
