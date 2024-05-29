@@ -9,7 +9,7 @@ use crate::entity::floor::Floor;
 use crate::entity::ground::Ground;
 use crate::entity::structure::Structure;
 use crate::space::layer::{CompositeLayer, FilledLayer, Layers};
-use crate::space::world::World;
+use crate::space::world::World as GeneratedWorld;
 
 use super::WorldGenerator;
 
@@ -57,7 +57,7 @@ impl PerlinNoiseSimpleGenerator {
 }
 
 impl WorldGenerator for PerlinNoiseSimpleGenerator {
-    fn generate(&self) -> World {
+    fn generate(&self) -> GeneratedWorld {
         let noise = PerlinNoise::new();
 
         let nm1 = NoiseMap::new(noise)
@@ -108,7 +108,7 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
             }
         }
 
-        World::new(
+        GeneratedWorld::new(
             Layers::new(
                 FilledLayer::new(grounds),
                 FilledLayer::new(floors),
