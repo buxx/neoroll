@@ -1,5 +1,9 @@
 use crossbeam::channel::{Receiver, Sender};
-use std::{fs, sync::{Arc, RwLock}, thread};
+use std::{
+    fs,
+    sync::{Arc, RwLock},
+    thread,
+};
 
 use neoroll_server::{run::RunnerBuilder, state::State};
 use neoroll_world::{
@@ -31,13 +35,15 @@ pub fn spawn(server_sender: Sender<ServerMessage>, client_receiver: Receiver<Cli
         while let Ok(message) = client_receiver.recv() {
             match message {
                 ClientMessage::RequireWorldArea(area, ignore_area) => {
-                    let new_layers = NewLayers::from_world_area(&world_.read().unwrap(), &area, &ignore_area);
+                    let new_layers =
+                        NewLayers::from_world_area(&world_.read().unwrap(), &area, &ignore_area);
                     server_sender
                         .send(ServerMessage::NewWorldLayers(area, new_layers))
                         .unwrap();
                 }
                 ClientMessage::RequireMapArea(area, ignore_area) => {
-                    let new_sectors = NewSectors::from_map_area(&map_.read().unwrap(), &area, &ignore_area);
+                    let new_sectors =
+                        NewSectors::from_map_area(&map_.read().unwrap(), &area, &ignore_area);
                     server_sender
                         .send(ServerMessage::NewMapSectors(area, new_sectors))
                         .unwrap();
@@ -47,6 +53,9 @@ pub fn spawn(server_sender: Sender<ServerMessage>, client_receiver: Receiver<Cli
     });
     // TODO: like in OpenCombat, permit remote server instead embedded server
     thread::spawn(|| {
-        RunnerBuilder::new().actions(vec![]).build(State::new(world, map)).run();
+        RunnerBuilder::new()
+            .actions(vec![])
+            .build(State::new(world, map))
+            .run();
     });
 }

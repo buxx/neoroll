@@ -13,10 +13,7 @@ use crate::plugins::world::tileset::WorldTileset;
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     layer::{LAYER_BACKGROUND, LAYER_SCENE_ITEMS},
-    plugins::{
-        map::{background::Background, updater::MapUpdater},
-        world::updater::WorldUpdater,
-    },
+    plugins::map::background::Background,
 };
 
 // TODO: dispatch setup into plugins when world & map
@@ -24,8 +21,6 @@ use crate::{
 pub fn setup_(
     mut world_tileset: ResMut<WorldTileset>,
     mut map_resources: ResMut<MapResources>,
-    mut world_reader: ResMut<WorldUpdater>,
-    mut map_reader: ResMut<MapUpdater>,
     asset_server: Res<AssetServer>,
     mut commands: Commands,
 ) {
@@ -69,20 +64,4 @@ pub fn setup_(
         Background,
         RenderLayers::layer(LAYER_BACKGROUND),
     ));
-
-    // // TODO : this part will be "server side" and network stuff
-    // let world = bincode::deserialize::<EntireWorld>(&fs::read("world.bin").unwrap()).unwrap();
-    // let map = bincode::deserialize::<Map>(&fs::read("map.bin").unwrap()).unwrap();
-    //
-    // info!(
-    //     "Generated world: {} lines, {} columns, so {} tiles",
-    //     world.lines(),
-    //     world.columns(),
-    //     world.lines() * world.columns()
-    // );
-    // // Here a socket to server
-    // world_reader.world = Some(world);
-    // // Here a socket to server
-    // map_reader.map = Some(map);
-    // // END of fake server part
 }

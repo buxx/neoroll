@@ -7,7 +7,6 @@ use self::{
     display::{refresh_map_display, resize_background},
     init::init_map,
     tileset::MapResources,
-    updater::MapUpdater,
 };
 
 pub mod background;
@@ -17,14 +16,12 @@ pub mod element;
 pub mod init;
 pub mod lake;
 pub mod tileset;
-pub mod updater;
 
 pub struct MapDisplayPlugin;
 
 impl Plugin for MapDisplayPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MapResources>()
-            .init_resource::<MapUpdater>()
             .init_resource::<MapPartContainer>()
             .add_event::<MapPartContainerNeedRefresh>()
             .add_event::<MapPartContainerRefreshed>()
