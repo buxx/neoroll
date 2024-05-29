@@ -4,7 +4,7 @@ use std::{fs, sync::{Arc, RwLock}, thread};
 use neoroll_server::{run::RunnerBuilder, state::State};
 use neoroll_world::{
     map::{area::MapArea, patch::NewSectors, Map},
-    space::{area::WorldArea, patch::NewLayers, world::EntireWorld},
+    space::{area::WorldArea, patch::NewLayers, world::World},
 };
 
 pub enum ServerMessage {
@@ -18,7 +18,7 @@ pub enum ClientMessage {
 
 // TODO : this part will be "server side" and network stuff
 pub fn spawn(server_sender: Sender<ServerMessage>, client_receiver: Receiver<ClientMessage>) {
-    let world = bincode::deserialize::<EntireWorld>(&fs::read("world.bin").unwrap()).unwrap();
+    let world = bincode::deserialize::<World>(&fs::read("world.bin").unwrap()).unwrap();
     let map = bincode::deserialize::<Map>(&fs::read("map.bin").unwrap()).unwrap();
 
     let world = Arc::new(RwLock::new(world));

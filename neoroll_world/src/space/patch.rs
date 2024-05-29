@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::entity::{floor::Floor, ground::Ground, human::Human, structure::Structure};
 
-use super::{area::WorldArea, world::EntireWorld, AbsoluteWorldPoint};
+use super::{area::WorldArea, world::World, AbsoluteWorldPoint};
 
 pub struct NewLayers {
     grounds: HashMap<AbsoluteWorldPoint, Ground>,
@@ -12,7 +12,7 @@ pub struct NewLayers {
 }
 
 impl NewLayers {
-    pub fn from_world_area(world: &EntireWorld, area: &WorldArea, ignore: &WorldArea) -> Self {
+    pub fn from_world_area(world: &World, area: &WorldArea, ignore: &WorldArea) -> Self {
         let mut grounds = HashMap::new();
         let mut floors = HashMap::new();
         let mut structures = HashMap::new();

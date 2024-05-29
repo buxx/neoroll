@@ -100,7 +100,7 @@ mod test {
 
     #[cfg(test)]
     #[fixture]
-    fn entire_world() -> EntireWorld {
+    fn world() -> World {
         use crate::space::layer::{FilledLayer, Layers};
 
         let lines = 5;
@@ -108,7 +108,7 @@ mod test {
         let grounds = (0..25).map(|_| Ground::Soil).collect();
         let floors = (0..25).map(|_| Floor::Nothing).collect();
         let structures = (0..25).map(|_| None).collect();
-        EntireWorld::new(
+        World::new(
             Layers::new(
                 FilledLayer::new(grounds),
                 FilledLayer::new(floors),
@@ -176,7 +176,7 @@ mod test {
         ]
     )]
     fn test_world_part(
-        entire_world: EntireWorld,
+        world: World,
         #[case] start: (isize, isize),
         #[case] lines: usize,
         #[case] columns: usize,
@@ -190,7 +190,7 @@ mod test {
         );
         let mut world_part = WorldPart::empty();
 
-        let new_layers = NewLayers::from_world_area(&entire_world, &area, &WorldArea::zero());
+        let new_layers = NewLayers::from_world_area(&world, &area, &WorldArea::zero());
         world_part.switch(new_layers, area);
 
         let grounds: Vec<usize> = world_part

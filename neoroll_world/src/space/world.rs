@@ -1,19 +1,17 @@
-use crate::entity::{floor::Floor, ground::Ground, human::Human, structure::Structure};
+use crate::entity::{floor::Floor, ground::Ground, structure::Structure};
 use serde::{Deserialize, Serialize};
 
 use super::{layer::Layers, AbsoluteWorldPoint};
 
 // TODO: rename in World ?
 #[derive(Deserialize, Serialize)]
-pub struct EntireWorld {
+pub struct World {
     layers: Layers,
     lines: usize,
     columns: usize,
-    // FIXME EntireWorld dump dans un fichier binaire, on y veut les donnees genre humans ?
-    // humans: Vec<Human>,
 }
 
-impl EntireWorld {
+impl World {
     pub fn new(layers: Layers, lines: usize, columns: usize) -> Self {
         Self {
             layers,
@@ -82,7 +80,7 @@ impl EntireWorld {
     }
 }
 
-impl Default for EntireWorld {
+impl Default for World {
     fn default() -> Self {
         Self {
             layers: Default::default(),

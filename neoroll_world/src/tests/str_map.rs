@@ -2,7 +2,7 @@ use crate::{
     entity::{floor::Floor, ground::Ground},
     space::{
         layer::{CompositeLayer, FilledLayer, Layers},
-        world::EntireWorld,
+        world::World,
     },
 };
 
@@ -15,7 +15,7 @@ impl<'a> WorldFromStrBuilder<'a> {
         Self { raw }
     }
 
-    pub fn build(&self) -> EntireWorld {
+    pub fn build(&self) -> World {
         let lines = self.raw.lines().collect::<Vec<&str>>();
         let columns = lines.first().unwrap_or(&"").len();
         let mut grounds = vec![];
@@ -30,7 +30,7 @@ impl<'a> WorldFromStrBuilder<'a> {
             }
         }
 
-        EntireWorld::new(
+        World::new(
             Layers::new(
                 FilledLayer::new(grounds),
                 FilledLayer::new(vec![Floor::Nothing; lines.len() * columns]),

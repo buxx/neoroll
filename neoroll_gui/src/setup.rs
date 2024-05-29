@@ -5,7 +5,7 @@ use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*};
 use neoroll_world::entity::ground::Ground;
 use neoroll_world::map::builder::MapBuilder;
 use neoroll_world::map::Map;
-use neoroll_world::space::world::EntireWorld;
+use neoroll_world::space::world::World;
 
 use crate::debug::WorldToTxt;
 use crate::plugins::map::tileset::MapResources;

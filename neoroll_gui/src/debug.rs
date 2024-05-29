@@ -2,17 +2,17 @@ use std::collections::HashMap;
 
 use neoroll_world::{
     entity::ground::Ground,
-    space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
+    space::{world::World, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
 };
 
 pub struct WorldToTxt<'a> {
-    world: &'a EntireWorld,
+    world: &'a World,
     default: char,
     grounds: HashMap<Ground, char>,
 }
 
 impl<'a> WorldToTxt<'a> {
-    pub fn new(world: &'a EntireWorld) -> Self {
+    pub fn new(world: &'a World) -> Self {
         Self {
             world,
             default: '0',

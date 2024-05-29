@@ -4,19 +4,19 @@ use std::{
     sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
-use neoroll_world::{map::Map, space::world::EntireWorld};
+use neoroll_world::{map::Map, space::world::World};
 
 use crate::action::{Action, ActionChange, ActionId, NextTick};
 
 pub struct State {
     frame_i: FrameI,
     actions: HashMap<ActionId, WrappedAction>,
-    world: Arc<RwLock<EntireWorld>>,
+    world: Arc<RwLock<World>>,
     map: Arc<RwLock<Map>>,
 }
 
 impl State {
-    pub fn new(world: Arc<RwLock<EntireWorld>>, map: Arc<RwLock<Map>>) -> Self {
+    pub fn new(world: Arc<RwLock<World>>, map: Arc<RwLock<Map>>) -> Self {
         Self {
             frame_i: FrameI(0),
             actions: HashMap::new(),
@@ -29,11 +29,11 @@ impl State {
         &self.frame_i
     }
 
-    pub fn world(&self) -> RwLockReadGuard<EntireWorld> {
+    pub fn world(&self) -> RwLockReadGuard<World> {
         self.world.read().unwrap()
     }
 
-    fn world_mut(&self) -> RwLockWriteGuard<EntireWorld> {
+    fn world_mut(&self) -> RwLockWriteGuard<World> {
         self.world.write().unwrap()
     }
 

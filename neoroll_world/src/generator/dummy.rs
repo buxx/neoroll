@@ -4,7 +4,7 @@ use crate::{
     entity::{floor::Floor, ground::Ground, structure::Structure},
     space::{
         layer::{CompositeLayer, FilledLayer, Layers},
-        world::EntireWorld,
+        world::World,
     },
 };
 
@@ -35,7 +35,7 @@ impl DummyWorldGenerator {
 }
 
 impl WorldGenerator for DummyWorldGenerator {
-    fn generate(&self) -> EntireWorld {
+    fn generate(&self) -> World {
         let mut grounds = vec![];
         let mut floors = vec![];
         let mut structures = vec![];
@@ -48,7 +48,7 @@ impl WorldGenerator for DummyWorldGenerator {
             }
         }
 
-        EntireWorld::new(
+        World::new(
             Layers::new(
                 FilledLayer::new(grounds),
                 FilledLayer::new(floors),

@@ -4,7 +4,7 @@ use strum_macros::EnumIter;
 
 use crate::{
     entity::ground::Ground,
-    space::{world::EntireWorld, AbsoluteWorldPoint},
+    space::{world::World, AbsoluteWorldPoint},
 };
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, EnumIter)]
@@ -146,13 +146,13 @@ impl Direction {
 }
 
 pub struct BlindFoldedMazesResolver<'a> {
-    world: &'a EntireWorld,
+    world: &'a World,
     coasts: &'a Vec<AbsoluteWorldPoint>,
     start_in_water: bool,
 }
 
 impl<'a> BlindFoldedMazesResolver<'a> {
-    pub fn new(world: &'a EntireWorld, coasts: &'a Vec<AbsoluteWorldPoint>) -> Self {
+    pub fn new(world: &'a World, coasts: &'a Vec<AbsoluteWorldPoint>) -> Self {
         Self {
             world,
             coasts,
@@ -203,7 +203,7 @@ pub struct BlindFoldedMazeWalker<'a> {
 
 impl<'a> BlindFoldedMazeWalker<'a> {
     pub fn new(
-        world: &'a EntireWorld,
+        world: &'a World,
         coasts: &'a Vec<AbsoluteWorldPoint>,
         start: &AbsoluteWorldPoint,
         start_in_water: bool,

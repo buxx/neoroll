@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use neoroll_world::space::{area::WorldArea, patch::NewLayers, world::EntireWorld};
+use neoroll_world::space::{area::WorldArea, patch::NewLayers, world::World};
 
 use crate::plugins::server::gateway::Gateway as ServerGateway;
 

@@ -5,7 +5,7 @@ use super::{
 };
 use crate::{
     entity::ground::Ground,
-    space::{world::EntireWorld, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
+    space::{world::World, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
     utils::{BlindFoldedMazesResolver, Direction},
 };
 use rand::seq::SliceRandom;
@@ -13,12 +13,12 @@ use rand::Rng;
 use strum::IntoEnumIterator;
 
 pub struct MapBuilder<'a> {
-    world: &'a EntireWorld,
+    world: &'a World,
     build_lakes: bool,
 }
 
 impl<'a> MapBuilder<'a> {
-    pub fn new(world: &'a EntireWorld) -> Self {
+    pub fn new(world: &'a World) -> Self {
         Self {
             world,
             build_lakes: false,
