@@ -1,5 +1,9 @@
+use std::sync::{Arc, RwLock};
+
 use action::{hello::SayHelloActionBuilder, ActionId};
+use neoroll_world::{map::Map, space::world::EntireWorld};
 use run::RunnerBuilder;
+use state::State;
 
 pub mod action;
 pub mod run;
@@ -11,5 +15,8 @@ fn main() {
         actions.push((ActionId::new(), SayHelloActionBuilder::new().build()));
     }
 
-    RunnerBuilder::new().actions(actions).build().run();
+    RunnerBuilder::new()
+        .actions(actions)
+        .build(State::default())
+        .run();
 }

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+neoroll_world = { path = "../neoroll_world" }
 num_cpus = "1.16"
 rayon = "1.10"
 

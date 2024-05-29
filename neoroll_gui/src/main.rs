@@ -1,12 +1,14 @@
-use std::thread;
-
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 
-use plugins::{inputs::UserInputsPlugin, map::MapDisplayPlugin, world::WorldDisplayPlugin};
+use crossbeam::channel::{unbounded, Receiver, Sender};
+use plugins::{
+    inputs::UserInputsPlugin, map::MapDisplayPlugin, server::ServerGatewayPlugin,
+    world::WorldDisplayPlugin,
+};
+use server::{ClientMessage, ServerMessage};
 use setup::setup_;
-use neoroll_server::run::RunnerBuilder;
 
 mod camera;
 mod debug;
@@ -14,13 +16,17 @@ mod graphics;
 mod layer;
 mod plugins;
 mod scene;
+mod server;
 mod setup;
 
 fn main() {
-    // TODO: like in OpenCombat, permit remote server instead embedded server
-    thread::spawn(|| {
-        RunnerBuilder::new().actions(vec![]).build().run();
-    });
+    // FIXME: channel should be able to manage different clients (with different needs ...)
+    let (server_sender, server_receiver): (Sender<ServerMessage>, Receiver<ServerMessage>) =
+        unbounded();
+    let (client_sender, client_receiver): (Sender<ClientMessage>, Receiver<ClientMessage>) =
+        unbounded();
+
+    server::spawn(server_sender, client_receiver);
 
     App::new()
         .add_plugins((
@@ -28,6 +34,7 @@ fn main() {
             ShapePlugin,
             TilesetPlugin::default(),
             UserInputsPlugin,
+            ServerGatewayPlugin::new(server_receiver, client_sender),
             WorldDisplayPlugin,
             MapDisplayPlugin,
         ))

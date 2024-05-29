@@ -6,16 +6,13 @@ use neoroll_world::map::MAP_TILE_FACTOR;
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::{AlphaByScale, REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
-    plugins::map::{
-        background::Background,
-        container::{MapPartContainer, MapPartContainerRefreshed},
-        element::Element,
-    },
+    plugins::map::{background::Background, container::MapPartContainer, element::Element},
     scene::ScenePoint,
 };
 
 use super::{
     background::MapBackgroundNeedResize,
+    container::MapPartContainerRefreshed,
     lake::Lake,
     tileset::{element_tile_name, spawn, MapResources, MAP_TILESET_NAME},
 };
@@ -35,7 +32,7 @@ pub fn refresh_map_display(
         (With<Background>, Without<Camera>),
     >,
     tilesets: Tilesets,
-    map_part_container: ResMut<MapPartContainer>,
+    map_part_container: Res<MapPartContainer>,
     mut commands: Commands,
 ) {
     let (_, _, camera_transform) = camera.single();

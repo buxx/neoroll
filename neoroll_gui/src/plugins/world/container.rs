@@ -1,12 +1,19 @@
 use bevy::prelude::*;
 use neoroll_world::space::part::WorldPart;
 
-use crate::camera::{camera_world_area, SceneItemsCamera};
+use crate::{
+    camera::{camera_world_area, SceneItemsCamera},
+    plugins::server::gateway::Gateway as ServerGateway,
+    server::ClientMessage,
+};
 
-use super::updater::WorldUpdater;
+// use super::updater::WorldUpdater;
 
+// TODO: rename (when used when server new layers received)
 #[derive(Event)]
 pub struct WorldPartContainerRefreshed;
+
+// TODO: rename (when used when server new sectors received)
 #[derive(Event)]
 pub struct WorldPartContainerNeedRefresh;
 
@@ -29,10 +36,11 @@ impl WorldPartContainer {
 
 pub fn refresh_world_part_container(
     camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
-    world_updater: ResMut<WorldUpdater>,
-    mut world_container: ResMut<WorldPartContainer>,
+    server_gateway: Res<ServerGateway>,
+    // world_updater: ResMut<WorldUpdater>,
+    world_part: ResMut<WorldPartContainer>,
     mut world_container_need_refresh: EventReader<WorldPartContainerNeedRefresh>,
-    mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
+    // mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
 ) {
     if !world_container_need_refresh
         .iter()
@@ -49,7 +57,10 @@ pub fn refresh_world_part_container(
         // FIXME BS NOW : fix a max area size to retrieve only needed area when on
         // map (to be able to compute path finding without download all world ...)
         // For now, when very little zoom, a lot of tile are loaded !!
-        world_updater.update(&mut world_container, area);
-        world_container_refreshed.send(WorldPartContainerRefreshed);
+        let current_area = world_part.0.area();
+        server_gateway.send(ClientMessage::RequireWorldArea(area, current_area.clone()));
+
+        // world_updater.update(&server_gateway, &mut world_container, area);
+        // world_container_refreshed.send(WorldPartContainerRefreshed);
     }
 }

@@ -1,13 +1,16 @@
-use crate::entity::{floor::Floor, ground::Ground, structure::Structure};
+use crate::entity::{floor::Floor, ground::Ground, human::Human, structure::Structure};
 use serde::{Deserialize, Serialize};
 
 use super::{layer::Layers, AbsoluteWorldPoint};
 
+// TODO: rename in World ?
 #[derive(Deserialize, Serialize)]
 pub struct EntireWorld {
     layers: Layers,
     lines: usize,
     columns: usize,
+    // FIXME EntireWorld dump dans un fichier binaire, on y veut les donnees genre humans ?
+    // humans: Vec<Human>,
 }
 
 impl EntireWorld {
@@ -76,5 +79,15 @@ impl EntireWorld {
 
         let i = row_i * self.columns + col_i;
         self.layers.structures().get(i)
+    }
+}
+
+impl Default for EntireWorld {
+    fn default() -> Self {
+        Self {
+            layers: Default::default(),
+            lines: Default::default(),
+            columns: Default::default(),
+        }
     }
 }

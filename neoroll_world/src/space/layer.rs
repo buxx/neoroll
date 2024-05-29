@@ -35,6 +35,16 @@ impl Layers {
     }
 }
 
+impl Default for Layers {
+    fn default() -> Self {
+        Self {
+            grounds: FilledLayer::new(vec![]),
+            floors: FilledLayer::new(vec![]),
+            structures: CompositeLayer::new(vec![]),
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct FilledLayer<T: Entity> {
     items: Vec<T>,

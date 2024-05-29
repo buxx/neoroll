@@ -4,14 +4,12 @@ use bevy_tileset::prelude::*;
 use crate::{
     camera::SceneItemsCamera,
     graphics::AlphaByScale,
-    plugins::world::{
-        container::{WorldPartContainer, WorldPartContainerRefreshed},
-        region::RegionTile,
-    },
+    plugins::world::{container::WorldPartContainer, region::RegionTile},
     scene::ScenePoint,
 };
 
 use super::{
+    container::WorldPartContainerRefreshed,
     resolver::LayersResolver,
     tileset::{spawn, WORLD_TILESET_NAME},
 };
@@ -21,7 +19,7 @@ pub fn refresh_world_display(
     mut world_container_refreshed: EventReader<WorldPartContainerRefreshed>,
     tiles: Query<Entity, With<RegionTile>>,
     tilesets: Tilesets,
-    world_container: ResMut<WorldPartContainer>,
+    world_container: Res<WorldPartContainer>,
     commands: Commands,
 ) {
     let (_, _, camera_transform) = camera.single();
@@ -46,7 +44,7 @@ pub fn refresh_world_display(
 
 pub fn re_spawn_world(
     tiles: Query<Entity, With<RegionTile>>,
-    world_container: ResMut<WorldPartContainer>,
+    world_container: Res<WorldPartContainer>,
     tileset: &Tileset,
     mut commands: Commands,
     scale: Vec3,
@@ -77,4 +75,7 @@ pub fn re_spawn_world(
             }
         }
     }
+
+    let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
+    commands.spawn(spawn(atlas, human_tile_index, (0., 0., 0.).into(), color));
 }

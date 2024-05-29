@@ -1,10 +1,8 @@
 use bevy::prelude::*;
+use container::WorldPartContainerRefreshed;
 
 use self::{
-    container::{
-        refresh_world_part_container, WorldPartContainer, WorldPartContainerNeedRefresh,
-        WorldPartContainerRefreshed,
-    },
+    container::{refresh_world_part_container, WorldPartContainer, WorldPartContainerNeedRefresh},
     display::refresh_world_display,
     init::init_world,
     tileset::WorldTileset,

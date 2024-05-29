@@ -11,7 +11,7 @@ pub mod sector;
 
 pub const MAP_TILE_FACTOR: usize = 16;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Map {
     sectors: Vec<Sector>,
     // FIXME BS NOW : identify sectors where lake is to transmit only required

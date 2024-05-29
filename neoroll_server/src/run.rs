@@ -108,9 +108,7 @@ impl RunnerBuilder {
         self
     }
 
-    pub fn build(self) -> Runner {
-        let mut state = State::new();
-
+    pub fn build(self, mut state: State) -> Runner {
         for (action_id, action) in self.actions {
             state.apply(vec![StateChange::Action(
                 action_id,
@@ -119,5 +117,11 @@ impl RunnerBuilder {
         }
 
         Runner::new(state)
+    }
+}
+
+impl Default for RunnerBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -1,16 +1,62 @@
 use std::{
     collections::HashMap,
     ops::{Add, AddAssign},
+    sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
+
+use neoroll_world::{map::Map, space::world::EntireWorld};
 
 use crate::action::{Action, ActionChange, ActionId, NextTick};
 
 pub struct State {
     frame_i: FrameI,
     actions: HashMap<ActionId, WrappedAction>,
+    world: Arc<RwLock<EntireWorld>>,
+    map: Arc<RwLock<Map>>,
 }
 
 impl State {
+    pub fn new(world: Arc<RwLock<EntireWorld>>, map: Arc<RwLock<Map>>) -> Self {
+        Self {
+            frame_i: FrameI(0),
+            actions: HashMap::new(),
+            world,
+            map,
+        }
+    }
+
+    pub fn frame_i(&self) -> &FrameI {
+        &self.frame_i
+    }
+
+    pub fn world(&self) -> RwLockReadGuard<EntireWorld> {
+        self.world.read().unwrap()
+    }
+
+    fn world_mut(&self) -> RwLockWriteGuard<EntireWorld> {
+        self.world.write().unwrap()
+    }
+
+    pub fn map(&self) -> RwLockReadGuard<Map> {
+        self.map.read().unwrap()
+    }
+
+    fn map_mut(&self) -> RwLockWriteGuard<Map> {
+        self.map.write().unwrap()
+    }
+
+    /// Return actions to tick for current state
+    pub fn actions(&self) -> impl Iterator<Item = (&ActionId, &Action)> {
+        self.actions
+            .iter()
+            .filter(|(_, w)| w.0 == self.frame_i)
+            .map(|(id, w)| (id, &w.1))
+    }
+
+    pub fn increment(&mut self) {
+        self.frame_i += FrameI(1);
+    }
+
     pub fn apply(&mut self, changes: Vec<StateChange>) {
         for change in changes {
             match change {
@@ -30,28 +76,16 @@ impl State {
             };
         }
     }
+}
 
-    pub fn new() -> Self {
+impl Default for State {
+    fn default() -> Self {
         Self {
             frame_i: FrameI(0),
-            actions: HashMap::new(),
+            actions: Default::default(),
+            world: Default::default(),
+            map: Default::default(),
         }
-    }
-
-    /// Return actions to tick for current state
-    pub fn actions(&self) -> impl Iterator<Item = (&ActionId, &Action)> {
-        self.actions
-            .iter()
-            .filter(|(_, w)| w.0 == self.frame_i)
-            .map(|(id, w)| (id, &w.1))
-    }
-
-    pub fn increment(&mut self) {
-        self.frame_i += FrameI(1);
-    }
-
-    pub fn frame_i(&self) -> &FrameI {
-        &self.frame_i
     }
 }
 

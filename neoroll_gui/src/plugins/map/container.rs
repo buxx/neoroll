@@ -1,12 +1,17 @@
 use bevy::prelude::*;
 use neoroll_world::map::part::MapPart;
 
-use crate::camera::{camera_map_area, BackgroundCamera, SceneItemsCamera};
+use crate::{
+    camera::{camera_map_area, BackgroundCamera, SceneItemsCamera},
+    plugins::server::gateway::Gateway as ServerGateway,
+    server::ClientMessage,
+};
 
-use super::updater::MapUpdater;
+// use super::updater::MapUpdater;
 
 #[derive(Event)]
 pub struct MapPartContainerRefreshed;
+
 #[derive(Event)]
 pub struct MapPartContainerNeedRefresh;
 
@@ -34,10 +39,11 @@ pub fn refresh_map_part_container(
         &mut Transform,
         (With<SceneItemsCamera>, Without<BackgroundCamera>),
     )>,
-    map_updater: ResMut<MapUpdater>,
-    mut map_container: ResMut<MapPartContainer>,
+    server_gateway: Res<ServerGateway>,
+    // map_updater: ResMut<MapUpdater>,
+    map_part: Res<MapPartContainer>,
     mut map_container_need_refresh: EventReader<MapPartContainerNeedRefresh>,
-    mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
+    // mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
 ) {
     if !map_container_need_refresh
         .iter()
@@ -51,7 +57,10 @@ pub fn refresh_map_part_container(
         let area = camera_map_area(target, translation, scale);
         let area = area.resize(2, 2);
 
-        map_updater.update(&mut map_container, area);
-        map_container_refreshed.send(MapPartContainerRefreshed);
+        let current_area = map_part.0.area();
+        server_gateway.send(ClientMessage::RequireMapArea(area, current_area.clone()))
+
+        // map_updater.update(&server_gateway, &mut map_container, area);
+        // map_container_refreshed.send(MapPartContainerRefreshed);
     }
 }

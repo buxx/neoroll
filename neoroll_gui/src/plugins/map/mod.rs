@@ -1,11 +1,9 @@
 use bevy::prelude::*;
+use container::MapPartContainerRefreshed;
 
 use self::{
     background::MapBackgroundNeedResize,
-    container::{
-        refresh_map_part_container, MapPartContainer, MapPartContainerNeedRefresh,
-        MapPartContainerRefreshed,
-    },
+    container::{refresh_map_part_container, MapPartContainer, MapPartContainerNeedRefresh},
     display::{refresh_map_display, resize_background},
     init::init_map,
     tileset::MapResources,

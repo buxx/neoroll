@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::entity::{floor::Floor, ground::Ground, structure::Structure};
+use crate::entity::{floor::Floor, ground::Ground, human::Human, structure::Structure};
 
 use super::{area::WorldArea, world::EntireWorld, AbsoluteWorldPoint};
 
@@ -8,6 +8,7 @@ pub struct NewLayers {
     grounds: HashMap<AbsoluteWorldPoint, Ground>,
     floors: HashMap<AbsoluteWorldPoint, Floor>,
     structures: HashMap<AbsoluteWorldPoint, Structure>,
+    movables: Vec<Human>,
 }
 
 impl NewLayers {
@@ -15,6 +16,7 @@ impl NewLayers {
         let mut grounds = HashMap::new();
         let mut floors = HashMap::new();
         let mut structures = HashMap::new();
+        let mut movables = vec![];
 
         for point in area.points() {
             if !ignore.contains(&point) {
@@ -30,10 +32,14 @@ impl NewLayers {
             }
         }
 
+        // TODO: include only area movable
+        // movables.extend();
+
         Self {
             grounds,
             floors,
             structures,
+            movables,
         }
     }
 

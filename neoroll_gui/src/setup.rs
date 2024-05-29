@@ -70,19 +70,19 @@ pub fn setup_(
         RenderLayers::layer(LAYER_BACKGROUND),
     ));
 
-    // TODO : this part will be "server side" and network stuff
-    let world = bincode::deserialize::<EntireWorld>(&fs::read("world.bin").unwrap()).unwrap();
-    let map = bincode::deserialize::<Map>(&fs::read("map.bin").unwrap()).unwrap();
-
-    info!(
-        "Generated world: {} lines, {} columns, so {} tiles",
-        world.lines(),
-        world.columns(),
-        world.lines() * world.columns()
-    );
-    // Here a socket to server
-    world_reader.world = Some(world);
-    // Here a socket to server
-    map_reader.map = Some(map);
-    // END of fake server part
+    // // TODO : this part will be "server side" and network stuff
+    // let world = bincode::deserialize::<EntireWorld>(&fs::read("world.bin").unwrap()).unwrap();
+    // let map = bincode::deserialize::<Map>(&fs::read("map.bin").unwrap()).unwrap();
+    //
+    // info!(
+    //     "Generated world: {} lines, {} columns, so {} tiles",
+    //     world.lines(),
+    //     world.columns(),
+    //     world.lines() * world.columns()
+    // );
+    // // Here a socket to server
+    // world_reader.world = Some(world);
+    // // Here a socket to server
+    // map_reader.map = Some(map);
+    // // END of fake server part
 }
