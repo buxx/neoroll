@@ -1,5 +1,12 @@
+use std::collections::HashMap;
+
 use crate::{
-    entity::{floor::Floor, ground::Ground, structure::Structure},
+    entity::{
+        creature::{Creature, CreatureId},
+        floor::Floor,
+        ground::Ground,
+        structure::Structure,
+    },
     space::RelativeWorldPoint,
 };
 
@@ -7,12 +14,21 @@ use super::{area::WorldArea, layer::CompositeLayer, patch::NewLayers, AbsoluteWo
 
 pub struct WorldPart {
     layers: LayersPart,
+    creatures: HashMap<CreatureId, Creature>,
     area: WorldArea,
 }
 
 impl WorldPart {
-    pub fn new(layers: LayersPart, area: WorldArea) -> Self {
-        Self { layers, area }
+    pub fn new(
+        layers: LayersPart,
+        creatures: HashMap<CreatureId, Creature>,
+        area: WorldArea,
+    ) -> Self {
+        Self {
+            layers,
+            creatures,
+            area,
+        }
     }
 
     pub fn empty() -> Self {
@@ -22,6 +38,7 @@ impl WorldPart {
                 CompositeLayer::empty(),
                 CompositeLayer::empty(),
             ),
+            HashMap::new(),
             WorldArea::new(AbsoluteWorldPoint::zero(), 0, 0),
         )
     }
@@ -97,6 +114,14 @@ impl WorldPart {
         self.layers.structures().get(self.index(point))
     }
 
+    pub fn creatures(&self) -> &HashMap<CreatureId, Creature> {
+        &self.creatures
+    }
+
+    pub fn creature(&self, id: &CreatureId) -> Option<&Creature> {
+        self.creatures.get(id)
+    }
+
     pub fn area(&self) -> &WorldArea {
         &self.area
     }
@@ -129,6 +154,11 @@ impl WorldPart {
             CompositeLayer::new(floors),
             CompositeLayer::new(structures),
         );
+        self.creatures = new
+            .creatures()
+            .iter()
+            .map(|c| (*c.id(), c.clone()))
+            .collect::<HashMap<CreatureId, Creature>>();
         self.area = area;
     }
 }

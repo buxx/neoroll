@@ -71,3 +71,9 @@ impl SayHelloActionBuilder {
         Action::SayHello(SayHello::new())
     }
 }
+
+impl Default for SayHelloActionBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -4,10 +4,14 @@ use std::{
     time::Duration,
 };
 
+use neoroll_world::{
+    entity::creature::{Creature, CreatureChange, CreatureId},
+    space::{world::WorldChange, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
+};
 use rayon::{ThreadPool, ThreadPoolBuilder};
 
 use crate::{
-    action::{Action, ActionChange, ActionId},
+    action::{move_::MoveCreatureBuilder, Action, ActionChange, ActionId},
     state::{State, StateChange},
 };
 
@@ -25,6 +29,21 @@ impl Runner {
     }
 
     pub fn run(&mut self) {
+        // HACK
+        let creature_id = CreatureId::new();
+        let creature_point = AbsoluteWorldPoint(AbsoluteWorldRowI(0), AbsoluteWorldColI(0));
+        let move_to = AbsoluteWorldPoint(AbsoluteWorldRowI(0), AbsoluteWorldColI(30));
+        self.state.apply(vec![
+            StateChange::World(WorldChange::Creature(
+                creature_id,
+                CreatureChange::New(Creature::new(creature_id, creature_point)),
+            )),
+            StateChange::Action(
+                ActionId::new(),
+                ActionChange::New(MoveCreatureBuilder::new(creature_id, move_to).build()),
+            ),
+        ]);
+
         loop {
             let mut state_changes = vec![];
             state_changes.extend(self.tick_actions());

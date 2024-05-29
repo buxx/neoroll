@@ -116,6 +116,7 @@ mod test {
             ),
             lines,
             columns,
+            vec![],
         )
     }
 

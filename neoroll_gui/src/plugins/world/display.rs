@@ -44,13 +44,13 @@ pub fn refresh_world_display(
 
 pub fn re_spawn_world(
     tiles: Query<Entity, With<RegionTile>>,
-    world_container: Res<WorldPartContainer>,
+    world_part: Res<WorldPartContainer>,
     tileset: &Tileset,
     mut commands: Commands,
     scale: Vec3,
 ) {
     let atlas = tileset.atlas();
-    let world_part = world_container.world_part();
+    let world_part = world_part.world_part();
 
     tiles.iter().for_each(|e| commands.entity(e).despawn());
 
@@ -76,6 +76,9 @@ pub fn re_spawn_world(
         }
     }
 
-    let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
-    commands.spawn(spawn(atlas, human_tile_index, (0., 0., 0.).into(), color));
+    for creature in world_part.creatures().values() {
+        let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
+        let scene_point = ScenePoint::from_world_point(creature.position());
+        commands.spawn(spawn(atlas, human_tile_index, scene_point.into(), color));
+    }
 }

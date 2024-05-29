@@ -4,7 +4,10 @@ use std::{
     sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
-use neoroll_world::{map::Map, space::world::World};
+use neoroll_world::{
+    map::Map,
+    space::world::{World, WorldChange},
+};
 
 use crate::action::{Action, ActionChange, ActionId, NextTick};
 
@@ -73,6 +76,9 @@ impl State {
                 StateChange::Action(id, ActionChange::Remove) => {
                     self.actions.remove(&id);
                 }
+                StateChange::World(change) => {
+                    self.world_mut().apply(change);
+                }
             };
         }
     }
@@ -91,6 +97,7 @@ impl Default for State {
 
 pub enum StateChange {
     Action(ActionId, ActionChange),
+    World(WorldChange),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
