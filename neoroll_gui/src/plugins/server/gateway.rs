@@ -1,8 +1,7 @@
 use crossbeam::channel::{Receiver, Sender};
 
 use bevy::ecs::system::Resource;
-
-use crate::server::{ClientMessage, ServerMessage};
+use neoroll_server::server::{ClientMessage, ServerMessage};
 
 #[derive(Resource)]
 pub struct Gateway {

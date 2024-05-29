@@ -5,7 +5,7 @@ use std::{
     thread,
 };
 
-use neoroll_server::{run::RunnerBuilder, state::State};
+use crate::{run::RunnerBuilder, state::State};
 use neoroll_world::{
     map::{area::MapArea, patch::NewSectors, Map},
     space::{area::WorldArea, patch::NewLayers, world::World},

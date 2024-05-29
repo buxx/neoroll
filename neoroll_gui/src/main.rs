@@ -3,11 +3,11 @@ use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
+use neoroll_server::server::{self, ClientMessage, ServerMessage};
 use plugins::{
     inputs::UserInputsPlugin, map::MapDisplayPlugin, server::ServerGatewayPlugin,
     world::WorldDisplayPlugin,
 };
-use server::{ClientMessage, ServerMessage};
 use setup::setup_;
 
 mod camera;
@@ -16,7 +16,6 @@ mod graphics;
 mod layer;
 mod plugins;
 mod scene;
-mod server;
 mod setup;
 
 fn main() {

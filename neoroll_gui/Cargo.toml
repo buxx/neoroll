@@ -10,7 +10,6 @@ neoroll_world = { path = "../neoroll_world" }
 # WARNING : remove dynamic_linking feature for production !!
 bevy = { version = "0.11.2", features = ["dynamic_linking"] }
 bevy_tileset = "0.8.0"
-bincode = "1.3.3"
 crossbeam = "0.8.4"
 # tests
 rstest = "0.18.1"

@@ -3,8 +3,7 @@ use crossbeam::channel::{Receiver, Sender};
 
 use bevy::prelude::*;
 use gateway::Gateway;
-
-use crate::server::{ClientMessage, ServerMessage};
+use neoroll_server::server::{ClientMessage, ServerMessage};
 
 pub mod gateway;
 

@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use super::{layer::Layers, AbsoluteWorldPoint};
 
-// TODO: rename in World ?
 #[derive(Deserialize, Serialize)]
 pub struct World {
     layers: Layers,

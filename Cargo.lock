@@ -2551,7 +2551,6 @@ dependencies = [
  "bevy",
  "bevy_prototype_lyon",
  "bevy_tileset",
- "bincode",
  "crossbeam",
  "neoroll_server",
  "neoroll_world",
@@ -2563,6 +2562,8 @@ dependencies = [
 name = "neoroll_server"
 version = "0.1.0"
 dependencies = [
+ "bincode",
+ "crossbeam",
  "neoroll_world",
  "num_cpus",
  "rayon",

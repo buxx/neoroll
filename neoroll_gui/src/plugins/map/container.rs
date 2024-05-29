@@ -1,10 +1,10 @@
 use bevy::prelude::*;
+use neoroll_server::server::ClientMessage;
 use neoroll_world::map::part::MapPart;
 
 use crate::{
     camera::{camera_map_area, BackgroundCamera, SceneItemsCamera},
     plugins::server::gateway::Gateway as ServerGateway,
-    server::ClientMessage,
 };
 
 // use super::updater::MapUpdater;

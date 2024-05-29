@@ -5,13 +5,11 @@ use bevy::{
     },
     log::info,
 };
+use neoroll_server::server::ServerMessage;
 
-use crate::{
-    plugins::{
-        map::container::{MapPartContainer, MapPartContainerRefreshed},
-        world::container::{WorldPartContainer, WorldPartContainerRefreshed},
-    },
-    server::ServerMessage,
+use crate::plugins::{
+    map::container::{MapPartContainer, MapPartContainerRefreshed},
+    world::container::{WorldPartContainer, WorldPartContainerRefreshed},
 };
 
 use super::gateway::Gateway as ServerGateway;
