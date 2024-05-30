@@ -4,6 +4,7 @@ use crate::entity::{creature::Creature, floor::Floor, ground::Ground, structure:
 
 use super::{area::WorldArea, world::World, AbsoluteWorldPoint};
 
+#[derive(Debug, Clone)]
 pub struct NewLayers {
     grounds: HashMap<AbsoluteWorldPoint, Ground>,
     floors: HashMap<AbsoluteWorldPoint, Floor>,

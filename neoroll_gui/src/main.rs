@@ -2,8 +2,10 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 
-use crossbeam::channel::{unbounded, Receiver, Sender};
-use neoroll_server::server::{self, ClientMessage, ServerMessage};
+use neoroll_server::{
+    gateway::Gateways,
+    server::{self},
+};
 use plugins::{
     inputs::UserInputsPlugin, map::MapDisplayPlugin, server::ServerGatewayPlugin,
     world::WorldDisplayPlugin,
@@ -19,13 +21,11 @@ mod scene;
 mod setup;
 
 fn main() {
+    // FIXME: When server behind network, gateways must be built server side and managed by network connections
+    let mut gateways = Gateways::new();
+    let gateway = gateways.register();
     // FIXME: channel should be able to manage different clients (with different needs ...)
-    let (server_sender, server_receiver): (Sender<ServerMessage>, Receiver<ServerMessage>) =
-        unbounded();
-    let (client_sender, client_receiver): (Sender<ClientMessage>, Receiver<ClientMessage>) =
-        unbounded();
-
-    server::spawn(server_sender, client_receiver);
+    server::spawn(gateways);
 
     App::new()
         .add_plugins((
@@ -33,7 +33,7 @@ fn main() {
             ShapePlugin,
             TilesetPlugin::default(),
             UserInputsPlugin,
-            ServerGatewayPlugin::new(server_receiver, client_sender),
+            ServerGatewayPlugin::new(gateway),
             WorldDisplayPlugin,
             MapDisplayPlugin,
         ))

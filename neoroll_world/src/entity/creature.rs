@@ -4,7 +4,7 @@ use super::Entity;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct Creature {
     id: CreatureId,
     position: AbsoluteWorldPoint,

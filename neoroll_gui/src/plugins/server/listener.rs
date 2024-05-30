@@ -12,16 +12,16 @@ use crate::plugins::{
     world::container::{WorldPartContainer, WorldPartContainerRefreshed},
 };
 
-use super::gateway::Gateway as ServerGateway;
+use super::gateway::GatewayWrapper;
 
 pub fn listen(
-    server_gateway: Res<ServerGateway>,
+    gateway: Res<GatewayWrapper>,
     mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
     mut world_part: ResMut<WorldPartContainer>,
     mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
     mut map_part: ResMut<MapPartContainer>,
 ) {
-    for message in server_gateway.read() {
+    for message in gateway.read() {
         match message {
             ServerMessage::NewWorldLayers(area, layers) => {
                 info!("Received {} tiles", layers.len());

@@ -4,7 +4,7 @@ use neoroll_world::map::part::MapPart;
 
 use crate::{
     camera::{camera_map_area, BackgroundCamera, SceneItemsCamera},
-    plugins::server::gateway::Gateway as ServerGateway,
+    plugins::server::gateway::GatewayWrapper,
 };
 
 // use super::updater::MapUpdater;
@@ -39,7 +39,7 @@ pub fn refresh_map_part_container(
         &mut Transform,
         (With<SceneItemsCamera>, Without<BackgroundCamera>),
     )>,
-    server_gateway: Res<ServerGateway>,
+    gateway: Res<GatewayWrapper>,
     // map_updater: ResMut<MapUpdater>,
     map_part: Res<MapPartContainer>,
     mut map_container_need_refresh: EventReader<MapPartContainerNeedRefresh>,
@@ -58,7 +58,7 @@ pub fn refresh_map_part_container(
         let area = area.resize(2, 2);
 
         let current_area = map_part.0.area();
-        server_gateway.send(ClientMessage::RequireMapArea(area, current_area.clone()))
+        gateway.send(ClientMessage::RequireMapArea(area, current_area.clone()))
 
         // map_updater.update(&server_gateway, &mut map_container, area);
         // map_container_refreshed.send(MapPartContainerRefreshed);

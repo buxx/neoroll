@@ -3,7 +3,7 @@ use neoroll_world::space::part::WorldPart;
 
 use crate::{
     camera::{camera_world_area, SceneItemsCamera},
-    plugins::server::gateway::Gateway as ServerGateway,
+    plugins::server::gateway::GatewayWrapper,
     server::ClientMessage,
 };
 
@@ -36,7 +36,7 @@ impl WorldPartContainer {
 
 pub fn refresh_world_part_container(
     camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
-    server_gateway: Res<ServerGateway>,
+    gateway: Res<GatewayWrapper>,
     // world_updater: ResMut<WorldUpdater>,
     world_part: ResMut<WorldPartContainer>,
     mut world_container_need_refresh: EventReader<WorldPartContainerNeedRefresh>,
@@ -58,7 +58,7 @@ pub fn refresh_world_part_container(
         // map (to be able to compute path finding without download all world ...)
         // For now, when very little zoom, a lot of tile are loaded !!
         let current_area = world_part.0.area();
-        server_gateway.send(ClientMessage::RequireWorldArea(area, current_area.clone()));
+        gateway.send(ClientMessage::RequireWorldArea(area, current_area.clone()));
 
         // world_updater.update(&server_gateway, &mut world_container, area);
         // world_container_refreshed.send(WorldPartContainerRefreshed);
