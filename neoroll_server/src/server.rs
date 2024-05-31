@@ -41,6 +41,8 @@ pub fn spawn(gateways: Gateways) {
     let world = Arc::new(RwLock::new(world));
     let map = Arc::new(RwLock::new(map));
 
+    gateways.start();
+
     // TODO: separate code (other crate) ...
     let world_ = Arc::clone(&world);
     let map_ = Arc::clone(&map);
