@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    fmt::Display,
     sync::{Arc, RwLock},
     thread,
 };
@@ -267,6 +268,12 @@ impl ClientId {
 impl Default for ClientId {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Display for ClientId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0.to_string())
     }
 }
 

@@ -78,6 +78,12 @@ impl MapPart {
         self.area = area;
     }
 
+    pub fn clear(&mut self) {
+        self.sectors = Default::default();
+        self.lakes = Default::default();
+        self.area = MapArea::zero();
+    }
+
     pub fn lakes(&self) -> &Vec<Vec<AbsoluteWorldPoint>> {
         &self.lakes
     }

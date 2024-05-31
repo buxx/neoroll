@@ -165,8 +165,15 @@ impl WorldPart {
             .collect::<HashMap<CreatureId, PartialCreature>>();
         self.area = area;
     }
+
+    pub fn clear(&mut self) {
+        self.layers = LayersPart::default();
+        self.creatures = Default::default();
+        self.area = WorldArea::zero();
+    }
 }
 
+#[derive(Default)]
 pub struct LayersPart {
     grounds: CompositeLayer<Ground>,
     floors: CompositeLayer<Floor>,

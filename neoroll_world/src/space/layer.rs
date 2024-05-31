@@ -93,3 +93,11 @@ impl<T: Entity> CompositeLayer<T> {
         self.len() == 0
     }
 }
+
+impl<T: Entity> Default for CompositeLayer<T> {
+    fn default() -> Self {
+        Self {
+            items: Default::default(),
+        }
+    }
+}

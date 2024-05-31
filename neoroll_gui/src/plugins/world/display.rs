@@ -90,13 +90,15 @@ pub fn re_spawn_world(
         let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
         let scene_point = ScenePoint::from_world_point(creature.point());
 
-        let entity = commands.spawn(spawn_creature(
-            *creature.id(),
-            atlas,
-            human_tile_index,
-            scene_point.into(),
-            color,
-        )).id();
+        let entity = commands
+            .spawn(spawn_creature(
+                *creature.id(),
+                atlas,
+                human_tile_index,
+                scene_point.into(),
+                color,
+            ))
+            .id();
         creatures_map.insert(*creature.id(), entity);
     }
 }

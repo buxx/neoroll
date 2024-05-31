@@ -5,12 +5,15 @@ use bevy::{
     },
     prelude::*,
 };
+use neoroll_server::{server::ClientMessage, subscriptions::SubscriptionsMessage};
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
+    graphics::AlphaByScale,
     plugins::{
-        map::container::MapPartContainerNeedRefresh,
-        world::container::WorldPartContainerNeedRefresh,
+        map::container::{MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed},
+        server::gateway::GatewayWrapper,
+        world::container::{WorldPartContainer, WorldPartContainerNeedRefresh, WorldPartContainerRefreshed},
     },
 };
 
@@ -26,7 +29,12 @@ pub fn update_inputs(
     mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
     mut world_container_need_refresh: EventWriter<WorldPartContainerNeedRefresh>,
     mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
+    mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
+    mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
     mut dragged_screen: EventWriter<DraggedScreen>,
+    mut world_part: ResMut<WorldPartContainer>,
+    mut map_part: ResMut<MapPartContainer>,
+    gateway: Res<GatewayWrapper>,
 ) {
     let mut camera = camera.single_mut();
 
@@ -48,8 +56,28 @@ pub fn update_inputs(
         camera.scale -= event.y / 5.;
         camera.scale.x = camera.scale.x.clamp(0.25, 16.);
         camera.scale.y = camera.scale.y.clamp(0.25, 16.);
-        world_container_need_refresh.send(WorldPartContainerNeedRefresh);
-        map_container_need_refresh.send(MapPartContainerNeedRefresh);
+
+        if AlphaByScale::world().display(camera.scale.x) {
+            world_container_need_refresh.send(WorldPartContainerNeedRefresh);
+        // If world is not anymore displayed, remove all related to World
+        } else {
+            gateway.send(ClientMessage::Subscriptions(SubscriptionsMessage::SetArea(
+                None,
+            )));
+            gateway.send(ClientMessage::Subscriptions(
+                SubscriptionsMessage::SetCreatures(vec![]),
+            ));
+
+            world_part.0.clear();
+            world_container_refreshed.send(WorldPartContainerRefreshed);
+        }
+
+        if AlphaByScale::map().display(camera.scale.x) {
+            map_container_need_refresh.send(MapPartContainerNeedRefresh);
+        } else {
+            map_part.0.clear();
+            map_container_refreshed.send(MapPartContainerRefreshed);
+        }
     }
 
     // Motion

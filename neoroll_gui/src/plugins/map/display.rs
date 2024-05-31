@@ -85,7 +85,7 @@ pub fn refresh_map_display(
             }
 
             // Lakes
-            // FIXME BS NOW : code for test now, will be according to area
+            // TODO : code for test now, will be according to area
             for lake in map_part_container.0.lakes() {
                 let mut path_builder = PathBuilder::new();
                 path_builder.move_to(ScenePoint::from_world_point(lake.first().unwrap()).into());

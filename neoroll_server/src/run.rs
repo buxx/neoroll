@@ -43,8 +43,8 @@ impl Runner {
 
     pub fn run(&mut self) {
         // HACK
-        for line in 0..20 {
-            for column in 0..20 {
+        for line in 0..1 {
+            for column in 0..1 {
                 let creature_id = CreatureId::new();
                 let creature_point =
                     AbsoluteWorldPoint(AbsoluteWorldRowI(line), AbsoluteWorldColI(column));

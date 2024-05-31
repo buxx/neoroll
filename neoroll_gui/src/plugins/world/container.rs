@@ -60,11 +60,8 @@ pub fn refresh_world_part_container(
         // For now, when very little zoom, a lot of tile are loaded !!
         let current_area = world_part.0.area();
         gateway.send(ClientMessage::Subscriptions(SubscriptionsMessage::SetArea(
-            area.clone(),
+            Some(area.clone()),
         )));
         gateway.send(ClientMessage::RequireWorldArea(area, current_area.clone()));
-
-        // world_updater.update(&server_gateway, &mut world_container, area);
-        // world_container_refreshed.send(WorldPartContainerRefreshed);
     }
 }

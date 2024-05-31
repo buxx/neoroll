@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::space::AbsoluteWorldPoint;
 
 use super::Entity;
@@ -44,6 +46,12 @@ impl CreatureId {
 impl Default for CreatureId {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Display for CreatureId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.0.to_string())
     }
 }
 

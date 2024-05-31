@@ -35,7 +35,12 @@ impl<'a> WorldModifier<'a> {
             WorldChange::Creature(id, change) => match change {
                 CreatureChange::New(creature) => {
                     // FIXME: send this new creature to clients which are in new creature area
+                    let point = *creature.point();
                     self.world.creatures_mut().insert(*creature.id(), creature);
+
+                    for _client_id in self.subscriptions.read().unwrap().to_point(&point) {
+                        // TODO: send new creature
+                    }
                 }
                 CreatureChange::SetPoint(point) => {
                     // FIXME BS NOW: think about how to propagate to client(s)
@@ -46,7 +51,7 @@ impl<'a> WorldModifier<'a> {
                         .unwrap()
                         .set_point(point);
 
-                    for client_id in self.subscriptions.read().unwrap().to_point(&point) {
+                    for client_id in self.subscriptions.read().unwrap().to_creature(&id) {
                         self.gateways
                             .read()
                             .unwrap()

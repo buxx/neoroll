@@ -20,8 +20,12 @@ impl Subscriptions {
         }
     }
 
-    pub fn set_area(&mut self, client_id: ClientId, area: WorldArea) {
-        self.areas.insert(client_id, area);
+    pub fn set_area(&mut self, client_id: ClientId, area: Option<WorldArea>) {
+        if let Some(area) = area {
+            self.areas.insert(client_id, area);
+        } else {
+            self.areas.remove(&client_id);
+        }
     }
 
     pub fn set_creatures(&mut self, client_id: ClientId, creature_ids: Vec<CreatureId>) {
@@ -32,6 +36,14 @@ impl Subscriptions {
         self.areas
             .iter()
             .filter(|(_, area)| area.include(point))
+            .map(|(client_id, _)| *client_id)
+            .collect()
+    }
+
+    pub fn to_creature(&self, id: &CreatureId) -> Vec<ClientId> {
+        self.creatures
+            .iter()
+            .filter(|(_, creature_ids)| creature_ids.contains(id))
             .map(|(client_id, _)| *client_id)
             .collect()
     }
@@ -46,6 +58,6 @@ impl Default for Subscriptions {
 // TODO: think about remove subscriptions when client disconnect
 #[derive(Debug, Clone, PartialEq)]
 pub enum SubscriptionsMessage {
-    SetArea(WorldArea),
+    SetArea(Option<WorldArea>),
     SetCreatures(Vec<CreatureId>),
 }

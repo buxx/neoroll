@@ -50,7 +50,7 @@ pub fn listen(
             }
             ServerMessage::NewMapSectors(area, sectors) => {
                 info!("Received {} sectors", sectors.len());
-                // FIXME BS NOW: hardcoded lakes for now
+                // TODO: hardcoded lakes for now
                 map_part.0.switch(sectors, vec![].clone(), area);
                 map_container_refreshed.send(MapPartContainerRefreshed);
             }
@@ -62,8 +62,12 @@ pub fn listen(
                             creature.set_point(point);
                             // Update bevy component display
                             let point: Vec3 = ScenePoint::from_world_point(creature.point()).into();
-                            if let Ok((_, mut transform)) = creatures.get_mut(*creatures_map.get(&id).unwrap()) {
-                                transform.translation = point;
+                            if let Some(entity) = creatures_map.get(&id) {
+                                if let Ok((_, mut transform)) = creatures.get_mut(*entity) {
+                                    transform.translation = point;
+                                }
+                            } else {
+                                error!("Creature '{}' not found when dispatching `SetPoint`", &id)
                             }
                         }
                     }
