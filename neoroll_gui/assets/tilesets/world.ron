@@ -6,5 +6,6 @@
         1: "../tiles/world/short_grass.ron",
         2: "../tiles/world/big_leaf_tree.ron",
         3: "../tiles/world/human.ron",
+        4: "../tiles/world/campfire.ron",
     }
 )

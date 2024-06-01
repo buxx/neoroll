@@ -5,12 +5,15 @@ use serde::{Deserialize, Serialize};
 pub enum Structure {
     Nothing,
     BigLeafTree,
+    Campfire,
 }
+
 impl Structure {
     pub fn hide(&self) -> bool {
         match self {
             Structure::Nothing => false,
             Structure::BigLeafTree => false,
+            Structure::Campfire => false,
         }
     }
 }

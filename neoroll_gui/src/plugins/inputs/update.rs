@@ -1,5 +1,6 @@
 use bevy::{
     input::{
+        keyboard::KeyboardInput,
         mouse::{MouseButtonInput, MouseWheel},
         ButtonState,
     },
@@ -11,9 +12,14 @@ use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::AlphaByScale,
     plugins::{
-        map::container::{MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed},
+        game::SwitchGuiDisplay,
+        map::container::{
+            MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed,
+        },
         server::gateway::GatewayWrapper,
-        world::container::{WorldPartContainer, WorldPartContainerNeedRefresh, WorldPartContainerRefreshed},
+        world::container::{
+            WorldPartContainer, WorldPartContainerNeedRefresh, WorldPartContainerRefreshed,
+        },
     },
 };
 
@@ -26,17 +32,28 @@ pub fn update_inputs(
     mut mouse_button_input_events: EventReader<MouseButtonInput>,
     mut mouse_wheel_input_events: EventReader<MouseWheel>,
     mut cursor_moved_events: EventReader<CursorMoved>,
+    mut keyboard_events: EventReader<KeyboardInput>,
     mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
     mut world_container_need_refresh: EventWriter<WorldPartContainerNeedRefresh>,
     mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
     mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
     mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
+    mut switch_gui_display: EventWriter<SwitchGuiDisplay>,
     mut dragged_screen: EventWriter<DraggedScreen>,
     mut world_part: ResMut<WorldPartContainer>,
     mut map_part: ResMut<MapPartContainer>,
     gateway: Res<GatewayWrapper>,
 ) {
     let mut camera = camera.single_mut();
+
+    // Keyboard
+    for event in keyboard_events.iter() {
+        if let Some(KeyCode::Space) = event.key_code {
+            if let ButtonState::Released = event.state {
+                switch_gui_display.send(SwitchGuiDisplay)
+            }
+        }
+    }
 
     // Clicks and Drags
     for event in mouse_button_input_events.iter() {

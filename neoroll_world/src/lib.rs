@@ -1,4 +1,5 @@
 pub mod entity;
+pub mod gameplay;
 pub mod generator;
 pub mod map;
 pub mod scale;

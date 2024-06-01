@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_egui::EguiPlugin;
 use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 
@@ -7,8 +8,7 @@ use neoroll_server::{
     server::{self},
 };
 use plugins::{
-    inputs::UserInputsPlugin, map::MapDisplayPlugin, server::ServerGatewayPlugin,
-    world::WorldDisplayPlugin,
+    game::GameStatePlugin, gui::GuiPlugin, inputs::UserInputsPlugin, map::MapDisplayPlugin, server::ServerGatewayPlugin, world::WorldDisplayPlugin
 };
 use setup::setup_;
 
@@ -29,12 +29,15 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
+            EguiPlugin,
             ShapePlugin,
             TilesetPlugin::default(),
             UserInputsPlugin,
             ServerGatewayPlugin::new(gateway),
             WorldDisplayPlugin,
             MapDisplayPlugin,
+            GameStatePlugin,
+            GuiPlugin,
         ))
         .add_systems(Startup, setup_)
         .run();

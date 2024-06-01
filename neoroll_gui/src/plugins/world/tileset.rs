@@ -23,6 +23,7 @@ pub fn structure_tile_name(structure: &Structure) -> TileName {
     match structure {
         Structure::Nothing => TileName("Nothing".to_string()),
         Structure::BigLeafTree => TileName("BigLeafTree".to_string()),
+        Structure::Campfire => TileName("Campfire".to_string()),
     }
 }
 
