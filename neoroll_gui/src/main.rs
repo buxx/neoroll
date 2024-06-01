@@ -19,6 +19,7 @@ mod layer;
 mod plugins;
 mod scene;
 mod setup;
+mod utils;
 
 fn main() {
     // FIXME: When server behind network, gateways must be built server side and managed by network connections

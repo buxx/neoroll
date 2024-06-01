@@ -7,7 +7,7 @@ use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::{AlphaByScale, REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
     plugins::map::{background::Background, container::MapPartContainer, element::Element},
-    scene::ScenePoint,
+    scene::ScenePoint, utils::EventReaderShortcuts,
 };
 
 use super::{
@@ -40,10 +40,7 @@ pub fn refresh_map_display(
     let (mut background_visibility, mut background_sprite) = background_query.single_mut();
 
     if let Some(tileset) = tilesets.get_by_name(MAP_TILESET_NAME) {
-        if !map_container_refreshed
-            .iter()
-            .collect::<Vec<&MapPartContainerRefreshed>>()
-            .is_empty()
+        if map_container_refreshed.has_been_set()
         {
             let atlas = tileset.atlas();
             let map_part = map_part_container.map_part();

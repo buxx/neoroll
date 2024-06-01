@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::utils::EventReaderShortcuts;
+
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
@@ -28,11 +30,7 @@ fn switch_gui_display(
     mut state: ResMut<GameState>,
     mut switch_gui_display: EventReader<SwitchGuiDisplay>,
 ) {
-    if switch_gui_display
-        .iter()
-        .collect::<Vec<&SwitchGuiDisplay>>()
-        .last()
-        .is_some()
+    if switch_gui_display.has_been_set()
     {
         state.gui = !state.gui
     }

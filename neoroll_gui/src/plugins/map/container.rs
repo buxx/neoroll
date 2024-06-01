@@ -4,7 +4,7 @@ use neoroll_world::map::part::MapPart;
 
 use crate::{
     camera::{camera_map_area, BackgroundCamera, SceneItemsCamera},
-    plugins::server::gateway::GatewayWrapper,
+    plugins::server::gateway::GatewayWrapper, utils::EventReaderShortcuts,
 };
 
 // use super::updater::MapUpdater;
@@ -45,10 +45,7 @@ pub fn refresh_map_part_container(
     mut map_container_need_refresh: EventReader<MapPartContainerNeedRefresh>,
     // mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
 ) {
-    if !map_container_need_refresh
-        .iter()
-        .collect::<Vec<&MapPartContainerNeedRefresh>>()
-        .is_empty()
+    if map_container_need_refresh.has_been_set()
     {
         let (_, camera, transform, _) = camera.single();
         let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));

@@ -5,7 +5,7 @@ use neoroll_world::space::part::WorldPart;
 use crate::{
     camera::{camera_world_area, SceneItemsCamera},
     plugins::server::gateway::GatewayWrapper,
-    server::ClientMessage,
+    server::ClientMessage, utils::EventReaderShortcuts,
 };
 
 // use super::updater::WorldUpdater;
@@ -43,10 +43,7 @@ pub fn refresh_world_part_container(
     mut world_container_need_refresh: EventReader<WorldPartContainerNeedRefresh>,
     // mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
 ) {
-    if !world_container_need_refresh
-        .iter()
-        .collect::<Vec<&WorldPartContainerNeedRefresh>>()
-        .is_empty()
+    if world_container_need_refresh.has_been_set()
     {
         let (_, camera, transform) = camera.single();
         let target = camera.physical_target_size().unwrap_or(UVec2::new(0, 0));
