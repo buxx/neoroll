@@ -100,6 +100,7 @@ impl World {
     }
 }
 
+#[derive(Debug)]
 pub enum WorldChange {
     Creature(CreatureId, CreatureChange),
 }

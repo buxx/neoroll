@@ -6,10 +6,6 @@ pub trait EventReaderShortcuts {
 
 impl<'w, 's, E: Event> EventReaderShortcuts for EventReader<'w, 's, E> {
     fn has_been_set(&mut self) -> bool {
-        self
-        .iter()
-        .collect::<Vec<&E>>()
-        .last()
-        .is_some()
+        self.iter().collect::<Vec<&E>>().last().is_some()
     }
 }

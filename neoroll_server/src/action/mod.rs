@@ -1,5 +1,4 @@
-pub mod hello;
-pub mod move_;
+use client::ComputeAndSendClientStates;
 use move_::{MoveCreature, MoveCreatureChange};
 use uuid::Uuid;
 
@@ -7,10 +6,15 @@ use crate::state::{FrameI, State, StateChange};
 
 use self::hello::{SayHello, SayHelloChange};
 
+pub mod client;
+pub mod hello;
+pub mod move_;
+
 #[derive(Debug, PartialEq)]
 pub enum Action {
     SayHello(SayHello),
     MoveCreature(MoveCreature),
+    ComputeAndSendClientStates(ComputeAndSendClientStates),
 }
 
 impl Action {
@@ -18,6 +22,7 @@ impl Action {
         match self {
             Action::SayHello(body) => body.tick(id, state),
             Action::MoveCreature(body) => body.tick(id, state),
+            Action::ComputeAndSendClientStates(body) => body.tick(id, state),
         }
     }
 
@@ -33,11 +38,12 @@ impl Action {
                     body.apply(change)
                 }
             }
+            Action::ComputeAndSendClientStates(_) => {}
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ActionId(Uuid);
 
 impl ActionId {
@@ -52,6 +58,7 @@ impl Default for ActionId {
     }
 }
 
+#[derive(Debug)]
 pub enum ActionChange {
     New(Action),
     Update(UpdateAction),
@@ -59,6 +66,7 @@ pub enum ActionChange {
     SetNextTick(NextTick),
 }
 
+#[derive(Debug)]
 pub enum UpdateAction {
     SayHello(SayHelloChange),
     MoveCreature(MoveCreatureChange),
@@ -69,6 +77,7 @@ pub trait BodyTick<T> {
     fn apply(&mut self, change: T);
 }
 
+#[derive(Debug)]
 pub struct NextTick(FrameI);
 
 impl NextTick {

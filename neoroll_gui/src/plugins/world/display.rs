@@ -15,9 +15,11 @@ use super::{
     tileset::{spawn_tile, WORLD_TILESET_NAME},
 };
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn refresh_world_display(
     world_part: Res<WorldPartContainer>,
-    mut creatures_map: ResMut<CreaturesMap>,
+    creatures_map: ResMut<CreaturesMap>,
     camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
     mut world_container_refreshed: EventReader<WorldPartContainerRefreshed>,
     tiles: Query<Entity, With<TileComponent>>,

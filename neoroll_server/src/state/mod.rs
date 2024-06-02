@@ -1,3 +1,5 @@
+pub mod client;
+pub mod game;
 pub mod world;
 use std::{
     collections::HashMap,
@@ -5,6 +7,7 @@ use std::{
     sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
+use game::{GameChange, GameState};
 use neoroll_world::{
     map::Map,
     space::world::{World, WorldChange},
@@ -14,6 +17,7 @@ use world::WorldModifier;
 use crate::{
     action::{Action, ActionChange, ActionId, NextTick},
     gateway::Gateways,
+    server::{ServerMessage, ServerMessageEnveloppe},
     subscriptions::Subscriptions,
 };
 
@@ -22,15 +26,21 @@ pub struct State {
     actions: HashMap<ActionId, WrappedAction>,
     world: Arc<RwLock<World>>,
     map: Arc<RwLock<Map>>,
+    game: Arc<RwLock<GameState>>,
 }
 
 impl State {
-    pub fn new(world: Arc<RwLock<World>>, map: Arc<RwLock<Map>>) -> Self {
+    pub fn new(
+        world: Arc<RwLock<World>>,
+        map: Arc<RwLock<Map>>,
+        game: Arc<RwLock<GameState>>,
+    ) -> Self {
         Self {
             frame_i: FrameI(0),
             actions: HashMap::new(),
             world,
             map,
+            game,
         }
     }
 
@@ -48,6 +58,10 @@ impl State {
 
     pub fn map(&self) -> RwLockReadGuard<Map> {
         self.map.read().unwrap()
+    }
+
+    pub fn game(&self) -> RwLockReadGuard<GameState> {
+        self.game.read().unwrap()
     }
 
     /// Return actions to tick for current state
@@ -86,6 +100,16 @@ impl State {
                 StateChange::World(change) => {
                     WorldModifier::new(gateways, subscriptions, &mut self.world_mut()).apply(change)
                 }
+                StateChange::Game(change) => match change {
+                    GameChange::SendClientGameState(client_id, state) => gateways
+                        .read()
+                        .unwrap()
+                        .send(ServerMessageEnveloppe::To(
+                            client_id,
+                            ServerMessage::NewClientGameState(state),
+                        ))
+                        .unwrap(),
+                },
             };
         }
     }
@@ -98,13 +122,16 @@ impl Default for State {
             actions: Default::default(),
             world: Default::default(),
             map: Default::default(),
+            game: Default::default(),
         }
     }
 }
 
+#[derive(Debug)]
 pub enum StateChange {
     Action(ActionId, ActionChange),
     World(WorldChange),
+    Game(GameChange),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

@@ -14,7 +14,10 @@ use neoroll_world::{
 use rayon::{ThreadPool, ThreadPoolBuilder};
 
 use crate::{
-    action::{move_::MoveCreatureBuilder, Action, ActionChange, ActionId},
+    action::{
+        client::ComputeAndSendClientStates, move_::MoveCreatureBuilder, Action, ActionChange,
+        ActionId,
+    },
     gateway::Gateways,
     state::{State, StateChange},
     subscriptions::Subscriptions,
@@ -42,35 +45,45 @@ impl Runner {
     }
 
     pub fn run(&mut self) {
-        // HACK
-        for line in 0..1 {
-            for column in 0..1 {
-                let creature_id = CreatureId::new();
-                let creature_point =
-                    AbsoluteWorldPoint(AbsoluteWorldRowI(line), AbsoluteWorldColI(column));
-                let move_to = AbsoluteWorldPoint(
-                    AbsoluteWorldRowI(line + 30),
-                    AbsoluteWorldColI(column + 30),
-                );
+        // HACK FIXME BS NOW : action on campfire
+        // for line in 0..1 {
+        //     for column in 0..1 {
+        //         let creature_id = CreatureId::new();
+        //         let creature_point =
+        //             AbsoluteWorldPoint(AbsoluteWorldRowI(line), AbsoluteWorldColI(column));
+        //         let move_to = AbsoluteWorldPoint(
+        //             AbsoluteWorldRowI(line + 30),
+        //             AbsoluteWorldColI(column + 30),
+        //         );
 
-                self.state.apply(
-                    &self.gateways,
-                    &self.subscriptions,
-                    vec![
-                        StateChange::World(WorldChange::Creature(
-                            creature_id,
-                            CreatureChange::New(Creature::new(creature_id, creature_point)),
-                        )),
-                        StateChange::Action(
-                            ActionId::new(),
-                            ActionChange::New(
-                                MoveCreatureBuilder::new(creature_id, move_to).build(),
-                            ),
-                        ),
-                    ],
-                );
-            }
-        }
+        //         self.state.apply(
+        //             &self.gateways,
+        //             &self.subscriptions,
+        //             vec![
+        //                 StateChange::World(WorldChange::Creature(
+        //                     creature_id,
+        //                     CreatureChange::New(Creature::new(creature_id, creature_point)),
+        //                 )),
+        //                 StateChange::Action(
+        //                     ActionId::new(),
+        //                     ActionChange::New(
+        //                         MoveCreatureBuilder::new(creature_id, move_to).build(),
+        //                     ),
+        //                 ),
+        //             ],
+        //         );
+        //     }
+        // }
+        self.state.apply(
+            &self.gateways,
+            &self.subscriptions,
+            vec![StateChange::Action(
+                ActionId::new(),
+                ActionChange::New(Action::ComputeAndSendClientStates(
+                    ComputeAndSendClientStates,
+                )),
+            )],
+        );
 
         loop {
             let mut state_changes = vec![];

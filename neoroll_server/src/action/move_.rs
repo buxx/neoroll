@@ -44,6 +44,7 @@ impl BodyTick<MoveCreatureChange> for MoveCreature {
     }
 }
 
+#[derive(Debug)]
 pub enum MoveCreatureChange {}
 
 pub struct MoveCreatureBuilder {

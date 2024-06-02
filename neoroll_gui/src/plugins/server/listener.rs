@@ -8,6 +8,7 @@ use neoroll_world::entity::creature::{CreatureId, PartialCreatureChange};
 
 use crate::{
     plugins::{
+        game::GameStateWrapper,
         map::container::{MapPartContainer, MapPartContainerRefreshed},
         world::{
             container::{WorldPartContainer, WorldPartContainerRefreshed},
@@ -27,6 +28,7 @@ pub fn listen(
     mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
     mut map_part: ResMut<MapPartContainer>,
     mut creatures: Query<(&CreatureComponent, &mut Transform)>,
+    mut game_state: ResMut<GameStateWrapper>,
 ) {
     for message in gateway.read() {
         // TODO: dispatch code in modules/plugins
@@ -73,6 +75,7 @@ pub fn listen(
                     }
                 }
             }
+            ServerMessage::NewClientGameState(state) => game_state.set_state(Some(state)),
         }
     }
 }

@@ -2,6 +2,7 @@ use std::fmt::Display;
 
 use uuid::Uuid;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Tribe {
     id: TribeId,
 }
@@ -9,6 +10,10 @@ pub struct Tribe {
 impl Tribe {
     pub fn new(id: TribeId) -> Self {
         Self { id }
+    }
+
+    pub fn id(&self) -> &TribeId {
+        &self.id
     }
 }
 

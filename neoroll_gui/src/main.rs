@@ -5,10 +5,13 @@ use bevy_tileset::prelude::*;
 
 use neoroll_server::{
     gateway::Gateways,
-    server::{self},
+    server::{self, ClientMessage},
+    state::game::ClientGameMessage,
 };
+use neoroll_world::gameplay::tribe::{Tribe, TribeId};
 use plugins::{
-    game::GameStatePlugin, gui::GuiPlugin, inputs::UserInputsPlugin, map::MapDisplayPlugin, server::ServerGatewayPlugin, world::WorldDisplayPlugin
+    game::GameStatePlugin, gui::GuiPlugin, inputs::UserInputsPlugin, map::MapDisplayPlugin,
+    server::ServerGatewayPlugin, world::WorldDisplayPlugin,
 };
 use setup::setup_;
 
@@ -26,6 +29,13 @@ fn main() {
     let mut gateways = Gateways::new();
     let gateway = gateways.register();
     server::spawn(gateways);
+
+    // TODO: in game (player choose name, etc)
+    gateway
+        .send(ClientMessage::Game(ClientGameMessage::CreateTribe(
+            Tribe::new(TribeId::new()),
+        )))
+        .unwrap();
 
     App::new()
         .add_plugins((

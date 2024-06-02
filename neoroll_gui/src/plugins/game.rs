@@ -1,37 +1,25 @@
 use bevy::prelude::*;
-
-use crate::utils::EventReaderShortcuts;
+use neoroll_server::state::client::ClientGameState;
 
 pub struct GameStatePlugin;
 
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<GameState>()
-            .add_event::<SwitchGuiDisplay>()
-            .add_systems(Update, switch_gui_display);
+        app.init_resource::<GameStateWrapper>();
     }
 }
 
 #[derive(Resource, Default)]
-pub struct GameState {
-    gui: bool,
+pub struct GameStateWrapper {
+    state: Option<ClientGameState>,
 }
 
-impl GameState {
-    pub fn gui(&self) -> bool {
-        self.gui
+impl GameStateWrapper {
+    pub fn state(&self) -> &Option<ClientGameState> {
+        &self.state
     }
-}
 
-#[derive(Event)]
-pub struct SwitchGuiDisplay;
-
-fn switch_gui_display(
-    mut state: ResMut<GameState>,
-    mut switch_gui_display: EventReader<SwitchGuiDisplay>,
-) {
-    if switch_gui_display.has_been_set()
-    {
-        state.gui = !state.gui
+    pub fn set_state(&mut self, state: Option<ClientGameState>) {
+        self.state = state;
     }
 }

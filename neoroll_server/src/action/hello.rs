@@ -30,7 +30,6 @@ impl BodyTick<SayHelloChange> for SayHello {
         if self.counter == 5 {
             changes.push(StateChange::Action(id, ActionChange::Remove))
         } else {
-            // println!("Hello");
             let x: u64 = (1..=1000000).product();
             changes.extend(vec![
                 StateChange::Action(
@@ -55,6 +54,7 @@ impl BodyTick<SayHelloChange> for SayHello {
     }
 }
 
+#[derive(Debug)]
 pub enum SayHelloChange {
     IncrementCounter,
     SetValue(u64),

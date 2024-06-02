@@ -11,6 +11,7 @@ pub struct Creature {
     id: CreatureId,
     point: AbsoluteWorldPoint,
 }
+
 impl Creature {
     pub fn new(id: CreatureId, position: AbsoluteWorldPoint) -> Self {
         Self {
@@ -55,6 +56,7 @@ impl Display for CreatureId {
     }
 }
 
+#[derive(Debug)]
 pub enum CreatureChange {
     New(Creature),
     SetPoint(AbsoluteWorldPoint),
