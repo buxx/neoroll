@@ -12,7 +12,7 @@ use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::AlphaByScale,
     plugins::{
-        gui::SwitchGuiDisplay,
+        gui::SwitchDisplayWindow,
         map::container::{
             MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed,
         },
@@ -38,7 +38,7 @@ pub fn update_inputs(
     mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
     mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
     mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
-    mut switch_gui_display: EventWriter<SwitchGuiDisplay>,
+    mut switch_gui_display: EventWriter<SwitchDisplayWindow>,
     mut dragged_screen: EventWriter<DraggedScreen>,
     mut world_part: ResMut<WorldPartContainer>,
     mut map_part: ResMut<MapPartContainer>,
@@ -50,7 +50,7 @@ pub fn update_inputs(
     for event in keyboard_events.iter() {
         if let Some(KeyCode::Space) = event.key_code {
             if let ButtonState::Released = event.state {
-                switch_gui_display.send(SwitchGuiDisplay)
+                switch_gui_display.send(SwitchDisplayWindow)
             }
         }
     }

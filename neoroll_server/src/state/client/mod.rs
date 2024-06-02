@@ -22,10 +22,18 @@ impl ClientGameState {
     pub fn tribe_id(&self) -> &TribeId {
         &self.tribe_id
     }
+
+    pub fn human(&self) -> &HumanGameState {
+        &self.human
+    }
+
+    pub fn build(&self) -> &BuildGameState {
+        &self.build
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct HumanGameState {
+pub struct HumanGameState {
     human_count: HumanCount,
 }
 
@@ -36,13 +44,17 @@ impl HumanGameState {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-struct BuildGameState {
+pub struct BuildGameState {
     can_build_campfire: bool,
 }
 
 impl BuildGameState {
     fn new(can_build_campfire: bool) -> Self {
         Self { can_build_campfire }
+    }
+
+    pub fn can_build_campfire(&self) -> bool {
+        self.can_build_campfire
     }
 }
 

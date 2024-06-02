@@ -20,6 +20,8 @@ use crate::{
 
 use super::gateway::GatewayWrapper;
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn listen(
     gateway: Res<GatewayWrapper>,
     creatures_map: Res<CreaturesMap>,
@@ -37,7 +39,7 @@ pub fn listen(
                 // TODO: heartbeat
             }
             ServerMessage::NewWorldLayers(area, layers) => {
-                info!("Received {} tiles", layers.len());
+                debug!("Received {} tiles", layers.len());
 
                 // Subscribe on each received creatures
                 let creature_ids: Vec<CreatureId> =
@@ -51,7 +53,7 @@ pub fn listen(
                 world_container_refreshed.send(WorldPartContainerRefreshed);
             }
             ServerMessage::NewMapSectors(area, sectors) => {
-                info!("Received {} sectors", sectors.len());
+                debug!("Received {} sectors", sectors.len());
                 // TODO: hardcoded lakes for now
                 map_part.0.switch(sectors, vec![].clone(), area);
                 map_container_refreshed.send(MapPartContainerRefreshed);

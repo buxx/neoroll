@@ -9,3 +9,7 @@ impl<'w, 's, E: Event> EventReaderShortcuts for EventReader<'w, 's, E> {
         self.iter().collect::<Vec<&E>>().last().is_some()
     }
 }
+
+pub trait TileName {
+    fn tile_name(&self) -> &str;
+}
