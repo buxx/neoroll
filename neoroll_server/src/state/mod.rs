@@ -64,6 +64,10 @@ impl State {
         self.game.read().unwrap()
     }
 
+    fn game_mut(&self) -> RwLockWriteGuard<GameState> {
+        self.game.write().unwrap()
+    }
+
     /// Return actions to tick for current state
     pub fn actions(&self) -> impl Iterator<Item = (&ActionId, &Action)> {
         self.actions
@@ -98,7 +102,13 @@ impl State {
                     self.actions.remove(&id);
                 }
                 StateChange::World(change) => {
-                    WorldModifier::new(gateways, subscriptions, &mut self.world_mut()).apply(change)
+                    WorldModifier::new(
+                        gateways,
+                        subscriptions,
+                        &mut self.world_mut(),
+                        &mut self.game_mut(),
+                    )
+                    .apply(change);
                 }
                 StateChange::Game(change) => match change {
                     GameChange::SendClientGameState(client_id, state) => gateways

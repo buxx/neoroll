@@ -2,7 +2,9 @@ pub mod build;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_tileset::prelude::Tilesets;
-use build::{display_build_cursor, spawn_display_cursor};
+use build::{
+    display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
+};
 use neoroll_world::gameplay::build::Buildable;
 
 use crate::utils::{EventReaderShortcuts, TileName};
@@ -21,7 +23,8 @@ impl Plugin for GuiPlugin {
                     gui,
                     switch_gui_display,
                     display_build_cursor,
-                    display_build_cursor,
+                    display_build_outline,
+                    try_build,
                 ),
             );
     }
@@ -78,8 +81,10 @@ fn gui(
     mut state: ResMut<GuiState>,
     mut contexts: EguiContexts,
     game_state: Res<GameStateWrapper>,
-    commands: Commands,
+    mut commands: Commands,
     tilesets: Tilesets,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<ColorMaterial>>,
 ) {
     if state.display_window() {
         egui::Window::new("").show(contexts.ctx_mut(), |ui| {
@@ -89,7 +94,8 @@ fn gui(
                 if game.build().can_build_campfire() && ui.button("Campfire").clicked() {
                     state.set_current(Current::Build(Buildable::Campfire));
                     state.set_display_window(false);
-                    spawn_display_cursor(commands, Buildable::Campfire, tilesets);
+                    spawn_build_cursor(&mut commands, Buildable::Campfire, tilesets);
+                    spawn_build_outline(&mut commands, meshes, materials);
                 }
             }
         });

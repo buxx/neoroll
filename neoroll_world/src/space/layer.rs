@@ -26,12 +26,24 @@ impl Layers {
         &self.grounds
     }
 
+    pub fn grounds_mut(&mut self) -> &mut FilledLayer<Ground> {
+        &mut self.grounds
+    }
+
     pub fn floors(&self) -> &FilledLayer<Floor> {
         &self.floors
     }
 
+    pub fn floors_mut(&mut self) -> &mut FilledLayer<Floor> {
+        &mut self.floors
+    }
+
     pub fn structures(&self) -> &CompositeLayer<Structure> {
         &self.structures
+    }
+
+    pub fn structures_mut(&mut self) -> &mut CompositeLayer<Structure> {
+        &mut self.structures
     }
 }
 
@@ -66,6 +78,10 @@ impl<T: Entity> FilledLayer<T> {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
+
+    pub fn set(&mut self, index: usize, value: T) {
+        self.items[index] = value;
+    }
 }
 
 #[derive(Deserialize, Serialize)]
@@ -91,6 +107,10 @@ impl<T: Entity> CompositeLayer<T> {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+
+    pub fn set(&mut self, index: usize, value: Option<T>) {
+        self.items[index] = value;
     }
 }
 

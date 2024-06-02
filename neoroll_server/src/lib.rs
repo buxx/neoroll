@@ -1,3 +1,4 @@
+pub mod shortcut;
 pub mod action;
 pub mod gateway;
 pub mod run;

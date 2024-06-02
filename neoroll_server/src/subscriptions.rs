@@ -32,6 +32,13 @@ impl Subscriptions {
         self.creatures.insert(client_id, creature_ids);
     }
 
+    pub fn push_creature(&mut self, client_id: ClientId, creature_id: CreatureId) {
+        self.creatures
+            .entry(client_id)
+            .or_default()
+            .push(creature_id);
+    }
+
     pub fn to_point(&self, point: &AbsoluteWorldPoint) -> Vec<ClientId> {
         self.areas
             .iter()
@@ -60,4 +67,5 @@ impl Default for Subscriptions {
 pub enum SubscriptionsMessage {
     SetArea(Option<WorldArea>),
     SetCreatures(Vec<CreatureId>),
+    PushCreatures(CreatureId),
 }

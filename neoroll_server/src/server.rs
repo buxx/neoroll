@@ -9,15 +9,22 @@ use crate::{
     run::RunnerBuilder,
     state::{
         client::ClientGameState,
-        game::{ClientGameMessage, GameState},
-        State,
+        game::{ClientGameMessage, GameState, ServerGameMessage},
+        State, StateChange,
     },
     subscriptions::{Subscriptions, SubscriptionsMessage},
 };
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use neoroll_world::{
     entity::creature::{CreatureId, PartialCreatureChange},
+    gameplay::{build::TryBuild, tribe::structure::StructureOwn},
     map::{area::MapArea, patch::NewSectors, Map},
-    space::{area::WorldArea, patch::NewLayers, world::World},
+    space::{
+        area::WorldArea,
+        part::WorldPartMessage,
+        patch::NewLayers,
+        world::{StructureChange, World, WorldChange},
+    },
 };
 use uuid::Uuid;
 
@@ -27,6 +34,7 @@ pub enum ServerMessageEnveloppe {
     To(ClientId, ServerMessage),
 }
 
+// TODO: regroup in sub types
 #[derive(Debug, Clone, PartialEq)]
 pub enum ServerMessage {
     Hello(Uuid),
@@ -34,6 +42,8 @@ pub enum ServerMessage {
     NewMapSectors(MapArea, NewSectors),   // TODO: Map(x)
     Creature(CreatureId, PartialCreatureChange),
     NewClientGameState(ClientGameState),
+    Game(ServerGameMessage),
+    WorldPart(WorldPartMessage),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -49,6 +59,7 @@ pub enum ClientMessage {
 //pub fn spawn(server_sender: Sender<ServerMessage>, client_receiver: Receiver<ClientMessage>) {
 pub fn spawn(gateways: Gateways) {
     gateways.start();
+
     let gateways = Arc::new(RwLock::new(gateways));
     let subscriptions = Arc::new(RwLock::new(Subscriptions::new()));
     let world = bincode::deserialize::<World>(&fs::read("world.bin").unwrap()).unwrap();
@@ -59,17 +70,29 @@ pub fn spawn(gateways: Gateways) {
     let map = Arc::new(RwLock::new(map));
     let game = Arc::new(RwLock::new(game));
 
+    let (server_sender, server_receiver): (Sender<StateChange>, Receiver<StateChange>) =
+        unbounded();
     // TODO: separate code (other crate) ...
     let gateways_ = Arc::clone(&gateways);
     let subscriptions_ = Arc::clone(&subscriptions);
     let world_ = Arc::clone(&world);
     let map_ = Arc::clone(&map);
     let game_ = Arc::clone(&game);
-    thread::spawn(move || Server::new(gateways_, subscriptions_, world_, map_, game_).run());
+    thread::spawn(move || {
+        Server::new(
+            gateways_,
+            subscriptions_,
+            server_sender,
+            world_,
+            map_,
+            game_,
+        )
+        .run()
+    });
 
     // TODO: like in OpenCombat, permit remote (network) server instead embedded server
     thread::spawn(|| {
-        RunnerBuilder::new(gateways, subscriptions)
+        RunnerBuilder::new(gateways, subscriptions, server_receiver)
             .actions(vec![])
             .build(State::new(world, map, game))
             .run();
@@ -79,6 +102,7 @@ pub fn spawn(gateways: Gateways) {
 pub struct Server {
     gateways: Arc<RwLock<Gateways>>,
     subscriptions: Arc<RwLock<Subscriptions>>,
+    server_sender: Sender<StateChange>,
     world: Arc<RwLock<World>>, // NOTE: Server should only read world (Runner is only allowed to write)
     map: Arc<RwLock<Map>>, // NOTE: Server should only read map (Runner is only allowed to write)
     game: Arc<RwLock<GameState>>,
@@ -88,6 +112,7 @@ impl Server {
     pub fn new(
         gateways: Arc<RwLock<Gateways>>,
         subscriptions: Arc<RwLock<Subscriptions>>,
+        server_sender: Sender<StateChange>,
         world: Arc<RwLock<World>>,
         map: Arc<RwLock<Map>>,
         game: Arc<RwLock<GameState>>,
@@ -95,6 +120,7 @@ impl Server {
         Self {
             gateways,
             subscriptions,
+            server_sender,
             world,
             map,
             game,
@@ -123,6 +149,14 @@ impl Server {
         }
     }
 
+    fn send_to_client(&self, client_id: ClientId, message: ServerMessage) {
+        self.gateways
+            .read()
+            .unwrap()
+            .send(ServerMessageEnveloppe::To(client_id, message))
+            .unwrap();
+    }
+
     pub fn react(&self, message: ClientMessageEnveloppe) {
         let ClientMessageEnveloppe(client_id, message) = message;
 
@@ -134,27 +168,12 @@ impl Server {
             ClientMessage::RequireWorldArea(area, ignore_area) => {
                 let new_layers =
                     NewLayers::from_world_area(&self.world.read().unwrap(), &area, &ignore_area);
-
-                self.gateways
-                    .read()
-                    .unwrap()
-                    .send(ServerMessageEnveloppe::To(
-                        client_id,
-                        ServerMessage::NewWorldLayers(area, new_layers),
-                    ))
-                    .unwrap();
+                self.send_to_client(client_id, ServerMessage::NewWorldLayers(area, new_layers));
             }
             ClientMessage::RequireMapArea(area, ignore_area) => {
                 let new_sectors =
                     NewSectors::from_map_area(&self.map.read().unwrap(), &area, &ignore_area);
-                self.gateways
-                    .read()
-                    .unwrap()
-                    .send(ServerMessageEnveloppe::To(
-                        client_id,
-                        ServerMessage::NewMapSectors(area, new_sectors),
-                    ))
-                    .unwrap();
+                self.send_to_client(client_id, ServerMessage::NewMapSectors(area, new_sectors));
             }
             ClientMessage::Subscriptions(subscription) => match subscription {
                 SubscriptionsMessage::SetCreatures(creatures) => {
@@ -163,12 +182,45 @@ impl Server {
                 SubscriptionsMessage::SetArea(area) => {
                     self.subscriptions_mut().set_area(client_id, area)
                 }
+                SubscriptionsMessage::PushCreatures(creature_id) => {
+                    self.subscriptions_mut()
+                        .push_creature(client_id, creature_id);
+                }
             },
-            ClientMessage::Game(message) => match message {
+            ClientMessage::Game(message) => match &message {
                 ClientGameMessage::CreateTribe(tribe) => {
                     let mut game = self.game_mut();
                     game.set_client_tribe_id(client_id, *tribe.id());
-                    game.new_tribe(tribe);
+                    game.new_tribe(tribe.clone());
+                }
+                ClientGameMessage::TryBuild(buildable, point) => {
+                    let game = self.game();
+                    let tribe_id = game.client_tribe_id(&client_id).unwrap();
+                    match TryBuild::new(&self.world.read().unwrap()).try_(buildable, point) {
+                        Ok(_) => {
+                            self.server_sender
+                                .send(StateChange::World(WorldChange::Structure(
+                                    *point,
+                                    StructureChange::SetOwned(StructureOwn::new(
+                                        (*buildable).into(),
+                                        *tribe_id,
+                                        *point,
+                                    )),
+                                )))
+                                .unwrap();
+                        }
+                        Err(error) => self
+                            .gateways
+                            .read()
+                            .unwrap()
+                            .send(ServerMessageEnveloppe::To(
+                                client_id,
+                                ServerMessage::Game(ServerGameMessage::TryBuildError(
+                                    message, error,
+                                )),
+                            ))
+                            .unwrap(),
+                    }
                 }
             },
         }

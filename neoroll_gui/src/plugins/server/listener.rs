@@ -2,9 +2,13 @@ use bevy::prelude::*;
 
 use neoroll_server::{
     server::{ClientMessage, ServerMessage},
+    state::game::ServerGameMessage,
     subscriptions::SubscriptionsMessage,
 };
-use neoroll_world::entity::creature::{CreatureId, PartialCreatureChange};
+use neoroll_world::{
+    entity::creature::{CreatureId, PartialCreatureChange},
+    space::part::{WorldPartCreatureMessage, WorldPartMessage, WorldPartStructureMessage},
+};
 
 use crate::{
     plugins::{
@@ -78,6 +82,26 @@ pub fn listen(
                 }
             }
             ServerMessage::NewClientGameState(state) => game_state.set_state(Some(state)),
+            ServerMessage::Game(message) => match message {
+                ServerGameMessage::TryBuildError(original, error) => {
+                    info!("TODO: (in gui) build error ({:?}): {:?}", original, error)
+                }
+            },
+            ServerMessage::WorldPart(change) => match change {
+                WorldPartMessage::Structure(point, change) => match change {
+                    WorldPartStructureMessage::Set(structure) => {
+                        world_part.0.set_structure(&point, structure);
+                        world_container_refreshed.send(WorldPartContainerRefreshed);
+                    }
+                },
+                WorldPartMessage::Creature(_, change) => match change {
+                    WorldPartCreatureMessage::New(creature) => {
+                        gateway.send(ClientMessage::Subscriptions(SubscriptionsMessage::PushCreatures(*creature.id())));
+                        world_part.0.add_creature(creature);
+                        world_container_refreshed.send(WorldPartContainerRefreshed);
+                    }
+                },
+            },
         }
     }
 }

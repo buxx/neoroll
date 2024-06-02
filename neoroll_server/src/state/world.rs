@@ -1,8 +1,12 @@
 use std::sync::{Arc, RwLock};
 
 use neoroll_world::{
-    entity::creature::{CreatureChange, PartialCreatureChange},
-    space::world::{World, WorldChange},
+    entity::creature::{CreatureChange, CreatureId, PartialCreatureChange},
+    space::{
+        part::{WorldPartCreatureMessage, WorldPartMessage, WorldPartStructureMessage},
+        world::{StructureChange, World, WorldChange},
+        AbsoluteWorldPoint,
+    },
 };
 
 use crate::{
@@ -11,10 +15,13 @@ use crate::{
     subscriptions::Subscriptions,
 };
 
+use super::game::GameState;
+
 pub struct WorldModifier<'a> {
     gateways: &'a Arc<RwLock<Gateways>>,
     subscriptions: &'a Arc<RwLock<Subscriptions>>,
     world: &'a mut World,
+    game: &'a mut GameState,
 }
 
 impl<'a> WorldModifier<'a> {
@@ -22,11 +29,33 @@ impl<'a> WorldModifier<'a> {
         gateways: &'a Arc<RwLock<Gateways>>,
         subscriptions: &'a Arc<RwLock<Subscriptions>>,
         world: &'a mut World,
+        game: &'a mut GameState,
     ) -> Self {
         Self {
             gateways,
             subscriptions,
             world,
+            game,
+        }
+    }
+
+    fn send_to_point_clients(&self, point: &AbsoluteWorldPoint, message: ServerMessage) {
+        for client_id in self.subscriptions.read().unwrap().to_point(point) {
+            self.gateways
+                .read()
+                .unwrap()
+                .send(ServerMessageEnveloppe::To(client_id, message.clone()))
+                .unwrap();
+        }
+    }
+
+    fn send_to_creature_clients(&self, id: &CreatureId, message: ServerMessage) {
+        for client_id in self.subscriptions.read().unwrap().to_creature(id) {
+            self.gateways
+                .read()
+                .unwrap()
+                .send(ServerMessageEnveloppe::To(client_id, message.clone()))
+                .unwrap();
         }
     }
 
@@ -34,33 +63,53 @@ impl<'a> WorldModifier<'a> {
         match change {
             WorldChange::Creature(id, change) => match change {
                 CreatureChange::New(creature) => {
-                    // FIXME: send this new creature to clients which are in new creature area
                     let point = *creature.point();
-                    self.world.creatures_mut().insert(*creature.id(), creature);
-
-                    for _client_id in self.subscriptions.read().unwrap().to_point(&point) {
-                        // TODO: send new creature
-                    }
+                    self.world.add_creature(creature.clone());
+                    self.send_to_point_clients(
+                        &point,
+                        ServerMessage::WorldPart(WorldPartMessage::Creature(
+                            *creature.id(),
+                            WorldPartCreatureMessage::New(creature.clone().into()),
+                        )),
+                    );
                 }
                 CreatureChange::SetPoint(point) => {
-                    // FIXME BS NOW: think about how to propagate to client(s)
-                    // (according to subscriptions, send through gateway)
                     self.world
                         .creatures_mut()
                         .get_mut(&id)
                         .unwrap()
                         .set_point(point);
+                    self.send_to_creature_clients(
+                        &id,
+                        ServerMessage::Creature(id, PartialCreatureChange::SetPoint(point)),
+                    );
+                }
+            },
+            WorldChange::Structure(point, change) => match change {
+                StructureChange::Set(structure) => {
+                    // FIXME: if None, destroy game.structures_own related objects
+                    self.world.set_structure(point, structure.clone());
 
-                    for client_id in self.subscriptions.read().unwrap().to_creature(&id) {
-                        self.gateways
-                            .read()
-                            .unwrap()
-                            .send(ServerMessageEnveloppe::To(
-                                client_id,
-                                ServerMessage::Creature(id, PartialCreatureChange::SetPoint(point)),
-                            ))
-                            .unwrap();
-                    }
+                    self.send_to_point_clients(
+                        &point,
+                        ServerMessage::WorldPart(WorldPartMessage::Structure(
+                            point,
+                            WorldPartStructureMessage::Set(structure.clone()),
+                        )),
+                    );
+                }
+                StructureChange::SetOwned(own) => {
+                    self.world
+                        .set_structure(*own.point(), Some(own.type_().clone()));
+                    self.game.set_structure_own(own.clone());
+
+                    self.send_to_point_clients(
+                        &point,
+                        ServerMessage::WorldPart(WorldPartMessage::Structure(
+                            point,
+                            WorldPartStructureMessage::Set(Some(own.type_().clone())),
+                        )),
+                    );
                 }
             },
         }

@@ -1,3 +1,5 @@
+pub mod structure;
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 use uuid::Uuid;
@@ -17,7 +19,7 @@ impl Tribe {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct TribeId(Uuid);
 
 impl TribeId {

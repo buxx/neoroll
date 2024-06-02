@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::space::AbsoluteWorldPoint;
+use crate::{gameplay::tribe::TribeId, space::AbsoluteWorldPoint};
 
 use super::Entity;
 use serde::{Deserialize, Serialize};
@@ -9,13 +9,15 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Creature {
     id: CreatureId,
+    tribe_id: TribeId,
     point: AbsoluteWorldPoint,
 }
 
 impl Creature {
-    pub fn new(id: CreatureId, position: AbsoluteWorldPoint) -> Self {
+    pub fn new(id: CreatureId, tribe_id: TribeId, position: AbsoluteWorldPoint) -> Self {
         Self {
             id,
+            tribe_id,
             point: position,
         }
     }
@@ -30,6 +32,10 @@ impl Creature {
 
     pub fn set_point(&mut self, position: AbsoluteWorldPoint) {
         self.point = position;
+    }
+
+    pub fn tribe_id(&self) -> &TribeId {
+        &self.tribe_id
     }
 }
 

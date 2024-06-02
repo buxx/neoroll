@@ -1,4 +1,6 @@
+pub mod migrant;
 use client::ComputeAndSendClientStates;
+use migrant::IncomingMigrant;
 use move_::{MoveCreature, MoveCreatureChange};
 use uuid::Uuid;
 
@@ -15,6 +17,7 @@ pub enum Action {
     SayHello(SayHello),
     MoveCreature(MoveCreature),
     ComputeAndSendClientStates(ComputeAndSendClientStates),
+    IncomingMigrant(IncomingMigrant),
 }
 
 impl Action {
@@ -23,6 +26,7 @@ impl Action {
             Action::SayHello(body) => body.tick(id, state),
             Action::MoveCreature(body) => body.tick(id, state),
             Action::ComputeAndSendClientStates(body) => body.tick(id, state),
+            Action::IncomingMigrant(body) => body.tick(id, state),
         }
     }
 
@@ -39,6 +43,7 @@ impl Action {
                 }
             }
             Action::ComputeAndSendClientStates(_) => {}
+            Action::IncomingMigrant(_) => {}
         }
     }
 }

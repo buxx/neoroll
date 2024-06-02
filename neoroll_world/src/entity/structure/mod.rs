@@ -1,3 +1,5 @@
+use crate::gameplay::build::Buildable;
+
 use super::Entity;
 use serde::{Deserialize, Serialize};
 
@@ -19,3 +21,11 @@ impl Structure {
 }
 
 impl Entity for Structure {}
+
+impl From<Buildable> for Structure {
+    fn from(value: Buildable) -> Self {
+        match value {
+            Buildable::Campfire => Structure::Campfire,
+        }
+    }
+}

@@ -130,6 +130,15 @@ impl WorldPart {
         &self.area
     }
 
+    pub fn set_structure(&mut self, point: &AbsoluteWorldPoint, structure: Option<Structure>) {
+        let i = self.index(point);
+        self.layers.structures_mut().set(i, structure);
+    }
+
+    pub fn add_creature(&mut self, creature: PartialCreature) {
+        self.creatures.insert(*creature.id(), creature);
+    }
+
     pub fn switch(&mut self, new: NewLayers, area: WorldArea) {
         let mut grounds = vec![];
         let mut floors = vec![];
@@ -197,11 +206,39 @@ impl LayersPart {
         &self.grounds
     }
 
+    pub fn grounds_mut(&mut self) -> &mut CompositeLayer<Ground> {
+        &mut self.grounds
+    }
+
     pub fn floors(&self) -> &CompositeLayer<Floor> {
         &self.floors
+    }
+
+    pub fn floors_mut(&mut self) -> &mut CompositeLayer<Floor> {
+        &mut self.floors
     }
 
     pub fn structures(&self) -> &CompositeLayer<Structure> {
         &self.structures
     }
+
+    pub fn structures_mut(&mut self) -> &mut CompositeLayer<Structure> {
+        &mut self.structures
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorldPartMessage {
+    Structure(AbsoluteWorldPoint, WorldPartStructureMessage),
+    Creature(CreatureId, WorldPartCreatureMessage),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorldPartStructureMessage {
+    Set(Option<Structure>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorldPartCreatureMessage {
+    New(PartialCreature),
 }

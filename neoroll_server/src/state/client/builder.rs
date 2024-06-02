@@ -1,4 +1,4 @@
-use neoroll_world::gameplay::tribe::TribeId;
+use neoroll_world::{entity::structure::Structure, gameplay::tribe::TribeId};
 
 use crate::{gateway::ClientId, state::State};
 
@@ -48,8 +48,14 @@ impl<'a> BuildGameStateBuilder<'a> {
         Self { state }
     }
 
-    pub fn build(self, _tribe_id: &TribeId) -> BuildGameState {
-        let can_build_campfire = true;
+    pub fn build(self, tribe_id: &TribeId) -> BuildGameState {
+        // In the future, we will manage migration, but for now, only one fire allowed
+        let can_build_campfire = self
+            .state
+            .game()
+            .tribe_structures(tribe_id, Some(Structure::Campfire))
+            .is_empty();
+
         BuildGameState::new(can_build_campfire)
     }
 }

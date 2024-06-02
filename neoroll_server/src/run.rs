@@ -1,21 +1,15 @@
 use std::{
-    sync::{
-        mpsc::{channel, Receiver, Sender},
-        Arc, RwLock,
-    },
+    sync::{Arc, RwLock},
     thread,
     time::Duration,
 };
 
-use neoroll_world::{
-    entity::creature::{Creature, CreatureChange, CreatureId},
-    space::{world::WorldChange, AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldRowI},
-};
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use rayon::{ThreadPool, ThreadPoolBuilder};
 
 use crate::{
     action::{
-        client::ComputeAndSendClientStates, move_::MoveCreatureBuilder, Action, ActionChange,
+        client::ComputeAndSendClientStates, migrant::IncomingMigrant, Action, ActionChange,
         ActionId,
     },
     gateway::Gateways,
@@ -28,6 +22,7 @@ pub struct Runner {
     subscriptions: Arc<RwLock<Subscriptions>>,
     workers_count: usize,
     state: State,
+    server_receiver: Receiver<StateChange>,
 }
 
 impl Runner {
@@ -35,12 +30,14 @@ impl Runner {
         gateways: Arc<RwLock<Gateways>>,
         subscriptions: Arc<RwLock<Subscriptions>>,
         state: State,
+        server_receiver: Receiver<StateChange>,
     ) -> Self {
         Runner {
             gateways,
             subscriptions,
             workers_count: num_cpus::get(),
             state,
+            server_receiver,
         }
     }
 
@@ -77,20 +74,27 @@ impl Runner {
         self.state.apply(
             &self.gateways,
             &self.subscriptions,
-            vec![StateChange::Action(
-                ActionId::new(),
-                ActionChange::New(Action::ComputeAndSendClientStates(
-                    ComputeAndSendClientStates,
-                )),
-            )],
+            vec![
+                StateChange::Action(
+                    ActionId::new(),
+                    ActionChange::New(Action::ComputeAndSendClientStates(
+                        ComputeAndSendClientStates,
+                    )),
+                ),
+                StateChange::Action(
+                    ActionId::new(),
+                    ActionChange::New(Action::IncomingMigrant(IncomingMigrant)),
+                ),
+            ],
         );
 
         loop {
-            let mut state_changes = vec![];
-            state_changes.extend(self.tick_actions());
+            let mut changes = vec![];
+            changes.extend(self.receive());
+            changes.extend(self.tick_actions());
 
             self.state
-                .apply(&self.gateways, &self.subscriptions, state_changes);
+                .apply(&self.gateways, &self.subscriptions, changes);
             self.state.increment();
 
             println!("tick");
@@ -98,8 +102,12 @@ impl Runner {
         }
     }
 
+    fn receive(&self) -> Vec<StateChange> {
+        self.server_receiver.try_iter().collect()
+    }
+
     fn tick_actions(&self) -> Vec<StateChange> {
-        let (tx, rx): (Sender<Vec<StateChange>>, Receiver<Vec<StateChange>>) = channel();
+        let (tx, rx): (Sender<Vec<StateChange>>, Receiver<Vec<StateChange>>) = unbounded();
         let actions: Vec<(&ActionId, &Action)> = self.state.actions().collect();
         let state_ = &self.state;
 
@@ -159,14 +167,20 @@ pub struct RunnerBuilder {
     gateways: Arc<RwLock<Gateways>>,
     subscriptions: Arc<RwLock<Subscriptions>>,
     actions: Vec<(ActionId, Action)>,
+    server_receiver: Receiver<StateChange>,
 }
 
 impl RunnerBuilder {
-    pub fn new(gateways: Arc<RwLock<Gateways>>, subscriptions: Arc<RwLock<Subscriptions>>) -> Self {
+    pub fn new(
+        gateways: Arc<RwLock<Gateways>>,
+        subscriptions: Arc<RwLock<Subscriptions>>,
+        server_receiver: Receiver<StateChange>,
+    ) -> Self {
         Self {
             gateways,
             subscriptions,
             actions: vec![],
+            server_receiver,
         }
     }
 
@@ -184,6 +198,11 @@ impl RunnerBuilder {
             );
         }
 
-        Runner::new(self.gateways, self.subscriptions, state)
+        Runner::new(
+            self.gateways,
+            self.subscriptions,
+            state,
+            self.server_receiver,
+        )
     }
 }
