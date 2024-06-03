@@ -5,7 +5,7 @@ use super::{ActionId, BodyTick, NextTick};
 #[derive(Debug, PartialEq)]
 pub struct ComputeAndSendClientStates;
 
-impl BodyTick<()> for ComputeAndSendClientStates {
+impl BodyTick<ComputeAndSendClientStatesChange> for ComputeAndSendClientStates {
     fn tick(&self, _id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
         let mut messages = vec![];
 
@@ -20,5 +20,8 @@ impl BodyTick<()> for ComputeAndSendClientStates {
         (NextTick(*state.frame_i() + 5), messages)
     }
 
-    fn apply(&mut self, _change: ()) {}
+    fn apply(&mut self, _change: ComputeAndSendClientStatesChange) {}
 }
+
+#[derive(Debug)]
+pub enum ComputeAndSendClientStatesChange {}

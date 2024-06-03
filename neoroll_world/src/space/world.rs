@@ -136,8 +136,13 @@ impl World {
             && point.1 .0 < self.columns as isize
     }
 
+    // FIXME BS NOW: used for humans, but need to have separate code for humans !
     pub fn tribe_creature_ids(&self, tribe_id: &TribeId) -> Option<&Vec<CreatureId>> {
         self.tribes_creatures.get(tribe_id)
+    }
+
+    pub fn layers(&self) -> &Layers {
+        &self.layers
     }
 }
 

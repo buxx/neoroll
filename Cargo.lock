@@ -2795,8 +2795,11 @@ dependencies = [
  "crossbeam",
  "neoroll_world",
  "num_cpus",
+ "rand",
  "rayon",
  "serde",
+ "strum",
+ "strum_macros",
  "uuid",
 ]
 

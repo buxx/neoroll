@@ -16,7 +16,10 @@ use crate::{
         map::container::{MapPartContainer, MapPartContainerRefreshed},
         world::{
             container::{WorldPartContainer, WorldPartContainerRefreshed},
-            creature::{CreatureComponent, CreaturesMap},
+            creature::{
+                display_progress, CreatureComponent, CreaturesMap, ProgressDone, ProgressMap,
+                ProgressTotal,
+            },
         },
     },
     scene::ScenePoint,
@@ -29,12 +32,24 @@ use super::gateway::GatewayWrapper;
 pub fn listen(
     gateway: Res<GatewayWrapper>,
     creatures_map: Res<CreaturesMap>,
+    mut progress_map: ResMut<ProgressMap>,
+    mut commands: Commands,
     mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
     mut world_part: ResMut<WorldPartContainer>,
     mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
     mut map_part: ResMut<MapPartContainer>,
     mut creatures: Query<(&CreatureComponent, &mut Transform)>,
+    mut progress_done: Query<
+        &mut Transform,
+        (
+            With<ProgressDone>,
+            Without<ProgressTotal>,
+            Without<CreatureComponent>,
+        ),
+    >,
     mut game_state: ResMut<GameStateWrapper>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     for message in gateway.read() {
         // TODO: dispatch code in modules/plugins
@@ -78,6 +93,24 @@ pub fn listen(
                                 error!("Creature '{}' not found when dispatching `SetPoint`", &id)
                             }
                         }
+                        PartialCreatureChange::SetJob(job) => {
+                            creature.set_job(job);
+                        }
+                        // FIXME BS NOW: need big refactor here
+                        PartialCreatureChange::SetBehavior(behavior) => {
+                            // Update our world state part creature
+                            creature.set_behavior(behavior.clone());
+                            // Update bevy component display
+                            display_progress(
+                                creature,
+                                behavior.progress(),
+                                &mut progress_map,
+                                &mut commands,
+                                &mut progress_done,
+                                &mut meshes,
+                                &mut materials,
+                            );
+                        }
                     }
                 }
             }
@@ -96,7 +129,9 @@ pub fn listen(
                 },
                 WorldPartMessage::Creature(_, change) => match change {
                     WorldPartCreatureMessage::New(creature) => {
-                        gateway.send(ClientMessage::Subscriptions(SubscriptionsMessage::PushCreatures(*creature.id())));
+                        gateway.send(ClientMessage::Subscriptions(
+                            SubscriptionsMessage::PushCreatures(*creature.id()),
+                        ));
                         world_part.0.add_creature(creature);
                         world_container_refreshed.send(WorldPartContainerRefreshed);
                     }

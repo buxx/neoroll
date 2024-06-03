@@ -42,35 +42,6 @@ impl Runner {
     }
 
     pub fn run(&mut self) {
-        // HACK FIXME BS NOW : action on campfire
-        // for line in 0..1 {
-        //     for column in 0..1 {
-        //         let creature_id = CreatureId::new();
-        //         let creature_point =
-        //             AbsoluteWorldPoint(AbsoluteWorldRowI(line), AbsoluteWorldColI(column));
-        //         let move_to = AbsoluteWorldPoint(
-        //             AbsoluteWorldRowI(line + 30),
-        //             AbsoluteWorldColI(column + 30),
-        //         );
-
-        //         self.state.apply(
-        //             &self.gateways,
-        //             &self.subscriptions,
-        //             vec![
-        //                 StateChange::World(WorldChange::Creature(
-        //                     creature_id,
-        //                     CreatureChange::New(Creature::new(creature_id, creature_point)),
-        //                 )),
-        //                 StateChange::Action(
-        //                     ActionId::new(),
-        //                     ActionChange::New(
-        //                         MoveCreatureBuilder::new(creature_id, move_to).build(),
-        //                     ),
-        //                 ),
-        //             ],
-        //         );
-        //     }
-        // }
         self.state.apply(
             &self.gateways,
             &self.subscriptions,
@@ -98,7 +69,7 @@ impl Runner {
             self.state.increment();
 
             println!("tick");
-            thread::sleep(Duration::from_millis(1000));
+            thread::sleep(Duration::from_millis(250));
         }
     }
 
@@ -108,7 +79,7 @@ impl Runner {
 
     fn tick_actions(&self) -> Vec<StateChange> {
         let (tx, rx): (Sender<Vec<StateChange>>, Receiver<Vec<StateChange>>) = unbounded();
-        let actions: Vec<(&ActionId, &Action)> = self.state.actions().collect();
+        let actions: Vec<(&ActionId, &Action)> = self.state.to_do().collect();
         let state_ = &self.state;
 
         self.pool().scope(|s| {

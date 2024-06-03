@@ -68,8 +68,12 @@ impl State {
         self.game.write().unwrap()
     }
 
+    pub fn actions(&self) -> &HashMap<ActionId, WrappedAction> {
+        &self.actions
+    }
+
     /// Return actions to tick for current state
-    pub fn actions(&self) -> impl Iterator<Item = (&ActionId, &Action)> {
+    pub fn to_do(&self) -> impl Iterator<Item = (&ActionId, &Action)> {
         self.actions
             .iter()
             .filter(|(_, w)| w.0 == self.frame_i)
@@ -90,6 +94,16 @@ impl State {
             match change {
                 StateChange::Action(id, ActionChange::New(action)) => {
                     let next = NextTick::new(self.frame_i + 1);
+                    for change in action.stamp() {
+                        WorldModifier::new(
+                            gateways,
+                            subscriptions,
+                            &mut self.world_mut(),
+                            &mut self.game_mut(),
+                        )
+                        .apply(change);
+                    }
+
                     self.actions.insert(id, WrappedAction(next, action));
                 }
                 StateChange::Action(id, ActionChange::SetNextTick(next)) => {
@@ -99,6 +113,18 @@ impl State {
                     self.actions.get_mut(&id).unwrap().1.apply(change);
                 }
                 StateChange::Action(id, ActionChange::Remove) => {
+                    if let Some(action) = self.actions.get(&id) {
+                        for change in action.1.take_off() {
+                            WorldModifier::new(
+                                gateways,
+                                subscriptions,
+                                &mut self.world_mut(),
+                                &mut self.game_mut(),
+                            )
+                            .apply(change);
+                        }
+                    }
+
                     self.actions.remove(&id);
                 }
                 StateChange::World(change) => {
@@ -145,7 +171,7 @@ pub enum StateChange {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct FrameI(u64);
+pub struct FrameI(pub u64);
 
 impl Add<u64> for FrameI {
     type Output = Self;

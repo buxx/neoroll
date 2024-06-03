@@ -112,6 +112,10 @@ impl<T: Entity> CompositeLayer<T> {
     pub fn set(&mut self, index: usize, value: Option<T>) {
         self.items[index] = value;
     }
+
+    pub fn items(&self) -> &[Option<T>] {
+        &self.items
+    }
 }
 
 impl<T: Entity> Default for CompositeLayer<T> {

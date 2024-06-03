@@ -49,6 +49,8 @@ pub fn refresh_world_display(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 pub fn re_spawn_world(
     world_part: Res<WorldPartContainer>,
     mut creatures_map: ResMut<CreaturesMap>,
@@ -92,15 +94,17 @@ pub fn re_spawn_world(
         let (human_tile_index, _) = &tileset.select_tile("Human").unwrap();
         let scene_point = ScenePoint::from_world_point(creature.point());
 
-        let entity = commands
-            .spawn(spawn_creature(
-                *creature.id(),
-                atlas,
-                human_tile_index,
-                scene_point.into(),
-                color,
-            ))
-            .id();
-        creatures_map.insert(*creature.id(), entity);
+        creatures_map.insert(
+            *creature.id(),
+            commands
+                .spawn(spawn_creature(
+                    *creature.id(),
+                    atlas,
+                    human_tile_index,
+                    scene_point.into(),
+                    color,
+                ))
+                .id(),
+        );
     }
 }

@@ -5,6 +5,7 @@ use std::{
 };
 
 use crate::{
+    action::{job::affect::AffectJobBuilder, ActionChange, ActionId},
     gateway::{ClientId, ClientMessageEnveloppe, Gateways},
     run::RunnerBuilder,
     state::{
@@ -192,6 +193,14 @@ impl Server {
                     let mut game = self.game_mut();
                     game.set_client_tribe_id(client_id, *tribe.id());
                     game.new_tribe(tribe.clone());
+
+                    let affect_jobs_action_id = ActionId::new();
+                    self.server_sender
+                        .send(StateChange::Action(
+                            affect_jobs_action_id,
+                            ActionChange::New(AffectJobBuilder::new(*tribe.id()).build()),
+                        ))
+                        .unwrap();
                 }
                 ClientGameMessage::TryBuild(buildable, point) => {
                     let game = self.game();

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use container::WorldPartContainerRefreshed;
-use creature::CreaturesMap;
+use creature::{CreaturesMap, ProgressMap};
 
 use self::{
     container::{refresh_world_part_container, WorldPartContainer, WorldPartContainerNeedRefresh},
@@ -24,6 +24,7 @@ impl Plugin for WorldDisplayPlugin {
         app.init_resource::<WorldTileset>()
             .init_resource::<WorldPartContainer>()
             .init_resource::<CreaturesMap>()
+            .init_resource::<ProgressMap>()
             .add_event::<WorldPartContainerNeedRefresh>()
             .add_event::<WorldPartContainerRefreshed>()
             .add_systems(

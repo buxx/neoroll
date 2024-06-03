@@ -14,7 +14,7 @@ pub struct IncomingMigrant;
 
 impl IncomingMigrant {
     fn tick_tribe(&self, tribe_id: &TribeId, state: &State) -> Vec<StateChange> {
-        let max_population = 5; // Later, it will be computed by complex algorithm
+        let max_population = 1; // Later, it will be computed by complex algorithm
         let population_count = state
             .world()
             .tribe_creature_ids(tribe_id)
@@ -35,7 +35,7 @@ impl IncomingMigrant {
     }
 }
 
-impl BodyTick<()> for IncomingMigrant {
+impl BodyTick<IncomingMigrantChange> for IncomingMigrant {
     fn tick(&self, _id: ActionId, state: &State) -> (super::NextTick, Vec<StateChange>) {
         let mut changes = vec![];
 
@@ -46,5 +46,8 @@ impl BodyTick<()> for IncomingMigrant {
         (NextTick(*state.frame_i() + TICK_FREQUENCY), changes)
     }
 
-    fn apply(&mut self, _change: ()) {}
+    fn apply(&mut self, _change: IncomingMigrantChange) {}
 }
+
+#[derive(Debug)]
+pub enum IncomingMigrantChange {}

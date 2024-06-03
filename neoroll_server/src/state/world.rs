@@ -84,6 +84,28 @@ impl<'a> WorldModifier<'a> {
                         ServerMessage::Creature(id, PartialCreatureChange::SetPoint(point)),
                     );
                 }
+                CreatureChange::SetJob(job) => {
+                    self.world
+                        .creatures_mut()
+                        .get_mut(&id)
+                        .unwrap()
+                        .set_job(job.clone());
+                    self.send_to_creature_clients(
+                        &id,
+                        ServerMessage::Creature(id, PartialCreatureChange::SetJob(job)),
+                    );
+                }
+                CreatureChange::SetBehavior(behavior) => {
+                    self.world
+                        .creatures_mut()
+                        .get_mut(&id)
+                        .unwrap()
+                        .set_behavior(behavior.clone());
+                    self.send_to_creature_clients(
+                        &id,
+                        ServerMessage::Creature(id, PartialCreatureChange::SetBehavior(behavior)),
+                    );
+                }
             },
             WorldChange::Structure(point, change) => match change {
                 StructureChange::Set(structure) => {
