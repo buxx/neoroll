@@ -3,6 +3,7 @@ use neoroll_world::space::{AbsoluteWorldColI, AbsoluteWorldPoint, AbsoluteWorldR
 
 use crate::graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH};
 
+#[derive(Debug, Clone, Copy)]
 pub struct ScenePoint {
     x: f32,
     y: f32,

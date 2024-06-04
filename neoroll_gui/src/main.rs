@@ -22,6 +22,7 @@ mod layer;
 mod plugins;
 mod scene;
 mod setup;
+mod shortcut;
 mod utils;
 
 fn main() {

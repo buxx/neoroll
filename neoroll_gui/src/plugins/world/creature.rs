@@ -1,12 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::{
-    asset::Handle,
-    math::Vec3,
-    render::{color::Color, view::RenderLayers},
-    sprite::{MaterialMesh2dBundle, SpriteSheetBundle, TextureAtlas, TextureAtlasSprite},
-    transform::components::Transform,
-};
+use bevy::{prelude::*, render::view::RenderLayers, sprite::MaterialMesh2dBundle};
 use bevy_tileset::prelude::TileIndex;
 use neoroll_world::{
     entity::creature::{CreatureId, PartialCreature},
@@ -17,9 +11,8 @@ use crate::{
     graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
     layer::LAYER_SCENE_ITEMS,
     scene::ScenePoint,
+    shortcut::progress::progress_bundle,
 };
-
-use bevy::prelude::*;
 
 pub const PROGRESS_TOTAL_Z: f32 = 2.;
 pub const PROGRESS_DONE_Z: f32 = 3.;
@@ -78,45 +71,16 @@ pub fn spawn_progress(
     (ProgressDone, MaterialMesh2dBundle<ColorMaterial>),
 ) {
     let point = ScenePoint::from_world_point(creature.point());
-    let height_scale = 8.;
     let height_offset = REGION_TILE_HEIGHT as f32 / 2.;
     let point = point.apply(0., -height_offset);
     (
         (
             ProgressTotal,
-            MaterialMesh2dBundle {
-                mesh: meshes
-                    .add(Mesh::from(shape::Quad::new(Vec2::new(
-                        REGION_TILE_WIDTH as f32,
-                        REGION_TILE_HEIGHT as f32 / height_scale,
-                    ))))
-                    .into(),
-                transform: Transform {
-                    translation: point.to_vec3(PROGRESS_TOTAL_Z),
-                    scale: Vec3::new(1., 1., 1.),
-                    ..Default::default()
-                },
-                material: materials.add(ColorMaterial::from(Color::BLACK)),
-                ..default()
-            },
+            progress_bundle(point, meshes, materials, Color::BLACK, 1.),
         ),
         (
             ProgressDone,
-            MaterialMesh2dBundle {
-                mesh: meshes
-                    .add(Mesh::from(shape::Quad::new(Vec2::new(
-                        REGION_TILE_WIDTH as f32,
-                        REGION_TILE_HEIGHT as f32 / height_scale,
-                    ))))
-                    .into(),
-                transform: Transform {
-                    translation: point.to_vec3(PROGRESS_DONE_Z),
-                    scale: Vec3::new(0., 1., 1.),
-                    ..Default::default()
-                },
-                material: materials.add(ColorMaterial::from(Color::GREEN)),
-                ..default()
-            },
+            progress_bundle(point, meshes, materials, Color::GREEN, 0.),
         ),
     )
 }
@@ -154,7 +118,8 @@ pub fn display_progress(
         if let Some((_, done_entity)) = &progress_map.get(creature.id()) {
             if let Ok(mut done_transform) = progress_done.get_mut(*done_entity) {
                 let progress_factor = (*progress).into();
-                let missing_width: f32 = (REGION_TILE_WIDTH as f32 - (REGION_TILE_WIDTH as f32 * progress_factor)) / 2.;
+                let missing_width: f32 =
+                    (REGION_TILE_WIDTH as f32 - (REGION_TILE_WIDTH as f32 * progress_factor)) / 2.;
                 // let width_offset: f32 = REGION_TILE_WIDTH as f32 / 2.;
                 // let width_offset: f32 = width_offset - (REGION_TILE_WIDTH as f32 * progress_factor);
                 let point = point.apply(-missing_width, 0.);
