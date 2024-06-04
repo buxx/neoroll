@@ -66,14 +66,13 @@ pub fn spawn_progress(
     creature: &PartialCreature,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<ColorMaterial>>,
-) -> (
-    (ProgressTotal, MaterialMesh2dBundle<ColorMaterial>),
-    (ProgressDone, MaterialMesh2dBundle<ColorMaterial>),
+    commands: &mut Commands,
+    progress_map: &mut ResMut<ProgressMap>,
 ) {
     let point = ScenePoint::from_world_point(creature.point());
     let height_offset = REGION_TILE_HEIGHT as f32 / 2.;
     let point = point.apply(0., -height_offset);
-    (
+    let (total, done) = (
         (
             ProgressTotal,
             progress_bundle(point, meshes, materials, Color::BLACK, 1.),
@@ -82,7 +81,10 @@ pub fn spawn_progress(
             ProgressDone,
             progress_bundle(point, meshes, materials, Color::GREEN, 0.),
         ),
-    )
+    );
+
+    let (total_entity, done_entity) = (commands.spawn(total).id(), commands.spawn(done).id());
+    progress_map.insert(*creature.id(), (total_entity, done_entity));
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -109,10 +111,7 @@ pub fn display_progress(
 
         // If not in progress_map, spawn
         if progress_map.get(creature.id()).is_none() {
-            let (total, done) = spawn_progress(creature, meshes, materials);
-            let (total_entity, done_entity) =
-                (commands.spawn(total).id(), commands.spawn(done).id());
-            progress_map.insert(*creature.id(), (total_entity, done_entity));
+            spawn_progress(creature, meshes, materials, commands, progress_map);
         }
 
         if let Some((_, done_entity)) = &progress_map.get(creature.id()) {
