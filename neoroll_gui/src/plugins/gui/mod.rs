@@ -5,7 +5,7 @@ use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
 };
-use neoroll_server::{gateway::Gateway, server::ClientMessage, state::game::ClientGameMessage};
+use neoroll_server::{server::ClientMessage, state::game::ClientGameMessage};
 use neoroll_world::gameplay::build::Buildable;
 
 use crate::utils::{EventReaderShortcuts, TileName};
@@ -47,6 +47,7 @@ pub struct GuiState {
     current: Current,
     display_window: bool,
     server_speed_request: u8,
+    is_pointer_over_area: bool,
 }
 
 impl GuiState {
@@ -64,6 +65,14 @@ impl GuiState {
 
     pub fn set_display_window(&mut self, display_window: bool) {
         self.display_window = display_window;
+    }
+
+    pub fn set_is_pointer_over_area(&mut self, is_pointer_over_area: bool) {
+        self.is_pointer_over_area = is_pointer_over_area;
+    }
+
+    pub fn is_pointer_over_area(&self) -> bool {
+        self.is_pointer_over_area
     }
 }
 
@@ -92,7 +101,9 @@ fn gui(
     materials: ResMut<Assets<ColorMaterial>>,
 ) {
     if state.display_window() {
-        egui::Window::new("").show(contexts.ctx_mut(), |ui| {
+        let context = contexts.ctx_mut();
+
+        egui::Window::new("").show(context, |ui| {
             if let Some(game) = game_state.state() {
                 ui.label(&game.tribe_id().to_string());
 
@@ -117,6 +128,10 @@ fn gui(
                 };
             }
         });
+
+        state.set_is_pointer_over_area(context.is_pointer_over_area());
+    } else {
+        state.set_is_pointer_over_area(false);
     }
 }
 
