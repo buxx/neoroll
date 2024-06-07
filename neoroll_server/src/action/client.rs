@@ -1,6 +1,11 @@
-use crate::state::{client::builder::ClientGameStateBuilder, game::GameChange, State, StateChange};
+use crate::{
+    run::TICK_BASE_PERIOD,
+    state::{client::builder::ClientGameStateBuilder, game::GameChange, State, StateChange},
+};
 
 use super::{ActionId, BodyTick, NextTick};
+
+const TICK_PERIOD: u64 = TICK_BASE_PERIOD / 5;
 
 #[derive(Debug, PartialEq)]
 pub struct ComputeAndSendClientStates;
@@ -17,7 +22,7 @@ impl BodyTick<ComputeAndSendClientStatesChange> for ComputeAndSendClientStates {
             )))
         }
 
-        (NextTick(*state.frame_i() + 5), messages)
+        (NextTick(*state.frame_i() + TICK_PERIOD), messages)
     }
 
     fn apply(&mut self, _change: ComputeAndSendClientStatesChange) {}

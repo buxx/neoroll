@@ -6,12 +6,13 @@ use neoroll_world::{
 
 use crate::{
     action::{Action, ActionId, BodyTick, NextTick},
+    run::TICK_BASE_PERIOD,
     state::{FrameI, State, StateChange},
 };
 
 use super::{ActionChange, UpdateAction};
 
-const TICK_FREQUENCY: u64 = 1;
+const TICK_PERIOD: u64 = TICK_BASE_PERIOD / 2;
 
 #[derive(Debug, PartialEq)]
 pub struct Collect {
@@ -65,7 +66,7 @@ impl BodyTick<CollectChange> for Collect {
                 StateChange::Action(
                     id,
                     ActionChange::Update(UpdateAction::Collect(CollectChange::SetEnd(
-                        *state.frame_i() + TICK_FREQUENCY * 10,
+                        *state.frame_i() + TICK_PERIOD * 10,
                     ))),
                 ),
             ]);
@@ -79,7 +80,7 @@ impl BodyTick<CollectChange> for Collect {
             }
         }
 
-        (NextTick(*state.frame_i() + TICK_FREQUENCY), changes)
+        (NextTick(*state.frame_i() + TICK_PERIOD), changes)
     }
 
     fn apply(&mut self, change: CollectChange) {

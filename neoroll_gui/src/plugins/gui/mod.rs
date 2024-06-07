@@ -5,11 +5,12 @@ use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
 };
+use neoroll_server::{gateway::Gateway, server::ClientMessage, state::game::ClientGameMessage};
 use neoroll_world::gameplay::build::Buildable;
 
 use crate::utils::{EventReaderShortcuts, TileName};
 
-use super::game::GameStateWrapper;
+use super::{game::GameStateWrapper, server::gateway::GatewayWrapper};
 
 pub struct GuiPlugin;
 
@@ -45,6 +46,7 @@ impl Default for Current {
 pub struct GuiState {
     current: Current,
     display_window: bool,
+    server_speed_request: u8,
 }
 
 impl GuiState {
@@ -77,7 +79,10 @@ fn switch_gui_display(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
 fn gui(
+    gateway: Res<GatewayWrapper>,
     mut state: ResMut<GuiState>,
     mut contexts: EguiContexts,
     game_state: Res<GameStateWrapper>,
@@ -97,6 +102,19 @@ fn gui(
                     spawn_build_cursor(&mut commands, Buildable::Campfire, tilesets);
                     spawn_build_outline(&mut commands, meshes, materials);
                 }
+
+                // TODO: state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)
+                if ui
+                    .add(
+                        egui::Slider::new(&mut state.server_speed_request, 0..=100)
+                            .text("Server speed"),
+                    )
+                    .changed()
+                {
+                    gateway.send(ClientMessage::Game(ClientGameMessage::RequestServerSpeed(
+                        state.server_speed_request,
+                    )));
+                };
             }
         });
     }

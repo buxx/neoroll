@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::{prelude::*, render::view::RenderLayers, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_tileset::prelude::TileIndex;
 use neoroll_world::{
     entity::creature::{CreatureId, PartialCreature},
@@ -125,11 +125,6 @@ pub fn display_progress(
                 done_transform.translation = point.to_vec3(PROGRESS_DONE_Z);
                 done_transform.scale = Vec3::new(progress_factor, 1., 1.);
             }
-        } else {
-            error!(
-                "Progress total/done '{}' not found when dispatching `SetBehavior`",
-                creature.id()
-            )
         }
     } else {
         despawn_progress(creature.id(), commands, progress_map);
@@ -145,10 +140,5 @@ pub fn despawn_progress(
         commands.entity(*total_entity).despawn();
         commands.entity(*done_entity).despawn();
         progress_map.remove(creature_id);
-    } else {
-        error!(
-            "Progress total/done '{}' not found when dispatching `SetBehavior`",
-            creature_id
-        )
     }
 }

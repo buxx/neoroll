@@ -89,8 +89,6 @@ pub fn listen(
                                 if let Ok((_, mut transform)) = creatures.get_mut(*entity) {
                                     transform.translation = point;
                                 }
-                            } else {
-                                error!("Creature '{}' not found when dispatching `SetPoint`", &id)
                             }
                         }
                         PartialCreatureChange::SetJob(job) => {

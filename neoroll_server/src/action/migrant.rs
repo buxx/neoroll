@@ -1,20 +1,22 @@
 use neoroll_world::{entity::structure::Structure, gameplay::tribe::TribeId};
 
 use crate::{
+    run::TICK_BASE_PERIOD,
     shortcut,
     state::{State, StateChange},
 };
 
 use super::{ActionId, BodyTick, NextTick};
 
-const TICK_FREQUENCY: u64 = 2;
+const TICK_PERIOD: u64 = TICK_BASE_PERIOD * 5;
 
 #[derive(Debug, PartialEq)]
 pub struct IncomingMigrant;
 
 impl IncomingMigrant {
     fn tick_tribe(&self, tribe_id: &TribeId, state: &State) -> Vec<StateChange> {
-        let max_population = 1; // Later, it will be computed by complex algorithm
+        let mut changes = vec![];
+        let max_population = 5; // Later, it will be computed by complex algorithm
         let population_count = state
             .world()
             .tribe_creature_ids(tribe_id)
@@ -27,11 +29,14 @@ impl IncomingMigrant {
                 .tribe_structures(tribe_id, Some(Structure::Campfire))
                 .first()
             {
-                return shortcut::creature::new_creature(*tribe_id, *campfire.point());
+                changes.extend(shortcut::creature::new_creature(
+                    *tribe_id,
+                    *campfire.point(),
+                ));
             }
         }
 
-        vec![]
+        changes
     }
 }
 
@@ -43,7 +48,7 @@ impl BodyTick<IncomingMigrantChange> for IncomingMigrant {
             changes.extend(self.tick_tribe(&tribe_id, state))
         }
 
-        (NextTick(*state.frame_i() + TICK_FREQUENCY), changes)
+        (NextTick(*state.frame_i() + TICK_PERIOD), changes)
     }
 
     fn apply(&mut self, _change: IncomingMigrantChange) {}

@@ -231,6 +231,9 @@ impl Server {
                             .unwrap(),
                     }
                 }
+                ClientGameMessage::RequestServerSpeed(speed) => self
+                    .game_mut()
+                    .set_client_speed_request(client_id, *speed.min(&100).max(&1)),
             },
         }
     }

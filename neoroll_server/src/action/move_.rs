@@ -7,7 +7,10 @@ use neoroll_world::{
     utils::Direction,
 };
 
-use crate::state::{State, StateChange};
+use crate::{
+    run::TICK_BASE_PERIOD,
+    state::{State, StateChange},
+};
 
 use super::{Action, ActionChange, ActionId, BodyTick, NextTick};
 
@@ -69,6 +72,7 @@ impl MoveToBuilder {
 }
 
 ///////
+const TICK_PERIOD: u64 = TICK_BASE_PERIOD;
 
 #[derive(Debug, PartialEq)]
 pub struct MoveRandomly {
@@ -99,7 +103,7 @@ impl BodyTick<MoveRandomlyChange> for MoveRandomly {
             StateChange::Action(id, ActionChange::Remove),
         ];
 
-        (NextTick(*state.frame_i() + 3), changes)
+        (NextTick(*state.frame_i() + TICK_PERIOD), changes)
     }
 
     fn apply(&mut self, change: MoveRandomlyChange) {

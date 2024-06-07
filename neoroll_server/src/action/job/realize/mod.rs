@@ -3,12 +3,13 @@ use neoroll_world::{entity::creature::CreatureId, gameplay::job::Job};
 
 use crate::{
     action::{Action, ActionId, BodyTick, NextTick},
+    run::TICK_BASE_PERIOD,
     state::{State, StateChange},
 };
 
 pub mod food;
 
-const TICK_FREQUENCY: u64 = 5;
+const TICK_FREQUENCY: u64 = TICK_BASE_PERIOD;
 
 #[derive(Debug, PartialEq)]
 pub struct RealizeJob {

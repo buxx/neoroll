@@ -18,6 +18,7 @@ pub struct GameState {
     tribes: HashMap<TribeId, Tribe>,
     client_tribe: HashMap<ClientId, TribeId>,
     structures_own: HashMap<TribeId, HashMap<AbsoluteWorldPoint, StructureOwn>>,
+    client_speed_requests: HashMap<ClientId, u8>,
 }
 
 impl GameState {
@@ -67,12 +68,35 @@ impl GameState {
             .or_default()
             .insert(*own.point(), own);
     }
+
+    pub fn client_speed_requests(&self) -> &HashMap<ClientId, u8> {
+        &self.client_speed_requests
+    }
+
+    pub fn set_client_speed_request(&mut self, client_id: ClientId, speed: u8) {
+        self.client_speed_requests.insert(client_id, speed);
+    }
+
+    pub fn speed(&self) -> u64 {
+        let values = self
+            .client_speed_requests()
+            .values()
+            .map(|v| *v as u64)
+            .collect::<Vec<u64>>();
+
+        if !values.is_empty() {
+            values.iter().sum::<u64>() / values.len() as u64
+        } else {
+            1
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ClientGameMessage {
     CreateTribe(Tribe),
     TryBuild(Buildable, AbsoluteWorldPoint),
+    RequestServerSpeed(u8),
 }
 
 #[derive(Debug)]

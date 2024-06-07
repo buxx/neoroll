@@ -1,7 +1,7 @@
 use std::{
-    sync::{Arc, RwLock},
+    sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
@@ -17,34 +17,54 @@ use crate::{
     subscriptions::Subscriptions,
 };
 
+pub const TICK_BASE_PERIOD: u64 = 50;
+const SLEEP_TARGET_NS: u64 = 1_000_000_000 / TICK_BASE_PERIOD;
+
 pub struct Runner {
-    gateways: Arc<RwLock<Gateways>>,
-    subscriptions: Arc<RwLock<Subscriptions>>,
+    gate: Arc<RwLock<Gateways>>,
+    subs: Arc<RwLock<Subscriptions>>,
     workers_count: usize,
-    state: State,
+    state: Arc<RwLock<State>>,
     server_receiver: Receiver<StateChange>,
+    lag: u64,
+    // stats: Arc<RwLock<Statistics>>,
 }
 
+// TODO: implement stop required (also stop statistics thread)
 impl Runner {
     pub fn new(
         gateways: Arc<RwLock<Gateways>>,
         subscriptions: Arc<RwLock<Subscriptions>>,
-        state: State,
+        state: Arc<RwLock<State>>,
         server_receiver: Receiver<StateChange>,
     ) -> Self {
         Runner {
-            gateways,
-            subscriptions,
+            gate: gateways,
+            subs: subscriptions,
             workers_count: num_cpus::get(),
             state,
             server_receiver,
+            lag: 0,
         }
     }
 
+    fn sleep_target_ns(&self) -> u64 {
+        SLEEP_TARGET_NS / self.state().game().speed()
+    }
+
+    fn state(&self) -> RwLockReadGuard<State> {
+        self.state.read().unwrap()
+    }
+
+    fn state_mut(&self) -> RwLockWriteGuard<State> {
+        self.state.write().unwrap()
+    }
+
     pub fn run(&mut self) {
-        self.state.apply(
-            &self.gateways,
-            &self.subscriptions,
+        // TODO: Move this code in separated code
+        self.state_mut().apply(
+            &self.gate,
+            &self.subs,
             vec![
                 StateChange::Action(
                     ActionId::new(),
@@ -59,18 +79,43 @@ impl Runner {
             ],
         );
 
+        self.start_stats();
+
         loop {
-            let mut changes = vec![];
-            changes.extend(self.receive());
-            changes.extend(self.tick_actions());
-
-            self.state
-                .apply(&self.gateways, &self.subscriptions, changes);
-            self.state.increment();
-
-            println!("tick");
-            thread::sleep(Duration::from_millis(250));
+            self.tick();
         }
+    }
+
+    fn start_stats(&self) {
+        let state = Arc::clone(&self.state);
+
+        thread::spawn(move || loop {
+            let previous_frame_i = *state.read().unwrap().frame_i();
+            thread::sleep(Duration::from_secs(1));
+
+            let frame_count = state.read().unwrap().frame_i().0 - previous_frame_i.0;
+            let speed = state.read().unwrap().game().speed();
+            println!("{}/{} tick/s", frame_count, TICK_BASE_PERIOD * speed);
+        });
+    }
+
+    fn tick(&mut self) {
+        let tick_start = Instant::now();
+
+        let mut changes = vec![];
+        changes.extend(self.receive());
+        changes.extend(self.tick_actions());
+        self.state_mut().apply(&self.gate, &self.subs, changes);
+        self.state_mut().increment();
+
+        // FPS target
+        let sleep_target = self.sleep_target_ns();
+        let tick_duration = Instant::now() - tick_start;
+        let need_sleep = sleep_target - (tick_duration.as_nanos() as u64).min(sleep_target);
+        self.lag += (tick_duration.as_nanos() as u64 - sleep_target).min(0);
+        let catchable_lag = self.lag.min(need_sleep);
+        self.lag -= catchable_lag;
+        thread::sleep(Duration::from_nanos(need_sleep - catchable_lag));
     }
 
     fn receive(&self) -> Vec<StateChange> {
@@ -79,18 +124,21 @@ impl Runner {
 
     fn tick_actions(&self) -> Vec<StateChange> {
         let (tx, rx): (Sender<Vec<StateChange>>, Receiver<Vec<StateChange>>) = unbounded();
-        let actions: Vec<(&ActionId, &Action)> = self.state.to_do().collect();
-        let state_ = &self.state;
+        let state = self.state();
+        let actions: Vec<(&ActionId, &Action)> = state.to_do().collect();
 
         self.pool().scope(|s| {
+            let state_ = Arc::clone(&self.state);
             for (start, end) in self.slices(&actions) {
                 let tx = tx.clone();
                 let actions_ = actions.clone();
 
+                let state_ = Arc::clone(&state_);
                 s.spawn(move |_| {
+                    let state__ = state_.read().unwrap();
                     for (action_id, action) in &actions_[start..end] {
                         let mut state_changes = vec![];
-                        let (next, changes) = action.tick(**action_id, state_);
+                        let (next, changes) = action.tick(**action_id, &state__);
                         state_changes.push(StateChange::Action(
                             **action_id,
                             ActionChange::SetNextTick(next),
@@ -169,6 +217,7 @@ impl RunnerBuilder {
             );
         }
 
+        let state = Arc::new(RwLock::new(state));
         Runner::new(
             self.gateways,
             self.subscriptions,
