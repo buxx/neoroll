@@ -3,8 +3,11 @@ use std::sync::{Arc, RwLock};
 use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId, PartialCreatureChange},
     space::{
-        part::{WorldPartCreatureMessage, WorldPartMessage, WorldPartStructureMessage},
-        world::{StructureChange, World, WorldChange},
+        part::{
+            WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMessage,
+            WorldPartStructureMessage,
+        },
+        world::{FloorChange, StructureChange, World, WorldChange},
         AbsoluteWorldPoint,
     },
 };
@@ -130,6 +133,19 @@ impl<'a> WorldModifier<'a> {
                         ServerMessage::WorldPart(WorldPartMessage::Structure(
                             point,
                             WorldPartStructureMessage::Set(Some(own.type_().clone())),
+                        )),
+                    );
+                }
+            },
+            WorldChange::Floor(point, change) => match change {
+                FloorChange::Set(floor) => {
+                    self.world.set_floor(point, floor.clone());
+
+                    self.send_to_point_clients(
+                        &point,
+                        ServerMessage::WorldPart(WorldPartMessage::Floor(
+                            point,
+                            WorldPartFloorMessage::Set(floor.clone()),
                         )),
                     );
                 }

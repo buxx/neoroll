@@ -135,6 +135,12 @@ impl WorldPart {
         self.layers.structures_mut().set(i, structure);
     }
 
+    pub fn set_floor(&mut self, point: &AbsoluteWorldPoint, floor: Floor) {
+        let i = self.index(point);
+        // TODO: Why LayersPart own only CompositeLayer unlike World ?
+        self.layers.floors_mut().set(i, Some(floor));
+    }
+
     pub fn add_creature(&mut self, creature: PartialCreature) {
         self.creatures.insert(*creature.id(), creature);
     }
@@ -230,12 +236,18 @@ impl LayersPart {
 #[derive(Debug, Clone, PartialEq)]
 pub enum WorldPartMessage {
     Structure(AbsoluteWorldPoint, WorldPartStructureMessage),
+    Floor(AbsoluteWorldPoint, WorldPartFloorMessage),
     Creature(CreatureId, WorldPartCreatureMessage),
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum WorldPartStructureMessage {
     Set(Option<Structure>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorldPartFloorMessage {
+    Set(Floor),
 }
 
 #[derive(Debug, Clone, PartialEq)]

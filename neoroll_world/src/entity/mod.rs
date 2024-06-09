@@ -27,3 +27,15 @@ impl Filled {
         self.0 == 0
     }
 }
+
+impl From<f32> for Filled {
+    fn from(value: f32) -> Self {
+        Self((255. * value) as u8)
+    }
+}
+
+impl From<Filled> for f32 {
+    fn from(val: Filled) -> Self {
+        val.0 as f32 / 255.
+    }
+}

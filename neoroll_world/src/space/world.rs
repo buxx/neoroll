@@ -129,6 +129,14 @@ impl World {
         self.layers.structures_mut().set(i, structure);
     }
 
+    pub fn set_floor(&mut self, point: AbsoluteWorldPoint, floor: Floor) {
+        let row_i = point.row_i().0 as usize;
+        let col_i = point.col_i().0 as usize;
+
+        let i = row_i * self.columns + col_i;
+        self.layers.floors_mut().set(i, floor);
+    }
+
     pub fn contains(&self, point: &AbsoluteWorldPoint) -> bool {
         point.0 .0 >= 0
             && point.1 .0 >= 0
@@ -149,6 +157,7 @@ impl World {
 #[derive(Debug)]
 pub enum WorldChange {
     Structure(AbsoluteWorldPoint, StructureChange),
+    Floor(AbsoluteWorldPoint, FloorChange),
     Creature(CreatureId, CreatureChange),
 }
 
@@ -156,4 +165,9 @@ pub enum WorldChange {
 pub enum StructureChange {
     Set(Option<Structure>),
     SetOwned(StructureOwn),
+}
+
+#[derive(Debug)]
+pub enum FloorChange {
+    Set(Floor),
 }

@@ -7,7 +7,7 @@ use neoroll_server::{
 };
 use neoroll_world::{
     entity::creature::{CreatureId, PartialCreatureChange},
-    space::part::{WorldPartCreatureMessage, WorldPartMessage, WorldPartStructureMessage},
+    space::part::{WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMessage, WorldPartStructureMessage},
 };
 
 use crate::{
@@ -133,6 +133,12 @@ pub fn listen(
                         world_part.0.add_creature(creature);
                         world_container_refreshed.send(WorldPartContainerRefreshed);
                     }
+                },
+                WorldPartMessage::Floor(point, change) => match change {
+                    WorldPartFloorMessage::Set(floor) => {
+                        world_part.0.set_floor(&point, floor);
+                        world_container_refreshed.send(WorldPartContainerRefreshed);
+                    },
                 },
             },
         }

@@ -1,7 +1,7 @@
 use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId},
-    gameplay::{behavior::Behavior, progress::Progress},
-    space::world::WorldChange,
+    gameplay::{behavior::Behavior, progress::Progress, CollectType},
+    space::world::{FloorChange, StructureChange, WorldChange},
 };
 
 use crate::{
@@ -43,23 +43,49 @@ impl Collect {
         ]
     }
 
-    fn progress(&self, state: &State) -> Vec<StateChange> {
+    fn tick_collect(&self, state: &State) -> Vec<StateChange> {
+        let mut changes = vec![];
+        if let Some(progress) = self.progress(state) {
+            changes.extend(vec![StateChange::World(WorldChange::Creature(
+                self.creature_id,
+                CreatureChange::SetBehavior(Behavior::Collect(progress)),
+            ))]);
+
+            if progress.full() {
+                let world = state.world();
+                let creature = world.creatures().get(&self.creature_id).unwrap();
+                if let Some(structure) = &world.structure(creature.point()) {
+                    let new_structure = structure.reduced(CollectType::Food);
+                    changes.extend(vec![StateChange::World(WorldChange::Structure(
+                        *creature.point(),
+                        StructureChange::Set(Some(new_structure)),
+                    ))]);
+                } else if let Some(floor) = world.floor(creature.point()) {
+                    let new_floor = floor.reduced(CollectType::Food);
+                    changes.extend(vec![StateChange::World(WorldChange::Floor(
+                        *creature.point(),
+                        FloorChange::Set(new_floor),
+                    ))]);
+                }
+            }
+        }
+
+        changes
+    }
+
+    fn progress(&self, state: &State) -> Option<Progress> {
         if let (Some(start), Some(end)) = (self.start, self.end) {
             let total = end.0 - start.0;
             let done = state.frame_i().0 - start.0;
-            let progress = Progress::from(done as f32 / total as f32);
-            vec![StateChange::World(WorldChange::Creature(
-                self.creature_id,
-                CreatureChange::SetBehavior(Behavior::Collect(progress)),
-            ))]
-        } else {
-            vec![]
+            return Some(Progress::from(done as f32 / total as f32));
         }
+
+        None
     }
 
     fn is_end(&self, state: &State) -> bool {
-        if let Some(end) = self.end {
-            return &end <= state.frame_i();
+        if let Some(progress) = self.progress(state) {
+            return progress.full();
         }
         false
     }
@@ -87,10 +113,11 @@ impl BodyTick<CollectChange> for Collect {
             changes.extend(self.start(id, state));
         }
 
+        // Its important to tick_collect before end to execute end progression changes
+        changes.extend(self.tick_collect(state));
+
         if self.is_end(state) {
             changes.push(StateChange::Action(id, ActionChange::Remove));
-        } else {
-            changes.extend(self.progress(state));
         }
 
         (NextTick(*state.frame_i() + TICK_PERIOD), changes)
