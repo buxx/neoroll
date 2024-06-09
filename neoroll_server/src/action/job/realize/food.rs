@@ -1,5 +1,5 @@
 use neoroll_world::{
-    entity::{creature::Creature, structure::Structure},
+    entity::{creature::Creature, floor::Floor, structure::Structure},
     gameplay::behavior::Behavior,
 };
 
@@ -21,9 +21,12 @@ impl<'a> RealizeSearchFood<'a> {
     fn food_to_collect_on_place(&self) -> bool {
         let world = self.state.world();
 
-        // TODO: A little bit simple for now ...
-        if let Some(structure) = world.structure(self.creature.point()) {
-            return matches!(structure, Structure::BigLeafTree);
+        if let Some(Structure::FruitTree(filled)) = world.structure(self.creature.point()) {
+            return !filled.is_empty();
+        }
+
+        if let Some(Floor::FruitBush(filled)) = world.floor(self.creature.point()) {
+            return !filled.is_empty();
         }
 
         false

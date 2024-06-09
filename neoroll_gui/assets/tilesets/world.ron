@@ -4,8 +4,13 @@
     tiles: {
         0: "../tiles/world/soil.ron",
         1: "../tiles/world/short_grass.ron",
-        2: "../tiles/world/big_leaf_tree.ron",
-        3: "../tiles/world/human.ron",
-        4: "../tiles/world/campfire.ron",
+        2: "../tiles/world/bush.ron",
+        3: "../tiles/world/fruit_bush1.ron",
+        4: "../tiles/world/fruit_bush2.ron",
+        5: "../tiles/world/big_leaf_tree.ron",
+        6: "../tiles/world/fruit_tree1.ron",
+        7: "../tiles/world/fruit_tree2.ron",
+        8: "../tiles/world/human.ron",
+        9: "../tiles/world/campfire.ron",
     }
 )

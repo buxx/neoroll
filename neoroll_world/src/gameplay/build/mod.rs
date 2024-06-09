@@ -37,13 +37,13 @@ impl<'a> TryBuild<'a> {
 
         if let Some(floor) = self.world.floor(point) {
             match floor {
-                Floor::Nothing | Floor::ShortGrass => {}
+                Floor::Nothing | Floor::ShortGrass | Floor::FruitBush(_) => {}
             }
         }
 
         if let Some(structure) = self.world.structure(point) {
             match structure {
-                Structure::BigLeafTree | Structure::Campfire => {
+                Structure::BigLeafTree | Structure::FruitTree(_) | Structure::Campfire => {
                     return Err(TryBuildError::StructureAlreadyExist(structure.clone()))
                 }
                 Structure::Nothing => {}

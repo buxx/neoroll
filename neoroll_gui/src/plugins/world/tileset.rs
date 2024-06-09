@@ -16,6 +16,11 @@ pub fn floor_tile_name(ground: &Floor) -> TileName {
     match ground {
         Floor::Nothing => TileName("Nothing".to_string()),
         Floor::ShortGrass => TileName("ShortGrass".to_string()),
+        Floor::FruitBush(filled) => match filled.0 {
+            0..=50 => TileName("Bush".to_string()),
+            51..=128 => TileName("FruitBush1".to_string()),
+            129..=255 => TileName("FruitBush2".to_string()),
+        },
     }
 }
 
@@ -23,6 +28,11 @@ pub fn structure_tile_name(structure: &Structure) -> TileName {
     match structure {
         Structure::Nothing => TileName("Nothing".to_string()),
         Structure::BigLeafTree => TileName("BigLeafTree".to_string()),
+        Structure::FruitTree(filled) => match filled.0 {
+            0..=50 => TileName("BigLeafTree".to_string()),
+            51..=128 => TileName("FruitTree1".to_string()),
+            129..=255 => TileName("FruitTree2".to_string()),
+        },
         Structure::Campfire => TileName("Campfire".to_string()),
     }
 }

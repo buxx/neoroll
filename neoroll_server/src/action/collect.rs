@@ -22,6 +22,27 @@ pub struct Collect {
 }
 
 impl Collect {
+    fn is_start(&self) -> bool {
+        self.start.is_none() || self.end.is_none()
+    }
+
+    fn start(&self, id: ActionId, state: &State) -> Vec<StateChange> {
+        vec![
+            StateChange::Action(
+                id,
+                ActionChange::Update(UpdateAction::Collect(CollectChange::SetStart(
+                    *state.frame_i(),
+                ))),
+            ),
+            StateChange::Action(
+                id,
+                ActionChange::Update(UpdateAction::Collect(CollectChange::SetEnd(
+                    *state.frame_i() + TICK_PERIOD * 10,
+                ))),
+            ),
+        ]
+    }
+
     fn progress(&self, state: &State) -> Vec<StateChange> {
         if let (Some(start), Some(end)) = (self.start, self.end) {
             let total = end.0 - start.0;
@@ -34,6 +55,13 @@ impl Collect {
         } else {
             vec![]
         }
+    }
+
+    fn is_end(&self, state: &State) -> bool {
+        if let Some(end) = self.end {
+            return &end <= state.frame_i();
+        }
+        false
     }
 }
 
@@ -55,29 +83,14 @@ impl BodyTick<CollectChange> for Collect {
     fn tick(&self, id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
         let mut changes = vec![];
 
-        if self.start.is_none() || self.end.is_none() {
-            changes.extend(vec![
-                StateChange::Action(
-                    id,
-                    ActionChange::Update(UpdateAction::Collect(CollectChange::SetStart(
-                        *state.frame_i(),
-                    ))),
-                ),
-                StateChange::Action(
-                    id,
-                    ActionChange::Update(UpdateAction::Collect(CollectChange::SetEnd(
-                        *state.frame_i() + TICK_PERIOD * 10,
-                    ))),
-                ),
-            ]);
+        if self.is_start() {
+            changes.extend(self.start(id, state));
         }
 
-        if let Some(end) = self.end {
-            if &end <= state.frame_i() {
-                changes.push(StateChange::Action(id, ActionChange::Remove));
-            } else {
-                changes.extend(self.progress(state));
-            }
+        if self.is_end(state) {
+            changes.push(StateChange::Action(id, ActionChange::Remove));
+        } else {
+            changes.extend(self.progress(state));
         }
 
         (NextTick(*state.frame_i() + TICK_PERIOD), changes)

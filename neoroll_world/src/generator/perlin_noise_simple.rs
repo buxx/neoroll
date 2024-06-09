@@ -8,6 +8,7 @@ use worldgen::world::{Tile, World};
 use crate::entity::floor::Floor;
 use crate::entity::ground::Ground;
 use crate::entity::structure::Structure;
+use crate::entity::Filled;
 use crate::space::layer::{CompositeLayer, FilledLayer, Layers};
 use crate::space::world::World as GeneratedWorld;
 
@@ -85,8 +86,11 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
                     let (ground, floor, structure) = match tile {
                         TileLike::Water => (Ground::FreshWater, Floor::Nothing, None),
                         TileLike::Plain => {
-                            let floor = [Floor::ShortGrass, Floor::Nothing]
-                                [WalkerTableBuilder::new(&[80, 20]).build().next()]
+                            let floor = [
+                                Floor::ShortGrass,
+                                Floor::FruitBush(Filled::full()),
+                                Floor::Nothing,
+                            ][WalkerTableBuilder::new(&[60, 20, 20]).build().next()]
                             .clone();
                             let structure = [Some(Structure::BigLeafTree), None]
                                 [WalkerTableBuilder::new(&[10, 90]).build().next()]
@@ -94,8 +98,11 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
                             (Ground::Soil, floor, structure)
                         }
                         TileLike::Forest => {
-                            let structure = [Some(Structure::BigLeafTree), None]
-                                [WalkerTableBuilder::new(&[70, 30]).build().next()]
+                            let structure = [
+                                Some(Structure::BigLeafTree),
+                                Some(Structure::FruitTree(Filled::full())),
+                                None,
+                            ][WalkerTableBuilder::new(&[60, 20, 20]).build().next()]
                             .clone();
                             (Ground::Soil, Floor::Nothing, structure)
                         }

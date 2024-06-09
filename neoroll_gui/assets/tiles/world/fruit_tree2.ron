@@ -1,0 +1,4 @@
+(
+    name: "FruitTree2",
+    tile: Standard("tiles/world/fruit_tree2.png")
+)
