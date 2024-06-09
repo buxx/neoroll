@@ -1,7 +1,10 @@
 use neoroll_world::{
-    entity::creature::{CreatureChange, CreatureId},
-    gameplay::{behavior::Behavior, progress::Progress},
-    space::world::WorldChange,
+    entity::{
+        creature::{CreatureChange, CreatureId},
+        Filled,
+    },
+    gameplay::{behavior::Behavior, progress::Progress, CollectType},
+    space::world::{StructureChange, WorldChange},
 };
 
 use crate::{
@@ -43,18 +46,46 @@ impl Collect {
         ]
     }
 
-    fn progress(&self, state: &State) -> Vec<StateChange> {
+    fn tick_collect(&self, state: &State) -> Vec<StateChange> {
+        let mut changes = vec![];
         if let (Some(start), Some(end)) = (self.start, self.end) {
             let total = end.0 - start.0;
             let done = state.frame_i().0 - start.0;
             let progress = Progress::from(done as f32 / total as f32);
-            vec![StateChange::World(WorldChange::Creature(
+
+            changes.extend(vec![StateChange::World(WorldChange::Creature(
                 self.creature_id,
                 CreatureChange::SetBehavior(Behavior::Collect(progress)),
-            ))]
-        } else {
-            vec![]
+            ))]);
+
+            if progress.full() {
+                let world = state.world();
+                let creature = world.creatures().get(&self.creature_id).unwrap();
+                if let Some(structure) = &world.structure(creature.point()) {
+                    if let Some(filled) = structure.filled() {
+                        if let (Some(collect_quantity), Some(maximum_quantity)) = (
+                            structure.collect_quantity(CollectType::Food),
+                            structure.maximum_quantity(CollectType::Food),
+                        ) {
+                            let current_quantity: f32 = maximum_quantity.0 as f32 * filled.0 as f32;
+                            let new_quantity_ =
+                                (current_quantity as u64 - collect_quantity.0).max(0);
+                            let new_filled_ =
+                                ((new_quantity_ as f32 / maximum_quantity.0 as f32) * 255.) as u8;
+
+                            let new_filled = Filled::new(new_filled_);
+                            let new_structure = structure.with_filled(new_filled);
+                            changes.extend(vec![StateChange::World(WorldChange::Structure(
+                                *creature.point(),
+                                StructureChange::Set(Some(new_structure)),
+                            ))]);
+                        }
+                    }
+                }
+            }
         }
+
+        changes
     }
 
     fn is_end(&self, state: &State) -> bool {
@@ -90,7 +121,7 @@ impl BodyTick<CollectChange> for Collect {
         if self.is_end(state) {
             changes.push(StateChange::Action(id, ActionChange::Remove));
         } else {
-            changes.extend(self.progress(state));
+            changes.extend(self.tick_collect(state));
         }
 
         (NextTick(*state.frame_i() + TICK_PERIOD), changes)

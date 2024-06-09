@@ -1,6 +1,6 @@
 use neoroll_world::{
     entity::{creature::Creature, floor::Floor, structure::Structure},
-    gameplay::behavior::Behavior,
+    gameplay::{behavior::Behavior, CollectType},
 };
 
 use crate::{
@@ -21,15 +21,23 @@ impl<'a> RealizeSearchFood<'a> {
     fn food_to_collect_on_place(&self) -> bool {
         let world = self.state.world();
 
-        if let Some(Structure::FruitTree(filled)) = world.structure(self.creature.point()) {
-            return !filled.is_empty();
-        }
+        let can_from_structure = world
+            .structure(self.creature.point())
+            .as_ref()
+            .and_then(|s| {
+                s.collectable(CollectType::Food)
+                    .and_then(|f| Some(!f.is_empty()))
+            })
+            .unwrap_or(false);
+        let can_from_floor = world
+            .floor(self.creature.point())
+            .and_then(|s| {
+                s.collectable(CollectType::Food)
+                    .and_then(|f| Some(!f.is_empty()))
+            })
+            .unwrap_or(false);
 
-        if let Some(Floor::FruitBush(filled)) = world.floor(self.creature.point()) {
-            return !filled.is_empty();
-        }
-
-        false
+        can_from_floor | can_from_structure
     }
 
     fn already_collecting(&self) -> bool {
