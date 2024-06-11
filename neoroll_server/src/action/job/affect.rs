@@ -31,7 +31,7 @@ impl BodyTick<AffectJobChange> for AffectJob {
         let game = state.game();
 
         let default = vec![];
-        let needs = game
+        let mut needs = game
             .tribe_needs()
             .get(&self.tribe_id)
             .unwrap_or(&default)
@@ -44,16 +44,24 @@ impl BodyTick<AffectJobChange> for AffectJob {
         //
         //
 
-        // FIXME: compute regularly tribe state and use it to affect jobs
-        // For now, affect simply the SearchFood job
         for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
             let human = world.creatures().get(human_id).unwrap();
             match human.job() {
                 Job::SearchFood => {}
-                Job::Idle => changes.push(StateChange::World(WorldChange::Creature(
-                    *human.id(),
-                    CreatureChange::SetJob(Job::SearchFood),
-                ))),
+                Job::Idle => {
+                    if let Some(need) = needs.pop() {
+                        match need {
+                            Need::MaterialInStorages(material, _) => match material {
+                                Material::Resource(Resource::Food) => {
+                                    changes.push(StateChange::World(WorldChange::Creature(
+                                        *human.id(),
+                                        CreatureChange::SetJob(Job::SearchFood),
+                                    )));
+                                }
+                            },
+                        }
+                    }
+                }
             }
         }
 
