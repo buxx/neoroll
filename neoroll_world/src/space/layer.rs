@@ -1,4 +1,7 @@
-use crate::entity::{floor::Floor, ground::Ground, structure::Structure, Entity};
+use crate::{
+    entity::{floor::Floor, ground::Ground, structure::Structure},
+    gameplay::{material::Material, Quantity},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -7,6 +10,7 @@ pub struct Layers {
     grounds: FilledLayer<Ground>,
     floors: FilledLayer<Floor>,
     structures: CompositeLayer<Structure>,
+    materials: FilledLayer<Vec<(Material, Quantity)>>,
 }
 
 impl Layers {
@@ -14,11 +18,13 @@ impl Layers {
         grounds: FilledLayer<Ground>,
         floors: FilledLayer<Floor>,
         structures: CompositeLayer<Structure>,
+        materials: FilledLayer<Vec<(Material, Quantity)>>,
     ) -> Self {
         Self {
             grounds,
             floors,
             structures,
+            materials,
         }
     }
 
@@ -45,6 +51,10 @@ impl Layers {
     pub fn structures_mut(&mut self) -> &mut CompositeLayer<Structure> {
         &mut self.structures
     }
+
+    pub fn materials(&self) -> &FilledLayer<Vec<(Material, Quantity)>> {
+        &self.materials
+    }
 }
 
 impl Default for Layers {
@@ -53,16 +63,17 @@ impl Default for Layers {
             grounds: FilledLayer::new(vec![]),
             floors: FilledLayer::new(vec![]),
             structures: CompositeLayer::new(vec![]),
+            materials: FilledLayer::new(vec![]),
         }
     }
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct FilledLayer<T: Entity> {
+pub struct FilledLayer<T> {
     items: Vec<T>,
 }
 
-impl<T: Entity> FilledLayer<T> {
+impl<T> FilledLayer<T> {
     pub fn new(items: Vec<T>) -> Self {
         Self { items }
     }
@@ -85,11 +96,11 @@ impl<T: Entity> FilledLayer<T> {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct CompositeLayer<T: Entity> {
+pub struct CompositeLayer<T> {
     items: Vec<Option<T>>,
 }
 
-impl<T: Entity> CompositeLayer<T> {
+impl<T> CompositeLayer<T> {
     pub fn new(items: Vec<Option<T>>) -> Self {
         Self { items }
     }
@@ -118,7 +129,7 @@ impl<T: Entity> CompositeLayer<T> {
     }
 }
 
-impl<T: Entity> Default for CompositeLayer<T> {
+impl<T> Default for CompositeLayer<T> {
     fn default() -> Self {
         Self {
             items: Default::default(),

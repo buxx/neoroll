@@ -1,15 +1,23 @@
 use neoroll_world::{
-    entity::creature::CreatureChange,
-    gameplay::{job::Job, tribe::TribeId},
+    entity::{creature::CreatureChange, structure::Structure},
+    gameplay::{
+        job::Job,
+        material::{Material, Resource},
+        need::Need,
+        target::Target,
+        tribe::TribeId,
+        Quantity,
+    },
     space::world::WorldChange,
 };
 
 use crate::{
     action::{Action, ActionId, BodyTick, NextTick},
+    run::TICK_BASE_PERIOD,
     state::{State, StateChange},
 };
 
-const TICK_FREQUENCY: u64 = 5;
+const TICK_FREQUENCY: u64 = TICK_BASE_PERIOD * 5;
 
 #[derive(Debug, PartialEq)]
 pub struct AffectJob {
@@ -20,6 +28,21 @@ impl BodyTick<AffectJobChange> for AffectJob {
     fn tick(&self, _id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
         let mut changes = vec![];
         let world = state.world();
+        let game = state.game();
+
+        let default = vec![];
+        let needs = game
+            .tribe_needs()
+            .get(&self.tribe_id)
+            .unwrap_or(&default)
+            .iter()
+            .filter(|n| !n.0)
+            .map(|n| &n.1)
+            .collect::<Vec<&Need>>();
+
+        //
+        //
+        //
 
         // FIXME: compute regularly tribe state and use it to affect jobs
         // For now, affect simply the SearchFood job

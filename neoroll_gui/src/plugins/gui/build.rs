@@ -74,7 +74,7 @@ pub fn display_build_outline(
     }
 }
 
-pub fn spawn_build_cursor(commands: &mut Commands, buildable: Buildable, tilesets: Tilesets) {
+pub fn spawn_build_cursor(commands: &mut Commands, buildable: Buildable, tilesets: &Tilesets) {
     if let Some(tileset) = tilesets.get_by_name(WORLD_TILESET_NAME) {
         let atlas = tileset.atlas();
         let (tile_index, _) = &tileset.select_tile(buildable.tile_name()).unwrap();
@@ -105,8 +105,8 @@ pub fn spawn_build_cursor(commands: &mut Commands, buildable: Buildable, tileset
 
 pub fn spawn_build_outline(
     commands: &mut Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
         BuildOutline,

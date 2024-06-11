@@ -1,5 +1,8 @@
+pub mod need;
+pub mod settings;
 use std::collections::HashMap;
 
+use need::ComputedNeed;
 use neoroll_world::{
     entity::structure::Structure,
     gameplay::{
@@ -8,6 +11,7 @@ use neoroll_world::{
     },
     space::AbsoluteWorldPoint,
 };
+use settings::TribeSettings;
 
 use crate::gateway::ClientId;
 
@@ -17,13 +21,22 @@ use super::client::ClientGameState;
 pub struct GameState {
     tribes: HashMap<TribeId, Tribe>,
     client_tribe: HashMap<ClientId, TribeId>,
-    structures_own: HashMap<TribeId, HashMap<AbsoluteWorldPoint, StructureOwn>>,
+    structures_own: HashMap<TribeId, Vec<StructureOwn>>,
     client_speed_requests: HashMap<ClientId, u8>,
+    tribe_settings: HashMap<TribeId, TribeSettings>,
+    tribe_needs: HashMap<TribeId, Vec<ComputedNeed>>,
 }
 
+// FIXME BS NOW: need default value of speed for each clients (connected or not)
 impl GameState {
     pub fn new_tribe(&mut self, tribe: Tribe) {
-        self.tribes.insert(*tribe.id(), tribe);
+        let tribe_id = *tribe.id();
+
+        self.tribes.insert(tribe_id, tribe);
+
+        // TODO: Is that the good place for tribe init ?
+        self.tribe_settings
+            .insert(tribe_id, TribeSettings::default());
     }
 
     pub fn set_client_tribe_id(&mut self, client_id: ClientId, tribe_id: TribeId) {
@@ -49,7 +62,7 @@ impl GameState {
     ) -> Vec<&StructureOwn> {
         let mut structures = vec![];
         if let Some(owns) = self.structures_own.get(tribe_id) {
-            owns.iter().for_each(|(_, own)| match &filter {
+            owns.iter().for_each(|own| match &filter {
                 Some(type_) => {
                     if type_ == own.type_() {
                         structures.push(own)
@@ -66,7 +79,7 @@ impl GameState {
         self.structures_own
             .entry(*own.tribe_id())
             .or_default()
-            .insert(*own.point(), own);
+            .push(own);
     }
 
     pub fn client_speed_requests(&self) -> &HashMap<ClientId, u8> {
@@ -90,6 +103,18 @@ impl GameState {
             1
         }
     }
+
+    pub fn tribe_settings(&self) -> &HashMap<TribeId, TribeSettings> {
+        &self.tribe_settings
+    }
+
+    pub fn tribe_needs(&self) -> &HashMap<TribeId, Vec<ComputedNeed>> {
+        &self.tribe_needs
+    }
+
+    pub fn set_tribe_needs(&mut self, tribe_id: TribeId, value: Vec<ComputedNeed>) {
+        self.tribe_needs.insert(tribe_id, value);
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -102,6 +127,7 @@ pub enum ClientGameMessage {
 #[derive(Debug)]
 pub enum GameChange {
     SendClientGameState(ClientId, ClientGameState),
+    SetTribeNeeds(TribeId, Vec<ComputedNeed>),
 }
 
 #[derive(Debug, Clone, PartialEq)]

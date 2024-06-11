@@ -79,6 +79,7 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
         let mut grounds = vec![];
         let mut floors = vec![];
         let mut structures = vec![];
+        let mut materials = vec![];
 
         for row in world.generate(0, 0).iter() {
             for val in row.iter() {
@@ -111,6 +112,7 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
                     grounds.push(ground);
                     floors.push(floor);
                     structures.push(structure);
+                    materials.push(vec![]);
                 }
             }
         }
@@ -120,6 +122,7 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
                 FilledLayer::new(grounds),
                 FilledLayer::new(floors),
                 CompositeLayer::new(structures),
+                FilledLayer::new(materials),
             ),
             self.lines as usize,
             self.columns as usize,

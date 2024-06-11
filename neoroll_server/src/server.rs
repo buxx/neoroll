@@ -5,7 +5,9 @@ use std::{
 };
 
 use crate::{
-    action::{job::affect::AffectJobBuilder, ActionChange, ActionId},
+    action::{
+        job::affect::AffectJobBuilder, need::ComputeTribeNeeds, Action, ActionChange, ActionId,
+    },
     gateway::{ClientId, ClientMessageEnveloppe, Gateways},
     run::RunnerBuilder,
     state::{
@@ -194,11 +196,22 @@ impl Server {
                     game.set_client_tribe_id(client_id, *tribe.id());
                     game.new_tribe(tribe.clone());
 
+                    // FIXME: more elegant way to create new tribe "actions"
                     let affect_jobs_action_id = ActionId::new();
                     self.server_sender
                         .send(StateChange::Action(
                             affect_jobs_action_id,
                             ActionChange::New(AffectJobBuilder::new(*tribe.id()).build()),
+                        ))
+                        .unwrap();
+
+                    let compute_needs_action_id = ActionId::new();
+                    self.server_sender
+                        .send(StateChange::Action(
+                            compute_needs_action_id,
+                            ActionChange::New(Action::ComputeTribeNeeds(ComputeTribeNeeds::new(
+                                *tribe.id(),
+                            ))),
                         ))
                         .unwrap();
                 }

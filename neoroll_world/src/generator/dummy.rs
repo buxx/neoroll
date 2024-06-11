@@ -39,12 +39,14 @@ impl WorldGenerator for DummyWorldGenerator {
         let mut grounds = vec![];
         let mut floors = vec![];
         let mut structures = vec![];
+        let mut materials = vec![];
 
         for _ in 0..self.lines {
             for _ in 0..self.columns {
                 grounds.push(Ground::Soil);
                 floors.push(self.floor());
                 structures.push(self.structure());
+                materials.push(vec![]);
             }
         }
 
@@ -53,6 +55,7 @@ impl WorldGenerator for DummyWorldGenerator {
                 FilledLayer::new(grounds),
                 FilledLayer::new(floors),
                 CompositeLayer::new(structures),
+                FilledLayer::new(materials),
             ),
             self.lines,
             self.columns,

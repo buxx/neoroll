@@ -10,6 +10,7 @@ use super::{ActionId, BodyTick, NextTick};
 
 const TICK_PERIOD: u64 = TICK_BASE_PERIOD * 5;
 
+// TODO: make it an action per tribe
 #[derive(Debug, PartialEq)]
 pub struct IncomingMigrant;
 

@@ -1,11 +1,10 @@
 use std::fmt::Display;
 
 use crate::{
-    gameplay::{behavior::Behavior, job::Job, tribe::TribeId},
+    gameplay::{behavior::Behavior, job::Job, material::Material, tribe::TribeId, Quantity},
     space::AbsoluteWorldPoint,
 };
 
-use super::Entity;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -16,6 +15,7 @@ pub struct Creature {
     point: AbsoluteWorldPoint,
     job: Job,
     behavior: Behavior,
+    carrying: Vec<(Material, Quantity)>,
 }
 
 impl Creature {
@@ -26,6 +26,7 @@ impl Creature {
             point: position,
             job: Default::default(),
             behavior: Default::default(),
+            carrying: vec![],
         }
     }
 
@@ -60,9 +61,21 @@ impl Creature {
     pub fn set_behavior(&mut self, behavior: Behavior) {
         self.behavior = behavior;
     }
-}
 
-impl Entity for Creature {}
+    pub fn add_to_carrying(&mut self, material: Material, quantity: Quantity) {
+        if let Some(quantity_) = self
+            .carrying
+            .iter_mut()
+            .filter(|(m, _)| m == &material)
+            .map(|(_, q)| q)
+            .next()
+        {
+            *quantity_ += quantity;
+        } else {
+            self.carrying.push((material, quantity))
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct CreatureId(Uuid);
@@ -91,6 +104,7 @@ pub enum CreatureChange {
     SetPoint(AbsoluteWorldPoint),
     SetJob(Job),
     SetBehavior(Behavior),
+    AddToCarrying(Material, Quantity),
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]

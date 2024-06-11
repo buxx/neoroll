@@ -1,5 +1,5 @@
 use neoroll_world::{
-    entity::{creature::Creature, floor::Floor, structure::Structure},
+    entity::creature::Creature,
     gameplay::{behavior::Behavior, CollectType},
 };
 
@@ -24,17 +24,11 @@ impl<'a> RealizeSearchFood<'a> {
         let can_from_structure = world
             .structure(self.creature.point())
             .as_ref()
-            .and_then(|s| {
-                s.collectable(CollectType::Food)
-                    .and_then(|f| Some(!f.is_empty()))
-            })
+            .and_then(|s| s.collectable(CollectType::Food).map(|f| !f.is_empty()))
             .unwrap_or(false);
         let can_from_floor = world
             .floor(self.creature.point())
-            .and_then(|s| {
-                s.collectable(CollectType::Food)
-                    .and_then(|f| Some(!f.is_empty()))
-            })
+            .and_then(|s| s.collectable(CollectType::Food).map(|f| !f.is_empty()))
             .unwrap_or(false);
 
         can_from_floor | can_from_structure

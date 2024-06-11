@@ -5,8 +5,6 @@ pub mod floor;
 pub mod ground;
 pub mod structure;
 
-pub trait Entity {}
-
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Filled(pub u8);
 

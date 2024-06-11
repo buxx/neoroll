@@ -1,3 +1,4 @@
+pub mod need;
 use client::{ComputeAndSendClientStates, ComputeAndSendClientStatesChange};
 use collect::{Collect, CollectChange};
 use job::{
@@ -6,6 +7,7 @@ use job::{
 };
 use migrant::{IncomingMigrant, IncomingMigrantChange};
 use move_::{MoveRandomly, MoveRandomlyChange, MoveTo, MoveToChange};
+use need::{ComputeTribeNeeds, ComputeTribeNeedsChange};
 use neoroll_world::space::world::WorldChange;
 use uuid::Uuid;
 
@@ -27,6 +29,7 @@ pub enum Action {
     MoveRandomly(MoveRandomly),
     ComputeAndSendClientStates(ComputeAndSendClientStates),
     IncomingMigrant(IncomingMigrant),
+    ComputeTribeNeeds(ComputeTribeNeeds),
     AffectJob(AffectJob),
     RealizeJob(RealizeJob),
     Collect(Collect),
@@ -43,6 +46,7 @@ impl Action {
             Action::AffectJob(body) => body.tick(id, state),
             Action::RealizeJob(body) => body.tick(id, state),
             Action::Collect(body) => body.tick(id, state),
+            Action::ComputeTribeNeeds(body) => body.tick(id, state),
         }
     }
 
@@ -56,6 +60,7 @@ impl Action {
             Action::AffectJob(body) => body.stamp(),
             Action::RealizeJob(body) => body.stamp(),
             Action::Collect(body) => body.stamp(),
+            Action::ComputeTribeNeeds(body) => body.stamp(),
         }
     }
 
@@ -69,6 +74,7 @@ impl Action {
             Action::AffectJob(body) => body.take_off(),
             Action::RealizeJob(body) => body.take_off(),
             Action::Collect(body) => body.take_off(),
+            Action::ComputeTribeNeeds(body) => body.take_off(),
         }
     }
 
@@ -114,6 +120,11 @@ impl Action {
                     body.apply(change)
                 }
             }
+            Action::ComputeTribeNeeds(body) => {
+                if let UpdateAction::ComputeTribeNeeds(change) = change {
+                    body.apply(change)
+                }
+            }
         }
     }
 }
@@ -148,6 +159,7 @@ pub enum UpdateAction {
     MoveRandomly(MoveRandomlyChange),
     ComputeAndSendClientStates(ComputeAndSendClientStatesChange),
     IncomingMigrant(IncomingMigrantChange),
+    ComputeTribeNeeds(ComputeTribeNeedsChange),
     AffectJob(AffectJobChange),
     RealizeJob(RealizeJobChange),
     Collect(CollectChange),

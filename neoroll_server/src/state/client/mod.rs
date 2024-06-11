@@ -1,21 +1,38 @@
+pub mod build;
 pub mod builder;
-use std::fmt::Display;
+pub mod human;
+pub mod target;
 
+use build::BuildGameState;
+use human::HumanGameState;
 use neoroll_world::gameplay::tribe::TribeId;
+use target::TargetsGameState;
+
+use super::game::need::ComputedNeed;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ClientGameState {
     tribe_id: TribeId,
     human: HumanGameState,
     build: BuildGameState,
+    target: TargetsGameState,
+    needs: Vec<ComputedNeed>,
 }
 
 impl ClientGameState {
-    pub fn new(tribe_id: TribeId, human: HumanGameState, build: BuildGameState) -> Self {
+    pub fn new(
+        tribe_id: TribeId,
+        human: HumanGameState,
+        build: BuildGameState,
+        target: TargetsGameState,
+        needs: Vec<ComputedNeed>,
+    ) -> Self {
         Self {
             tribe_id,
             human,
             build,
+            target,
+            needs,
         }
     }
 
@@ -30,51 +47,17 @@ impl ClientGameState {
     pub fn build(&self) -> &BuildGameState {
         &self.build
     }
-}
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct HumanGameState {
-    human_count: HumanCount,
-}
-
-impl HumanGameState {
-    fn new(human_count: HumanCount) -> Self {
-        Self { human_count }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct BuildGameState {
-    can_build_campfire: bool,
-}
-
-impl BuildGameState {
-    fn new(can_build_campfire: bool) -> Self {
-        Self { can_build_campfire }
+    pub fn target(&self) -> &TargetsGameState {
+        &self.target
     }
 
-    pub fn can_build_campfire(&self) -> bool {
-        self.can_build_campfire
+    pub fn can_configure_targets(&self) -> bool {
+        // For now, consider simply as this
+        true
     }
-}
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct HumanCount(u16);
-
-impl HumanCount {
-    pub fn new(value: u16) -> Self {
-        Self(value)
-    }
-}
-
-impl Default for HumanCount {
-    fn default() -> Self {
-        Self::new(0)
-    }
-}
-
-impl Display for HumanCount {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.0.to_string())
+    pub fn needs(&self) -> &[ComputedNeed] {
+        &self.needs
     }
 }

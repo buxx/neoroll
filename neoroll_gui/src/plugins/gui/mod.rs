@@ -97,8 +97,8 @@ fn gui(
     game_state: Res<GameStateWrapper>,
     mut commands: Commands,
     tilesets: Tilesets,
-    meshes: ResMut<Assets<Mesh>>,
-    materials: ResMut<Assets<ColorMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     if state.display_window() {
         let context = contexts.ctx_mut();
@@ -110,8 +110,27 @@ fn gui(
                 if game.build().can_build_campfire() && ui.button("Campfire").clicked() {
                     state.set_current(Current::Build(Buildable::Campfire));
                     state.set_display_window(false);
-                    spawn_build_cursor(&mut commands, Buildable::Campfire, tilesets);
-                    spawn_build_outline(&mut commands, meshes, materials);
+                    spawn_build_cursor(&mut commands, Buildable::Campfire, &tilesets);
+                    spawn_build_outline(&mut commands, &mut meshes, &mut materials);
+                }
+
+                if game.build().can_build_storage() && ui.button("Storage").clicked() {
+                    state.set_current(Current::Build(Buildable::Storage));
+                    state.set_display_window(false);
+                    spawn_build_cursor(&mut commands, Buildable::Storage, &tilesets);
+                    spawn_build_outline(&mut commands, &mut meshes, &mut materials);
+                }
+                
+                if game.can_configure_targets() {
+                    ui.label(&format!("targets: {}", game.target().targets().len()));
+
+                    for target in game.target().targets() {
+                        ui.label(&format!("{:?}", target));
+                    }
+                }
+
+                for need in game.needs() {
+                    ui.label(&format!("need: {:?}", need));
                 }
 
                 // TODO: state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)
@@ -139,6 +158,7 @@ impl TileName for Buildable {
     fn tile_name(&self) -> &str {
         match self {
             Buildable::Campfire => "Campfire",
+            Buildable::Storage => "Storage",
         }
     }
 }

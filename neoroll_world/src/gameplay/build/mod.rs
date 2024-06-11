@@ -6,6 +6,7 @@ use crate::{
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Buildable {
     Campfire,
+    Storage,
 }
 
 pub struct TryBuild<'a> {
@@ -43,9 +44,13 @@ impl<'a> TryBuild<'a> {
 
         if let Some(structure) = self.world.structure(point) {
             match structure {
-                Structure::BigLeafTree | Structure::FruitTree(_) | Structure::Campfire => {
+                Structure::BigLeafTree
+                | Structure::FruitTree(_)
+                | Structure::Campfire
+                | Structure::Storage => {
                     return Err(TryBuildError::StructureAlreadyExist(structure.clone()))
                 }
+
                 Structure::Nothing => {}
             }
         };

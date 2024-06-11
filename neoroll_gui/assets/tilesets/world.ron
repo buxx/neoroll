@@ -12,5 +12,6 @@
         7: "../tiles/world/fruit_tree2.ron",
         8: "../tiles/world/human.ron",
         9: "../tiles/world/campfire.ron",
+        10: "../tiles/world/storage.ron",
     }
 )

@@ -145,6 +145,9 @@ impl State {
                             ServerMessage::NewClientGameState(state),
                         ))
                         .unwrap(),
+                    GameChange::SetTribeNeeds(tribe_id, needs) => {
+                        self.game_mut().set_tribe_needs(tribe_id, needs);
+                    }
                 },
             };
         }

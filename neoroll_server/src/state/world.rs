@@ -109,6 +109,13 @@ impl<'a> WorldModifier<'a> {
                         ServerMessage::Creature(id, PartialCreatureChange::SetBehavior(behavior)),
                     );
                 }
+                CreatureChange::AddToCarrying(material, quantity) => {
+                    self.world
+                        .creatures_mut()
+                        .get_mut(&id)
+                        .unwrap()
+                        .add_to_carrying(material, quantity);
+                }
             },
             WorldChange::Structure(point, change) => match change {
                 StructureChange::Set(structure) => {

@@ -7,7 +7,11 @@ use crate::{
         ground::Ground,
         structure::Structure,
     },
-    gameplay::tribe::{structure::StructureOwn, TribeId},
+    gameplay::{
+        material::Material,
+        tribe::{structure::StructureOwn, TribeId},
+        Quantity,
+    },
     space::{layer::Layers, AbsoluteWorldPoint},
 };
 use serde::{Deserialize, Serialize};
@@ -18,7 +22,7 @@ pub struct World {
     lines: usize,
     columns: usize,
     creatures: HashMap<CreatureId, Creature>,
-    tribes_creatures: HashMap<TribeId, Vec<CreatureId>>,
+    tribes_creatures: HashMap<TribeId, Vec<CreatureId>>, // TODO: feel like it should be in `Game` ...
 }
 
 impl World {
@@ -151,6 +155,41 @@ impl World {
 
     pub fn layers(&self) -> &Layers {
         &self.layers
+    }
+
+    pub fn materials_on(
+        &self,
+        point: &AbsoluteWorldPoint,
+        filter: Option<Material>,
+    ) -> Vec<&(Material, Quantity)> {
+        // FIXME: something to refactor (see .floor(), .structure() etc)
+        if point.row_i().0 >= self.lines as isize
+            || point.row_i().0 < 0
+            || point.col_i().0 >= self.columns as isize
+            || point.col_i().0 < 0
+        {
+            return vec![];
+        }
+
+        let row_i = point.row_i().0 as usize;
+        let col_i = point.col_i().0 as usize;
+
+        let i = row_i * self.columns + col_i;
+
+        let mut found = vec![];
+        let materials = self.layers().materials().get(i);
+
+        match filter {
+            Some(filter_) => {
+                return materials
+                    .iter()
+                    .filter(|(m, _)| m == &filter_)
+                    .collect::<Vec<&(Material, Quantity)>>()
+            }
+            None => found.extend(materials),
+        }
+
+        found
     }
 }
 

@@ -34,6 +34,7 @@ pub fn structure_tile_name(structure: &Structure) -> TileName {
             129..=255 => TileName("FruitTree2".to_string()),
         },
         Structure::Campfire => TileName("Campfire".to_string()),
+        Structure::Storage => TileName("Storage".to_string()),
     }
 }
 
