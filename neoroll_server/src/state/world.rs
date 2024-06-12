@@ -7,7 +7,7 @@ use neoroll_world::{
             WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMessage,
             WorldPartStructureMessage,
         },
-        world::{FloorChange, StructureChange, World, WorldChange},
+        world::{FloorChange, MaterialChange, StructureChange, World, WorldChange},
         AbsoluteWorldPoint,
     },
 };
@@ -116,6 +116,13 @@ impl<'a> WorldModifier<'a> {
                         .unwrap()
                         .add_to_carrying(material, quantity);
                 }
+                CreatureChange::RemoveFromCarrying(material, quantity) => {
+                    self.world
+                        .creatures_mut()
+                        .get_mut(&id)
+                        .unwrap()
+                        .remove_from_carrying(material, quantity);
+                }
             },
             WorldChange::Structure(point, change) => match change {
                 StructureChange::Set(structure) => {
@@ -155,6 +162,11 @@ impl<'a> WorldModifier<'a> {
                             WorldPartFloorMessage::Set(floor.clone()),
                         )),
                     );
+                }
+            },
+            WorldChange::Material(point, change) => match change {
+                MaterialChange::Add(material, quantity) => {
+                    self.world.add_material(point, material, quantity);
                 }
             },
         }

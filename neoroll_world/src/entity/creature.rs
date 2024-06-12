@@ -8,6 +8,8 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+const MAX_CARRYING_QUANTITY: Quantity = Quantity(50000);
+
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Creature {
     id: CreatureId,
@@ -75,6 +77,26 @@ impl Creature {
             self.carrying.push((material, quantity))
         }
     }
+
+    pub fn remove_from_carrying(&mut self, material: Material, quantity: Quantity) {
+        if let Some(quantity_) = self
+            .carrying
+            .iter_mut()
+            .filter(|(m, _)| m == &material)
+            .map(|(_, q)| q)
+            .next()
+        {
+            quantity_.0 -= quantity.0.min(quantity_.0);
+        }
+    }
+
+    pub fn cant_carry_more(&self) -> bool {
+        self.carrying.iter().map(|(_, q)| *q).sum::<Quantity>().0 >= MAX_CARRYING_QUANTITY.0
+    }
+
+    pub fn carrying(&self) -> &[(Material, Quantity)] {
+        &self.carrying
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize)]
@@ -105,6 +127,7 @@ pub enum CreatureChange {
     SetJob(Job),
     SetBehavior(Behavior),
     AddToCarrying(Material, Quantity),
+    RemoveFromCarrying(Material, Quantity),
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]

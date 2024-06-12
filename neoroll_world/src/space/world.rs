@@ -1,4 +1,7 @@
+use glam::Vec2;
+use pathfinding::prelude::astar;
 use std::collections::HashMap;
+use strum::IntoEnumIterator;
 
 use crate::{
     entity::{
@@ -13,8 +16,11 @@ use crate::{
         Quantity,
     },
     space::{layer::Layers, AbsoluteWorldPoint},
+    utils::Direction,
 };
 use serde::{Deserialize, Serialize};
+
+use super::{AbsoluteWorldColI, AbsoluteWorldRowI};
 
 #[derive(Deserialize, Serialize, Default)]
 pub struct World {
@@ -141,6 +147,24 @@ impl World {
         self.layers.floors_mut().set(i, floor);
     }
 
+    pub fn add_material(
+        &mut self,
+        point: AbsoluteWorldPoint,
+        material: Material,
+        quantity: Quantity,
+    ) {
+        let row_i = point.row_i().0 as usize;
+        let col_i = point.col_i().0 as usize;
+        let i = row_i * self.columns + col_i;
+
+        let materials = self.layers.materials_mut().get_mut(i);
+        if let Some((_, mut quantity_)) = materials.iter_mut().find(|(m, _)| m == &material) {
+            quantity_ += quantity;
+        } else {
+            materials.push((material, quantity));
+        }
+    }
+
     pub fn contains(&self, point: &AbsoluteWorldPoint) -> bool {
         point.0 .0 >= 0
             && point.1 .0 >= 0
@@ -155,6 +179,10 @@ impl World {
 
     pub fn layers(&self) -> &Layers {
         &self.layers
+    }
+
+    pub fn layers_mut(&mut self) -> &mut Layers {
+        &mut self.layers
     }
 
     pub fn materials_on(
@@ -191,12 +219,55 @@ impl World {
 
         found
     }
+
+    pub fn find_path(
+        &self,
+        from: &AbsoluteWorldPoint,
+        to: &AbsoluteWorldPoint,
+    ) -> Option<(Vec<AbsoluteWorldPoint>, i32)> {
+        astar(
+            from,
+            |p| self.successors(p),
+            |p| Vec2::from(p).distance(Vec2::from(to)) as i32,
+            |p| p == to,
+        )
+    }
+
+    fn successors(&self, from: &AbsoluteWorldPoint) -> Vec<(AbsoluteWorldPoint, i32)> {
+        let mut successors = vec![];
+
+        for direction in Direction::iter() {
+            let (mod_row, mod_col) = direction.modifier();
+            let new_row_i = from.0 .0 + mod_row;
+            let new_col_i = from.1 .0 + mod_col;
+            let new_point =
+                AbsoluteWorldPoint(AbsoluteWorldRowI(new_row_i), AbsoluteWorldColI(new_col_i));
+
+            // Don't care ifd outside map
+            if new_row_i < 0
+                || new_col_i < 0
+                || new_col_i > self.columns as isize
+                || new_row_i > self.lines as isize
+            {
+                continue;
+            }
+
+            if let Some(Ground::FreshWater) = self.ground(&new_point) {
+                continue;
+            }
+
+            successors.push((new_point, 1));
+        }
+
+        successors
+    }
 }
 
 #[derive(Debug)]
 pub enum WorldChange {
     Structure(AbsoluteWorldPoint, StructureChange),
     Floor(AbsoluteWorldPoint, FloorChange),
+    Material(AbsoluteWorldPoint, MaterialChange),
     Creature(CreatureId, CreatureChange),
 }
 
@@ -209,4 +280,9 @@ pub enum StructureChange {
 #[derive(Debug)]
 pub enum FloorChange {
     Set(Floor),
+}
+
+#[derive(Debug)]
+pub enum MaterialChange {
+    Add(Material, Quantity),
 }

@@ -104,7 +104,7 @@ impl Direction {
     }
 
     /// (row, col)
-    pub fn modifier(&self) -> (i32, i32) {
+    pub fn modifier(&self) -> (isize, isize) {
         match self {
             Self::Front => (-1, 0),
             Self::FrontLeft => (-1, -1),

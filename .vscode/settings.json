@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "astar",
         "bincode",
         "buildable",
         "Buildable",
@@ -10,6 +11,7 @@
         "nanos",
         "neoroll",
         "noisemap",
+        "pathfinding",
         "perlin",
         "Perlin",
         "rstest",

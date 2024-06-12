@@ -1,6 +1,8 @@
+pub mod drop;
 pub mod need;
 use client::{ComputeAndSendClientStates, ComputeAndSendClientStatesChange};
 use collect::{Collect, CollectChange};
+use drop::{DropOff, DropOffChange};
 use job::{
     affect::{AffectJob, AffectJobChange},
     realize::{RealizeJob, RealizeJobChange},
@@ -33,6 +35,7 @@ pub enum Action {
     AffectJob(AffectJob),
     RealizeJob(RealizeJob),
     Collect(Collect),
+    DropOff(DropOff),
 }
 
 impl Action {
@@ -47,6 +50,7 @@ impl Action {
             Action::RealizeJob(body) => body.tick(id, state),
             Action::Collect(body) => body.tick(id, state),
             Action::ComputeTribeNeeds(body) => body.tick(id, state),
+            Action::DropOff(body) => body.tick(id, state),
         }
     }
 
@@ -61,6 +65,7 @@ impl Action {
             Action::RealizeJob(body) => body.stamp(),
             Action::Collect(body) => body.stamp(),
             Action::ComputeTribeNeeds(body) => body.stamp(),
+            Action::DropOff(body) => body.stamp(),
         }
     }
 
@@ -75,6 +80,7 @@ impl Action {
             Action::RealizeJob(body) => body.take_off(),
             Action::Collect(body) => body.take_off(),
             Action::ComputeTribeNeeds(body) => body.take_off(),
+            Action::DropOff(body) => body.take_off(),
         }
     }
 
@@ -125,6 +131,11 @@ impl Action {
                     body.apply(change)
                 }
             }
+            Action::DropOff(body) => {
+                if let UpdateAction::DropOff(change) = change {
+                    body.apply(change)
+                }
+            }
         }
     }
 }
@@ -163,6 +174,7 @@ pub enum UpdateAction {
     AffectJob(AffectJobChange),
     RealizeJob(RealizeJobChange),
     Collect(CollectChange),
+    DropOff(DropOffChange),
 }
 
 pub trait BodyTick<T> {

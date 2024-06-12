@@ -55,6 +55,10 @@ impl Layers {
     pub fn materials(&self) -> &FilledLayer<Vec<(Material, Quantity)>> {
         &self.materials
     }
+
+    pub fn materials_mut(&mut self) -> &mut FilledLayer<Vec<(Material, Quantity)>> {
+        &mut self.materials
+    }
 }
 
 impl Default for Layers {
@@ -92,6 +96,10 @@ impl<T> FilledLayer<T> {
 
     pub fn set(&mut self, index: usize, value: T) {
         self.items[index] = value;
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> &mut T {
+        &mut self.items[index]
     }
 }
 
