@@ -1,7 +1,13 @@
 use std::fmt::Display;
 
 use crate::{
-    gameplay::{behavior::Behavior, job::Job, material::Material, tribe::TribeId, Quantity},
+    gameplay::{
+        behavior::Behavior,
+        job::Job,
+        material::{self, Material},
+        tribe::TribeId,
+        Quantity,
+    },
     space::AbsoluteWorldPoint,
 };
 
@@ -96,6 +102,18 @@ impl Creature {
 
     pub fn carrying(&self) -> &[(Material, Quantity)] {
         &self.carrying
+    }
+
+    pub fn carrying_quantity(&self, filter: Option<Material>) -> Quantity {
+        match &filter {
+            Some(material) => self
+                .carrying()
+                .iter()
+                .filter(|(m, _)| m == material)
+                .map(|(_, q)| *q)
+                .sum(),
+            None => self.carrying().iter().map(|(_, q)| *q).sum(),
+        }
     }
 }
 

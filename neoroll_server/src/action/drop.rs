@@ -68,12 +68,8 @@ impl BodyTick<DropOffChange> for DropOff {
                 // Drop + remove this action
                 let world = state.world();
                 let creature = world.creatures().get(&self.creature_id).unwrap();
-                let food_quantity = creature
-                    .carrying()
-                    .iter()
-                    .filter(|(m, _)| m == &Material::Resource(Resource::Food))
-                    .map(|(_, q)| *q)
-                    .sum();
+                let food_quantity =
+                    creature.carrying_quantity(Some(Material::Resource(Resource::Food)));
                 (
                     NextTick(*state.frame_i()),
                     vec![

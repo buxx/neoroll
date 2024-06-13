@@ -6,7 +6,7 @@ use neoroll_world::{
         behavior::Behavior,
         material::{Material, Resource},
         tribe::{structure::StructureOwn, TribeId},
-        CollectType,
+        CollectType, Quantity,
     },
 };
 
@@ -17,6 +17,8 @@ use crate::{
     },
     state::{game::GameState, State, StateChange},
 };
+
+const FOOD_LIMIT_QUANTITY: Quantity = Quantity(4000);
 
 pub struct RealizeSearchFood<'a> {
     creature: &'a Creature,
@@ -64,7 +66,7 @@ impl<'a> RealizeSearchFood<'a> {
             .iter()
             .any(|(m, _)| m == &Material::Resource(Resource::Food));
 
-        if carrying_food && self.creature.cant_carry_more() {
+        if carrying_food && self.creature.carrying_quantity(None).0 >= FOOD_LIMIT_QUANTITY.0 {
             let tribe_id = self.creature.tribe_id();
             let game = self.state.game();
             if let Some(storage) = self.nearest_storages(tribe_id, &game).first() {

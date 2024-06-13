@@ -133,6 +133,8 @@ fn gui(
                     ui.label(&format!("need: {:?}", need));
                 }
 
+                ui.label(&format!("{:?}", game.materials().total()));
+
                 // TODO: state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)
                 if ui
                     .add(

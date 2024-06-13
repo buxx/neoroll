@@ -1,8 +1,8 @@
 use crate::{gateway::ClientId, state::State};
 
 use super::{
-    build::BuildGameStateBuilder, human::HumanGameStateBuilder, target::TargetGameStateBuilder,
-    ClientGameState,
+    build::BuildGameStateBuilder, human::HumanGameStateBuilder, material::MaterialsStateBuilder,
+    target::TargetGameStateBuilder, ClientGameState,
 };
 
 pub struct ClientGameStateBuilder<'a> {
@@ -21,7 +21,8 @@ impl<'a> ClientGameStateBuilder<'a> {
         let build = BuildGameStateBuilder::new(self.state).build(tribe_id);
         let target = TargetGameStateBuilder::new(self.state).build(tribe_id);
         let needs = game.tribe_needs().get(tribe_id).unwrap_or(&vec![]).clone();
+        let materials = MaterialsStateBuilder::new(self.state).build(tribe_id);
 
-        ClientGameState::new(*tribe_id, human, build, target, needs)
+        ClientGameState::new(*tribe_id, human, build, target, needs, materials)
     }
 }
