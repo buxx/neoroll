@@ -102,7 +102,7 @@ impl Satisfied for Need {
                     .collect::<Vec<Vec<&(Material, Quantity)>>>()
                     .concat()
                     .iter()
-                    .map(|(_, q)| *q)
+                    .map(|(_, q)| q.clone())
                     .sum::<Quantity>()
                     .0
                     >= quantity.0

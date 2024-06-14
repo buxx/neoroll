@@ -158,8 +158,8 @@ impl World {
         let i = row_i * self.columns + col_i;
 
         let materials = self.layers.materials_mut().get_mut(i);
-        if let Some((_, mut quantity_)) = materials.iter_mut().find(|(m, _)| m == &material) {
-            quantity_ += quantity;
+        if let Some((_, quantity_)) = materials.iter_mut().find(|(m, _)| m == &material) {
+            quantity_.0 += quantity.0;
         } else {
             materials.push((material, quantity));
         }
@@ -243,16 +243,7 @@ impl World {
             let new_point =
                 AbsoluteWorldPoint(AbsoluteWorldRowI(new_row_i), AbsoluteWorldColI(new_col_i));
 
-            // Don't care ifd outside map
-            if new_row_i < 0
-                || new_col_i < 0
-                || new_col_i > self.columns as isize
-                || new_row_i > self.lines as isize
-            {
-                continue;
-            }
-
-            if let Some(Ground::FreshWater) = self.ground(&new_point) {
+            if !self.can_walk(&new_point) {
                 continue;
             }
 
@@ -260,6 +251,23 @@ impl World {
         }
 
         successors
+    }
+
+    pub fn can_walk(&self, point: &AbsoluteWorldPoint) -> bool {
+        // Don't care ifd outside map
+        if point.row_i().0 < 0
+            || point.col_i().0 < 0
+            || point.col_i().0 > self.columns as isize
+            || point.row_i().0 > self.lines as isize
+        {
+            return false;
+        }
+
+        if let Some(Ground::FreshWater) = self.ground(point) {
+            return false;
+        }
+
+        true
     }
 }
 

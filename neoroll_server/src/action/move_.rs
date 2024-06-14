@@ -32,15 +32,19 @@ impl MoveTo {
 impl BodyTick<MoveToChange> for MoveTo {
     fn tick(&self, _id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
         let mut changes = vec![];
+        let mut meta = state.meta_mut();
         let world = state.world();
 
         // TODO: find smooth move solution for gui
         let creature = world.creatures().get(&self.creature_id).unwrap();
-        let new_point = creature.point().next(&Direction::Right);
-        changes.push(StateChange::World(WorldChange::Creature(
-            self.creature_id,
-            CreatureChange::SetPoint(new_point),
-        )));
+        let try_point = creature.point().next(&Direction::Right);
+
+        if let Some(next_point) = meta.book(&try_point) {
+            changes.push(StateChange::World(WorldChange::Creature(
+                self.creature_id,
+                CreatureChange::SetPoint(next_point),
+            )));
+        }
 
         (NextTick(*state.frame_i() + 1), changes)
     }
@@ -77,33 +81,43 @@ const TICK_PERIOD: u64 = TICK_BASE_PERIOD;
 #[derive(Debug, PartialEq)]
 pub struct MoveRandomly {
     creature_id: CreatureId,
-    direction: Direction,
 }
 
 impl MoveRandomly {
-    pub fn new(creature_id: CreatureId, current_direction: Direction) -> Self {
-        Self {
-            creature_id,
-            direction: current_direction,
-        }
+    pub fn new(creature_id: CreatureId) -> Self {
+        Self { creature_id }
     }
 }
 
 impl BodyTick<MoveRandomlyChange> for MoveRandomly {
     fn tick(&self, id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
+        let mut meta = state.meta_mut();
         let world = state.world();
         let creature = world.creatures().get(&self.creature_id).unwrap();
-        let new_point = creature.point().next(&self.direction);
+        let mut possible_directions = Direction::iter().collect::<Vec<Direction>>();
+        possible_directions.shuffle(&mut rand::thread_rng());
 
-        let changes = vec![
-            StateChange::World(WorldChange::Creature(
-                self.creature_id,
-                CreatureChange::SetPoint(new_point),
-            )),
-            StateChange::Action(id, ActionChange::Remove),
-        ];
+        while let Some(direction) = possible_directions.pop() {
+            if let Some(new_point) = meta.book(&creature.point().next(&direction)) {
+                if state.world().can_walk(&new_point) {
+                    return (
+                        NextTick(*state.frame_i() + TICK_PERIOD),
+                        vec![
+                            StateChange::World(WorldChange::Creature(
+                                self.creature_id,
+                                CreatureChange::SetPoint(new_point),
+                            )),
+                            StateChange::Action(id, ActionChange::Remove),
+                        ],
+                    );
+                }
+            }
+        }
 
-        (NextTick(*state.frame_i() + TICK_PERIOD), changes)
+        (
+            NextTick(*state.frame_i()),
+            vec![StateChange::Action(id, ActionChange::Remove)],
+        )
     }
 
     fn apply(&mut self, change: MoveRandomlyChange) {
@@ -116,31 +130,14 @@ pub enum MoveRandomlyChange {}
 
 pub struct MoveRandomlyBuilder {
     creature_id: CreatureId,
-    direction: Option<Direction>,
 }
 
 impl MoveRandomlyBuilder {
     pub fn new(creature_id: CreatureId) -> Self {
-        Self {
-            creature_id,
-            direction: Default::default(),
-        }
-    }
-
-    pub fn direction(mut self, value: Option<Direction>) -> Self {
-        self.direction = value;
-        self
+        Self { creature_id }
     }
 
     pub fn build(&self) -> Action {
-        let direction = match self.direction {
-            Some(direction) => direction,
-            None => *Direction::iter()
-                .collect::<Vec<Direction>>()
-                .choose(&mut rand::thread_rng())
-                .unwrap_or(&Direction::Front),
-        };
-
-        Action::MoveRandomly(MoveRandomly::new(self.creature_id, direction))
+        Action::MoveRandomly(MoveRandomly::new(self.creature_id))
     }
 }

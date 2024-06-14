@@ -17,6 +17,7 @@ use world::WorldModifier;
 use crate::{
     action::{Action, ActionChange, ActionId, NextTick},
     gateway::Gateways,
+    meta::MetaState,
     server::{ServerMessage, ServerMessageEnveloppe},
     subscriptions::Subscriptions,
 };
@@ -27,6 +28,7 @@ pub struct State {
     world: Arc<RwLock<World>>,
     map: Arc<RwLock<Map>>,
     game: Arc<RwLock<GameState>>,
+    meta: Arc<RwLock<MetaState>>,
 }
 
 impl State {
@@ -34,6 +36,7 @@ impl State {
         world: Arc<RwLock<World>>,
         map: Arc<RwLock<Map>>,
         game: Arc<RwLock<GameState>>,
+        meta: Arc<RwLock<MetaState>>,
     ) -> Self {
         Self {
             frame_i: FrameI(0),
@@ -41,6 +44,7 @@ impl State {
             world,
             map,
             game,
+            meta,
         }
     }
 
@@ -68,6 +72,14 @@ impl State {
         self.game.write().unwrap()
     }
 
+    pub fn meta(&self) -> RwLockReadGuard<MetaState> {
+        self.meta.read().unwrap()
+    }
+
+    pub fn meta_mut(&self) -> RwLockWriteGuard<MetaState> {
+        self.meta.write().unwrap()
+    }
+
     pub fn actions(&self) -> &HashMap<ActionId, WrappedAction> {
         &self.actions
     }
@@ -82,6 +94,7 @@ impl State {
 
     pub fn increment(&mut self) {
         self.frame_i += FrameI(1);
+        self.meta_mut().clear();
     }
 
     pub fn apply(
@@ -162,6 +175,7 @@ impl Default for State {
             world: Default::default(),
             map: Default::default(),
             game: Default::default(),
+            meta: Default::default(),
         }
     }
 }

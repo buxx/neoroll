@@ -17,6 +17,7 @@ anyhow = "1.0.75"
 bincode = "1.3.3"
 serde = { version = "1", features = ["derive"] }
 pathfinding = "4.9.1"
+enum-display = "0.1.4"
 # tests
 rstest = "0.18.1"
 

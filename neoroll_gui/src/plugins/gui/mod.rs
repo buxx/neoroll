@@ -138,7 +138,7 @@ fn gui(
                 // TODO: state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)
                 if ui
                     .add(
-                        egui::Slider::new(&mut state.server_speed_request, 0..=100)
+                        egui::Slider::new(&mut state.server_speed_request, 0..=200)
                             .text("Server speed"),
                     )
                     .changed()

@@ -13,7 +13,6 @@ pub struct MaterialsState {
 }
 impl MaterialsState {
     fn new(total: Vec<(Material, Quantity)>) -> Self {
-        dbg!(&total);
         Self { total }
     }
 
@@ -47,7 +46,7 @@ impl<'a> MaterialsStateBuilder<'a> {
         MaterialsState::new(
             total
                 .iter()
-                .map(|(k, v)| (*k, *v))
+                .map(|(k, v)| (*k, v.clone()))
                 .collect::<Vec<(Material, Quantity)>>(),
         )
     }

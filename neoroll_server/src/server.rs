@@ -9,6 +9,7 @@ use crate::{
         job::affect::AffectJobBuilder, need::ComputeTribeNeeds, Action, ActionChange, ActionId,
     },
     gateway::{ClientId, ClientMessageEnveloppe, Gateways},
+    meta::MetaState,
     run::RunnerBuilder,
     state::{
         client::ClientGameState,
@@ -72,6 +73,7 @@ pub fn spawn(gateways: Gateways) {
     let world = Arc::new(RwLock::new(world));
     let map = Arc::new(RwLock::new(map));
     let game = Arc::new(RwLock::new(game));
+    let meta = Arc::new(RwLock::new(MetaState::default()));
 
     let (server_sender, server_receiver): (Sender<StateChange>, Receiver<StateChange>) =
         unbounded();
@@ -97,7 +99,7 @@ pub fn spawn(gateways: Gateways) {
     thread::spawn(|| {
         RunnerBuilder::new(gateways, subscriptions, server_receiver)
             .actions(vec![])
-            .build(State::new(world, map, game))
+            .build(State::new(world, map, game, meta))
             .run();
     });
 }
@@ -246,7 +248,7 @@ impl Server {
                 }
                 ClientGameMessage::RequestServerSpeed(speed) => self
                     .game_mut()
-                    .set_client_speed_request(client_id, *speed.min(&100).max(&1)),
+                    .set_client_speed_request(client_id, *speed.min(&200).max(&1)),
             },
         }
     }

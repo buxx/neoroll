@@ -8,5 +8,5 @@ pub enum Target {
 }
 
 /// All in game things have same unit
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct QuantityPerHuman(pub Quantity);

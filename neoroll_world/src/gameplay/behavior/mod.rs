@@ -6,12 +6,14 @@ use super::progress::Progress;
 pub enum Behavior {
     Idle,
     Collect(Progress),
+    DropOff,
 }
 impl Behavior {
     pub fn progress(&self) -> Option<&Progress> {
         match self {
             Behavior::Idle => None,
             Behavior::Collect(progress) => Some(progress),
+            Behavior::DropOff => None,
         }
     }
 }

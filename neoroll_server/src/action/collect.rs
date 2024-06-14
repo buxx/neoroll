@@ -58,31 +58,37 @@ impl Collect {
                     if let Some(material) = structure.collect_material(CollectType::Food) {
                         let (new_structure, collected_quantity) =
                             structure.reduced(CollectType::Food);
-
-                        changes.extend(vec![
-                            StateChange::World(WorldChange::Structure(
-                                *creature.point(),
-                                StructureChange::Set(Some(new_structure)),
-                            )),
-                            StateChange::World(WorldChange::Creature(
-                                self.creature_id,
-                                CreatureChange::AddToCarrying(material, collected_quantity),
-                            )),
-                        ]);
+                        if collected_quantity.0 > 0 {
+                            changes.extend(vec![
+                                StateChange::World(WorldChange::Structure(
+                                    *creature.point(),
+                                    StructureChange::Set(Some(new_structure)),
+                                )),
+                                StateChange::World(WorldChange::Creature(
+                                    self.creature_id,
+                                    CreatureChange::AddToCarrying(material, collected_quantity),
+                                )),
+                            ]);
+                            return changes;
+                        }
                     }
-                } else if let Some(floor) = world.floor(creature.point()) {
-                    let (new_floor, collected_quantity) = floor.reduced(CollectType::Food);
+                }
+                if let Some(floor) = world.floor(creature.point()) {
                     if let Some(material) = floor.collect_material(CollectType::Food) {
-                        changes.extend(vec![
-                            StateChange::World(WorldChange::Floor(
-                                *creature.point(),
-                                FloorChange::Set(new_floor),
-                            )),
-                            StateChange::World(WorldChange::Creature(
-                                self.creature_id,
-                                CreatureChange::AddToCarrying(material, collected_quantity),
-                            )),
-                        ]);
+                        let (new_floor, collected_quantity) = floor.reduced(CollectType::Food);
+                        if collected_quantity.0 > 0 {
+                            changes.extend(vec![
+                                StateChange::World(WorldChange::Floor(
+                                    *creature.point(),
+                                    FloorChange::Set(new_floor),
+                                )),
+                                StateChange::World(WorldChange::Creature(
+                                    self.creature_id,
+                                    CreatureChange::AddToCarrying(material, collected_quantity),
+                                )),
+                            ]);
+                            return changes;
+                        }
                     }
                 }
             }

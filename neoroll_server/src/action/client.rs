@@ -5,7 +5,7 @@ use crate::{
 
 use super::{ActionId, BodyTick, NextTick};
 
-const TICK_PERIOD: u64 = TICK_BASE_PERIOD / 5;
+const TICK_PERIOD: u64 = TICK_BASE_PERIOD * 5;
 
 #[derive(Debug, PartialEq)]
 pub struct ComputeAndSendClientStates;

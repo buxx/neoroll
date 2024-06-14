@@ -20,7 +20,7 @@ pub enum CollectType {
 }
 
 /// All in game things have same unit
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Default)]
 pub struct Quantity(pub u64);
 
 impl Add for Quantity {

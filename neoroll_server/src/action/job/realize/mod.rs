@@ -22,7 +22,6 @@ impl BodyTick<RealizeJobChange> for RealizeJob {
         let world = state.world();
         let creature = world.creatures().get(&self.creature_id).unwrap();
 
-        // FIXME: dispatch in specialized modules
         match creature.job() {
             Job::Idle => {}
             Job::SearchFood => changes.extend(RealizeSearchFood::new(creature, state).changes()),

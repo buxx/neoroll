@@ -1,13 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
-    gameplay::{
-        behavior::Behavior,
-        job::Job,
-        material::{self, Material},
-        tribe::TribeId,
-        Quantity,
-    },
+    gameplay::{behavior::Behavior, job::Job, material::Material, tribe::TribeId, Quantity},
     space::AbsoluteWorldPoint,
 };
 
@@ -97,7 +91,12 @@ impl Creature {
     }
 
     pub fn cant_carry_more(&self) -> bool {
-        self.carrying.iter().map(|(_, q)| *q).sum::<Quantity>().0 >= MAX_CARRYING_QUANTITY.0
+        self.carrying
+            .iter()
+            .map(|(_, q)| q.clone())
+            .sum::<Quantity>()
+            .0
+            >= MAX_CARRYING_QUANTITY.0
     }
 
     pub fn carrying(&self) -> &[(Material, Quantity)] {
@@ -110,9 +109,9 @@ impl Creature {
                 .carrying()
                 .iter()
                 .filter(|(m, _)| m == material)
-                .map(|(_, q)| *q)
+                .map(|(_, q)| q.clone())
                 .sum(),
-            None => self.carrying().iter().map(|(_, q)| *q).sum(),
+            None => self.carrying().iter().map(|(_, q)| q.clone()).sum(),
         }
     }
 }

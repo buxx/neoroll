@@ -1,12 +1,10 @@
 use neoroll_world::{
-    entity::{creature::CreatureChange, structure::Structure},
+    entity::creature::CreatureChange,
     gameplay::{
         job::Job,
         material::{Material, Resource},
         need::Need,
-        target::Target,
         tribe::TribeId,
-        Quantity,
     },
     space::world::WorldChange,
 };
@@ -39,10 +37,14 @@ impl BodyTick<AffectJobChange> for AffectJob {
             .filter(|n| !n.0)
             .map(|n| &n.1)
             .collect::<Vec<&Need>>();
-
-        //
-        //
-        //
+        let not_needs = game
+            .tribe_needs()
+            .get(&self.tribe_id)
+            .unwrap_or(&default)
+            .iter()
+            .filter(|n| n.0)
+            .map(|n| &n.1)
+            .collect::<Vec<&Need>>();
 
         for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
             let human = world.creatures().get(human_id).unwrap();
@@ -59,6 +61,26 @@ impl BodyTick<AffectJobChange> for AffectJob {
                                     )));
                                 }
                             },
+                        }
+                    }
+                }
+            }
+        }
+
+        for not_need in not_needs {
+            match not_need {
+                Need::MaterialInStorages(Material::Resource(Resource::Food), _) => {
+                    // Disable job of workers
+                    for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
+                        let human = world.creatures().get(human_id).unwrap();
+                        match human.job() {
+                            Job::SearchFood => {
+                                changes.push(StateChange::World(WorldChange::Creature(
+                                    *human.id(),
+                                    CreatureChange::SetJob(Job::Idle),
+                                )));
+                            }
+                            Job::Idle => {}
                         }
                     }
                 }
