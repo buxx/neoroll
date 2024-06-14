@@ -6,7 +6,10 @@ use neoroll_world::map::MAP_TILE_FACTOR;
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::{AlphaByScale, REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
-    plugins::map::{background::Background, container::MapPartContainer, element::Element},
+    plugins::{
+        game::GameStateWrapper,
+        map::{background::Background, container::MapPartContainer, element::Element},
+    },
     scene::ScenePoint,
     utils::EventReaderShortcuts,
 };
@@ -15,7 +18,7 @@ use super::{
     background::MapBackgroundNeedResize,
     container::MapPartContainerRefreshed,
     lake::Lake,
-    tileset::{element_tile_name, spawn, MapResources, MAP_TILESET_NAME},
+    tileset::{element_tile_name, spawn_map_element, MapResources, MAP_TILESET_NAME},
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -34,6 +37,7 @@ pub fn refresh_map_display(
     >,
     tilesets: Tilesets,
     map_part_container: Res<MapPartContainer>,
+    game_state: Res<GameStateWrapper>,
     mut commands: Commands,
 ) {
     let (_, _, camera_transform) = camera.single();
@@ -75,9 +79,28 @@ pub fn refresh_map_display(
                                 (REGION_TILE_WIDTH * MAP_TILE_FACTOR) as f32 * relative_point.0,
                                 (REGION_TILE_HEIGHT * MAP_TILE_FACTOR) as f32 * relative_point.1,
                             );
-                            commands.spawn(spawn(atlas, tile_index, scene_point.into(), color));
+                            commands.spawn(spawn_map_element(
+                                atlas,
+                                tile_index,
+                                scene_point.into(),
+                                color,
+                            ));
                         }
                     }
+                }
+            }
+
+            // Campfires
+            let state = game_state.as_ref().state().as_ref().unwrap();
+            for campfire_point in state.build().campfires() {
+                if let Some((tile_index, _)) = &tileset.select_tile("Campfire") {
+                    let scene_point = ScenePoint::from_world_point(campfire_point);
+                    commands.spawn(spawn_map_element(
+                        atlas,
+                        tile_index,
+                        scene_point.to_vec3(1.0),
+                        color,
+                    ));
                 }
             }
 

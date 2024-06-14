@@ -14,5 +14,6 @@
         9: "../tiles/map/tree4b.ron",
         10: "../tiles/map/tree4c.ron",
         11: "../tiles/map/tree4d.ron",
+        12: "../tiles/map/campfire.ron",
     }
 )

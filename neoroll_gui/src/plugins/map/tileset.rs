@@ -30,7 +30,7 @@ pub struct MapResources {
     pub background: Option<Handle<Image>>,
 }
 
-pub fn spawn(
+pub fn spawn_map_element(
     atlas: &Handle<TextureAtlas>,
     tile_index: &TileIndex,
     point: Vec3,

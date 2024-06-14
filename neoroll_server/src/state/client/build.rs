@@ -1,4 +1,6 @@
-use neoroll_world::{entity::structure::Structure, gameplay::tribe::TribeId};
+use neoroll_world::{
+    entity::structure::Structure, gameplay::tribe::TribeId, space::AbsoluteWorldPoint,
+};
 
 use crate::state::State;
 
@@ -6,13 +8,19 @@ use crate::state::State;
 pub struct BuildGameState {
     can_build_campfire: bool,
     can_build_storage: bool,
+    campfires: Vec<AbsoluteWorldPoint>,
 }
 
 impl BuildGameState {
-    pub fn new(can_build_campfire: bool, can_build_storage: bool) -> Self {
+    pub fn new(
+        can_build_campfire: bool,
+        can_build_storage: bool,
+        campfires: Vec<AbsoluteWorldPoint>,
+    ) -> Self {
         Self {
             can_build_campfire,
             can_build_storage,
+            campfires,
         }
     }
 
@@ -22,6 +30,10 @@ impl BuildGameState {
 
     pub fn can_build_storage(&self) -> bool {
         self.can_build_storage
+    }
+
+    pub fn campfires(&self) -> &[AbsoluteWorldPoint] {
+        &self.campfires
     }
 }
 
@@ -52,7 +64,14 @@ impl<'a> BuildGameStateBuilder<'a> {
                 .game()
                 .tribe_structures(tribe_id, Some(Structure::Storage))
                 .is_empty();
+        let campfires = self
+            .state
+            .game()
+            .tribe_structures(tribe_id, Some(Structure::Campfire))
+            .iter()
+            .map(|s| *s.point())
+            .collect::<Vec<AbsoluteWorldPoint>>();
 
-        BuildGameState::new(can_build_campfire, can_build_storage)
+        BuildGameState::new(can_build_campfire, can_build_storage, campfires)
     }
 }
