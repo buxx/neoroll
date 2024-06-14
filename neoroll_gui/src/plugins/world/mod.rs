@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use container::WorldPartContainerRefreshed;
 use creature::{CreaturesMap, ProgressMap};
+use display::refresh_progress_display;
 
 use self::{
     container::{refresh_world_part_container, WorldPartContainer, WorldPartContainerNeedRefresh},
@@ -33,6 +34,7 @@ impl Plugin for WorldDisplayPlugin {
                     init_world,
                     refresh_world_part_container,
                     refresh_world_display,
+                    refresh_progress_display,
                 ),
             );
     }

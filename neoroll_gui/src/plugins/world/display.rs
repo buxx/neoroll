@@ -10,7 +10,9 @@ use crate::{
 
 use super::{
     container::WorldPartContainerRefreshed,
-    creature::{spawn_creature, CreatureComponent, CreaturesMap},
+    creature::{
+        spawn_creature, CreatureComponent, CreaturesMap, ProgressDone, ProgressMap, ProgressTotal,
+    },
     resolver::LayersResolver,
     tileset::{spawn_tile, WORLD_TILESET_NAME},
 };
@@ -106,5 +108,28 @@ pub fn re_spawn_world(
                 ))
                 .id(),
         );
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
+pub fn refresh_progress_display(
+    camera: Query<(&SceneItemsCamera, &Camera, &mut Transform)>,
+    mut commands: Commands,
+    progress_total: Query<Entity, With<ProgressTotal>>,
+    progress_done: Query<Entity, With<ProgressDone>>,
+    mut progress_map: ResMut<ProgressMap>,
+) {
+    let (_, _, camera_transform) = camera.single();
+    let alpha = AlphaByScale::world();
+
+    if !alpha.display(camera_transform.scale.x) {
+        progress_total
+            .iter()
+            .for_each(|e| commands.entity(e).despawn());
+        progress_done
+            .iter()
+            .for_each(|e| commands.entity(e).despawn());
+        progress_map.clear();
     }
 }

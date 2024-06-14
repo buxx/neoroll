@@ -120,7 +120,7 @@ fn gui(
                     spawn_build_cursor(&mut commands, Buildable::Storage, &tilesets);
                     spawn_build_outline(&mut commands, &mut meshes, &mut materials);
                 }
-                
+
                 if game.can_configure_targets() {
                     ui.label(&format!("targets: {}", game.target().targets().len()));
 
