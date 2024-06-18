@@ -1,0 +1,4 @@
+(
+    name: "Apple",
+    tile: Standard("tiles/world/apple.png")
+)

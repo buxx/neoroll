@@ -14,7 +14,7 @@ use super::{
         spawn_creature, CreatureComponent, CreaturesMap, ProgressDone, ProgressMap, ProgressTotal,
     },
     resolver::LayersResolver,
-    tileset::{spawn_tile, WORLD_TILESET_NAME},
+    tileset::{material_tile_name, spawn_tile, WORLD_TILESET_NAME},
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -77,17 +77,28 @@ pub fn re_spawn_world(
     }
 
     let color = alpha.color(scale.x);
-    for (((point, ground), (_, floor)), (_, structure)) in world_part
+    for ((((point, ground), (_, floor)), (_, materials)), (_, structure)) in world_part
         .grounds()
         .iter()
         .zip(world_part.floors().iter())
+        .zip(world_part.materials().iter())
         .zip(world_part.structures())
     {
         let tiles = LayersResolver.resolve(ground, floor, structure);
+        let scene_point = ScenePoint::from_world_point(point);
+
         for tile in tiles {
             if let Some((tile_index, _)) = &tileset.select_tile(&tile.0) {
-                let scene_point = ScenePoint::from_world_point(point);
                 commands.spawn(spawn_tile(atlas, tile_index, scene_point.into(), color));
+            }
+        }
+
+        // TODO: display side-at-side ?
+        if let Some(materials) = materials {
+            for (material, _) in materials {
+                if let Some((tile_index, _)) = &tileset.select_tile(&material_tile_name(material).0) {
+                    commands.spawn(spawn_tile(atlas, tile_index, scene_point.into(), color));
+                }
             }
         }
     }

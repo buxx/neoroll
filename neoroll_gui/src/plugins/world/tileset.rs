@@ -1,6 +1,8 @@
 use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_tileset::prelude::*;
 use neoroll_world::entity::{floor::Floor, ground::Ground, structure::Structure};
+use neoroll_world::gameplay::material::Material as Material_;
+use neoroll_world::gameplay::material::Resource;
 
 use crate::{graphics::TileName, layer::LAYER_SCENE_ITEMS, plugins::world::region::TileComponent};
 
@@ -12,6 +14,7 @@ pub fn ground_tile_name(ground: &Ground) -> TileName {
         Ground::FreshWater => TileName("FreshWater".to_string()),
     }
 }
+
 pub fn floor_tile_name(ground: &Floor) -> TileName {
     match ground {
         Floor::Nothing => TileName("Nothing".to_string()),
@@ -21,6 +24,12 @@ pub fn floor_tile_name(ground: &Floor) -> TileName {
             51..=128 => TileName("FruitBush1".to_string()),
             129..=255 => TileName("FruitBush2".to_string()),
         },
+    }
+}
+
+pub fn material_tile_name(material: &Material_) -> TileName {
+    match material {
+        Material_::Resource(Resource::Food) => TileName("Apple".to_string()),
     }
 }
 

@@ -97,6 +97,23 @@ impl World {
         Some(self.layers.floors().get(i))
     }
 
+    pub fn material(&self, point: &AbsoluteWorldPoint) -> Option<&Vec<(Material, Quantity)>> {
+        // Outside
+        if point.row_i().0 >= self.lines as isize
+            || point.row_i().0 < 0
+            || point.col_i().0 >= self.columns as isize
+            || point.col_i().0 < 0
+        {
+            return None;
+        }
+
+        let row_i = point.row_i().0 as usize;
+        let col_i = point.col_i().0 as usize;
+
+        let i = row_i * self.columns + col_i;
+        Some(self.layers.materials().get(i))
+    }
+
     pub fn structure(&self, point: &AbsoluteWorldPoint) -> &Option<Structure> {
         // Outside
         if point.row_i().0 >= self.lines as isize

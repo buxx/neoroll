@@ -7,6 +7,7 @@ use crate::{
         ground::Ground,
         structure::Structure,
     },
+    gameplay::{material::Material, Quantity},
     space::RelativeWorldPoint,
 };
 
@@ -34,6 +35,7 @@ impl WorldPart {
     pub fn empty() -> Self {
         Self::new(
             LayersPart::new(
+                CompositeLayer::empty(),
                 CompositeLayer::empty(),
                 CompositeLayer::empty(),
                 CompositeLayer::empty(),
@@ -95,6 +97,26 @@ impl WorldPart {
         self.layers.floors().get(self.index(point))
     }
 
+    #[allow(clippy::type_complexity)]
+    pub fn materials(&self) -> Vec<(AbsoluteWorldPoint, &Option<Vec<(Material, Quantity)>>)> {
+        let mut materials = vec![];
+
+        for point in self.area().points() {
+            materials.push((point, self.material(&point)));
+        }
+
+        materials
+    }
+
+    pub fn material(&self, point: &AbsoluteWorldPoint) -> &Option<Vec<(Material, Quantity)>> {
+        // Outside
+        if !self.area.contains(point) {
+            return &None;
+        }
+
+        self.layers.materials().get(self.index(point))
+    }
+
     pub fn structures(&self) -> Vec<(AbsoluteWorldPoint, &Option<Structure>)> {
         let mut structures = vec![];
 
@@ -135,6 +157,15 @@ impl WorldPart {
         self.layers.structures_mut().set(i, structure);
     }
 
+    pub fn set_materials(
+        &mut self,
+        point: &AbsoluteWorldPoint,
+        materials: Vec<(Material, Quantity)>,
+    ) {
+        let i = self.index(point);
+        self.layers.materials_mut().set(i, Some(materials));
+    }
+
     pub fn set_floor(&mut self, point: &AbsoluteWorldPoint, floor: Floor) {
         let i = self.index(point);
         // TODO: Why LayersPart own only CompositeLayer unlike World ?
@@ -149,8 +180,10 @@ impl WorldPart {
         let mut grounds = vec![];
         let mut floors = vec![];
         let mut structures = vec![];
+        let mut materials = vec![];
 
         for point in area.points() {
+            // dbg!(&new.material(&point));
             grounds.push(
                 self.ground(&point)
                     .clone()
@@ -166,12 +199,18 @@ impl WorldPart {
                     .clone()
                     .or_else(|| new.structure(&point).cloned()),
             );
+            materials.push(
+                self.material(&point)
+                    .clone()
+                    .or_else(|| new.material(&point).cloned()),
+            );
         }
 
         self.layers = LayersPart::new(
             CompositeLayer::new(grounds),
             CompositeLayer::new(floors),
             CompositeLayer::new(structures),
+            CompositeLayer::new(materials),
         );
         self.creatures = new
             .creatures()
@@ -193,6 +232,7 @@ pub struct LayersPart {
     grounds: CompositeLayer<Ground>,
     floors: CompositeLayer<Floor>,
     structures: CompositeLayer<Structure>,
+    materials: CompositeLayer<Vec<(Material, Quantity)>>,
 }
 
 impl LayersPart {
@@ -200,11 +240,13 @@ impl LayersPart {
         grounds: CompositeLayer<Ground>,
         floors: CompositeLayer<Floor>,
         structures: CompositeLayer<Structure>,
+        materials: CompositeLayer<Vec<(Material, Quantity)>>,
     ) -> Self {
         Self {
             grounds,
             floors,
             structures,
+            materials,
         }
     }
 
@@ -231,6 +273,14 @@ impl LayersPart {
     pub fn structures_mut(&mut self) -> &mut CompositeLayer<Structure> {
         &mut self.structures
     }
+
+    pub fn materials(&self) -> &CompositeLayer<Vec<(Material, Quantity)>> {
+        &self.materials
+    }
+
+    pub fn materials_mut(&mut self) -> &mut CompositeLayer<Vec<(Material, Quantity)>> {
+        &mut self.materials
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -238,6 +288,7 @@ pub enum WorldPartMessage {
     Structure(AbsoluteWorldPoint, WorldPartStructureMessage),
     Floor(AbsoluteWorldPoint, WorldPartFloorMessage),
     Creature(CreatureId, WorldPartCreatureMessage),
+    Material(AbsoluteWorldPoint, WorldPartMaterialMessage),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -253,4 +304,9 @@ pub enum WorldPartFloorMessage {
 #[derive(Debug, Clone, PartialEq)]
 pub enum WorldPartCreatureMessage {
     New(PartialCreature),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorldPartMaterialMessage {
+    Set(Vec<(Material, Quantity)>),
 }

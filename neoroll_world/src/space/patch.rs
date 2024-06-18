@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
-use crate::entity::{
-    creature::PartialCreature, floor::Floor, ground::Ground, structure::Structure,
+use crate::{
+    entity::{creature::PartialCreature, floor::Floor, ground::Ground, structure::Structure},
+    gameplay::{material::Material, Quantity},
 };
 
 use super::{area::WorldArea, world::World, AbsoluteWorldPoint};
@@ -12,6 +13,7 @@ pub struct NewLayers {
     floors: HashMap<AbsoluteWorldPoint, Floor>,
     structures: HashMap<AbsoluteWorldPoint, Structure>,
     creatures: Vec<PartialCreature>,
+    materials: HashMap<AbsoluteWorldPoint, Vec<(Material, Quantity)>>,
 }
 
 impl NewLayers {
@@ -19,6 +21,7 @@ impl NewLayers {
         let mut grounds = HashMap::new();
         let mut floors = HashMap::new();
         let mut structures = HashMap::new();
+        let mut materials = HashMap::new();
 
         for point in area.points() {
             if !ignore.contains(&point) {
@@ -30,6 +33,9 @@ impl NewLayers {
                 }
                 if let Some(structure) = world.structure(&point) {
                     structures.insert(point, structure.clone());
+                }
+                if let Some(material) = world.material(&point) {
+                    materials.insert(point, material.clone());
                 }
             }
         }
@@ -45,6 +51,7 @@ impl NewLayers {
                 .cloned()
                 .map(|c| c.into())
                 .collect(),
+            materials,
         }
     }
 
@@ -54,6 +61,10 @@ impl NewLayers {
 
     pub fn floor(&self, point: &AbsoluteWorldPoint) -> Option<&Floor> {
         self.floors.get(point)
+    }
+
+    pub fn material(&self, point: &AbsoluteWorldPoint) -> Option<&Vec<(Material, Quantity)>> {
+        self.materials.get(point)
     }
 
     pub fn structure(&self, point: &AbsoluteWorldPoint) -> Option<&Structure> {

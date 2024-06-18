@@ -4,8 +4,8 @@ use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId, PartialCreatureChange},
     space::{
         part::{
-            WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMessage,
-            WorldPartStructureMessage,
+            WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMaterialMessage,
+            WorldPartMessage, WorldPartStructureMessage,
         },
         world::{FloorChange, MaterialChange, StructureChange, World, WorldChange},
         AbsoluteWorldPoint,
@@ -166,7 +166,16 @@ impl<'a> WorldModifier<'a> {
             },
             WorldChange::Material(point, change) => match change {
                 MaterialChange::Add(material, quantity) => {
-                    self.world.add_material(point, material, quantity);
+                    self.world.add_material(point, material, quantity.clone());
+                    self.send_to_point_clients(
+                        &point,
+                        ServerMessage::WorldPart(WorldPartMessage::Material(
+                            point,
+                            WorldPartMaterialMessage::Set(
+                                self.world.material(&point).cloned().unwrap_or(vec![]),
+                            ),
+                        )),
+                    );
                 }
             },
         }

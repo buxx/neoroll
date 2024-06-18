@@ -13,5 +13,6 @@
         8: "../tiles/world/human.ron",
         9: "../tiles/world/campfire.ron",
         10: "../tiles/world/storage.ron",
+        11: "../tiles/world/apple.ron",
     }
 )
