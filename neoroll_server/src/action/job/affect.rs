@@ -1,11 +1,6 @@
 use neoroll_world::{
     entity::creature::CreatureChange,
-    gameplay::{
-        job::Job,
-        material::{Material, Resource},
-        need::Need,
-        tribe::TribeId,
-    },
+    gameplay::{job::Job, material::Material, need::Need, tribe::TribeId},
     space::world::WorldChange,
 };
 
@@ -49,36 +44,35 @@ impl BodyTick<AffectJobChange> for AffectJob {
         for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
             let human = world.creatures().get(human_id).unwrap();
             match human.job() {
-                Job::SearchFood => {}
                 Job::Idle => {
                     if let Some(need) = needs.pop() {
                         match need {
-                            Need::MaterialInStorages(material, _) => match material {
-                                Material::Resource(Resource::Food) => {
-                                    changes.push(StateChange::World(WorldChange::Creature(
-                                        *human.id(),
-                                        CreatureChange::SetJob(Job::SearchFood),
-                                    )));
-                                }
-                            },
+                            Need::MaterialInStorages(material, _) => {
+                                changes.push(StateChange::World(WorldChange::Creature(
+                                    *human.id(),
+                                    CreatureChange::SetJob(Job::from(material)),
+                                )));
+                            }
                         }
                     }
                 }
+                _ => {}
             }
         }
 
         for not_need in not_needs {
             match not_need {
-                Need::MaterialInStorages(Material::Resource(Resource::Food), _) => {
+                Need::MaterialInStorages(Material::Resource(resource), _) => {
                     // Disable job of workers
                     for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
-                        let human = world.creatures().get(human_id).unwrap();
-                        match human.job() {
-                            Job::SearchFood => {
-                                changes.push(StateChange::World(WorldChange::Creature(
-                                    *human.id(),
-                                    CreatureChange::SetJob(Job::Idle),
-                                )));
+                        match world.creatures().get(human_id).unwrap().job() {
+                            Job::SearchResource(job_resource) => {
+                                if resource == job_resource {
+                                    changes.push(StateChange::World(WorldChange::Creature(
+                                        *human_id,
+                                        CreatureChange::SetJob(Job::Idle),
+                                    )));
+                                }
                             }
                             Job::Idle => {}
                         }

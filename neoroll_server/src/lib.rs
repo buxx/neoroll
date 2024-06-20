@@ -6,3 +6,4 @@ pub mod server;
 pub mod shortcut;
 pub mod state;
 pub mod subscriptions;
+pub mod target;

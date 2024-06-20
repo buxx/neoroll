@@ -10,8 +10,14 @@ pub const WORLD_TILESET_NAME: &str = "World";
 
 pub fn ground_tile_name(ground: &Ground) -> TileName {
     match ground {
-        Ground::Soil => TileName("Soil".to_string()),
         Ground::FreshWater => TileName("FreshWater".to_string()),
+        Ground::Soil => TileName("Soil".to_string()),
+        Ground::SoilFlint(filled) => match filled.0 {
+            0 => TileName("Bush".to_string()),
+            1..=50 => TileName("SoilFlint".to_string()),
+            51..=128 => TileName("SoilFlint".to_string()),
+            129..=255 => TileName("SoilFlint".to_string()),
+        },
     }
 }
 
@@ -30,6 +36,7 @@ pub fn floor_tile_name(ground: &Floor) -> TileName {
 pub fn material_tile_name(material: &Material_) -> TileName {
     match material {
         Material_::Resource(Resource::Food) => TileName("Apple".to_string()),
+        Material_::Resource(Resource::RawFlint) => TileName("RawFlint".to_string()),
     }
 }
 

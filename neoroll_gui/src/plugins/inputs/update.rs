@@ -12,7 +12,7 @@ use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::AlphaByScale,
     plugins::{
-        gui::{GuiState, SwitchDisplayWindow},
+        gui::{state::GuiState, SwitchDisplayWindow},
         map::container::{
             MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed,
         },

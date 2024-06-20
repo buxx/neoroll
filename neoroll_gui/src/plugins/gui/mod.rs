@@ -1,16 +1,29 @@
-pub mod build;
+pub mod targets;
+pub mod paint;
+pub mod root;
+
+use std::fmt::Display;
+
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{
+    egui::{self},
+    EguiContexts,
+};
 use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
 };
-use neoroll_server::{server::ClientMessage, state::game::ClientGameMessage};
 use neoroll_world::gameplay::build::Buildable;
+use paint::Painter;
+use state::GuiState;
+use strum_macros::EnumIter;
 
 use crate::utils::{EventReaderShortcuts, TileName};
 
 use super::{game::GameStateWrapper, server::gateway::GatewayWrapper};
+
+pub mod build;
+pub mod state;
 
 pub struct GuiPlugin;
 
@@ -42,40 +55,6 @@ impl Default for Current {
     }
 }
 
-#[derive(Resource, Default)]
-pub struct GuiState {
-    current: Current,
-    display_window: bool,
-    server_speed_request: u8,
-    is_pointer_over_area: bool,
-}
-
-impl GuiState {
-    pub fn display_window(&self) -> bool {
-        self.display_window
-    }
-
-    pub fn current(&self) -> &Current {
-        &self.current
-    }
-
-    pub fn set_current(&mut self, current: Current) {
-        self.current = current;
-    }
-
-    pub fn set_display_window(&mut self, display_window: bool) {
-        self.display_window = display_window;
-    }
-
-    pub fn set_is_pointer_over_area(&mut self, is_pointer_over_area: bool) {
-        self.is_pointer_over_area = is_pointer_over_area;
-    }
-
-    pub fn is_pointer_over_area(&self) -> bool {
-        self.is_pointer_over_area
-    }
-}
-
 #[derive(Event)]
 pub struct SwitchDisplayWindow;
 
@@ -84,7 +63,7 @@ fn switch_gui_display(
     mut switch_gui_display: EventReader<SwitchDisplayWindow>,
 ) {
     if switch_gui_display.has_been_set() {
-        state.display_window = !state.display_window
+        state.switch_display_window()
     }
 }
 
@@ -100,60 +79,40 @@ fn gui(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    let mut hover = false;
+    let mut effects = vec![];
+
     if state.display_window() {
         let context = contexts.ctx_mut();
 
         egui::Window::new("").show(context, |ui| {
             if let Some(game) = game_state.state() {
-                ui.label(&game.tribe_id().to_string());
-
-                if game.build().can_build_campfire() && ui.button("Campfire").clicked() {
-                    state.set_current(Current::Build(Buildable::Campfire));
-                    state.set_display_window(false);
-                    spawn_build_cursor(&mut commands, Buildable::Campfire, &tilesets);
-                    spawn_build_outline(&mut commands, &mut meshes, &mut materials);
-                }
-
-                if game.build().can_build_storage() && ui.button("Storage").clicked() {
-                    state.set_current(Current::Build(Buildable::Storage));
-                    state.set_display_window(false);
-                    spawn_build_cursor(&mut commands, Buildable::Storage, &tilesets);
-                    spawn_build_outline(&mut commands, &mut meshes, &mut materials);
-                }
-
-                if game.can_configure_targets() {
-                    ui.label(&format!("targets: {}", game.target().targets().len()));
-
-                    for target in game.target().targets() {
-                        ui.label(&format!("{:?}", target));
-                    }
-                }
-
-                for need in game.needs() {
-                    ui.label(&format!("need: {:?}", need));
-                }
-
-                ui.label(&format!("{:?}", game.materials().total()));
-
-                // TODO: state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)
-                if ui
-                    .add(
-                        egui::Slider::new(&mut state.server_speed_request, 0..=200)
-                            .text("Server speed"),
+                effects.extend(
+                    Painter::new(
+                        game,
+                        &mut state,
+                        &gateway,
                     )
-                    .changed()
-                {
-                    gateway.send(ClientMessage::Game(ClientGameMessage::RequestServerSpeed(
-                        state.server_speed_request,
-                    )));
-                };
+                    .paint(ui),
+                );
             }
         });
 
-        state.set_is_pointer_over_area(context.is_pointer_over_area());
-    } else {
-        state.set_is_pointer_over_area(false);
+        hover = context.is_pointer_over_area();
     }
+
+    for effect in effects {
+        match effect {
+            GuiAction::Build(buildable) => {
+                state.set_display_window(false);
+                state.set_current(Current::Build(buildable));
+                spawn_build_outline(&mut commands, &mut meshes, &mut materials);
+                spawn_build_cursor(&mut commands, buildable, &tilesets);
+            }
+        }
+    }
+
+    state.set_is_pointer_over_area(hover);
 }
 
 impl TileName for Buildable {
@@ -163,4 +122,29 @@ impl TileName for Buildable {
             Buildable::Storage => "Storage",
         }
     }
+}
+
+#[derive(EnumIter, Eq, PartialEq)]
+pub enum Panel {
+    Root,
+    Targets,
+}
+
+impl Default for Panel {
+    fn default() -> Self {
+        Self::Root
+    }
+}
+
+impl Display for Panel {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Panel::Root => f.write_str("Resume"),
+            Panel::Targets => f.write_str("Targets"),
+        }
+    }
+}
+
+pub enum GuiAction {
+    Build(Buildable),
 }

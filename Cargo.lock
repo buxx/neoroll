@@ -2836,6 +2836,8 @@ dependencies = [
  "neoroll_world",
  "rand",
  "rstest",
+ "strum",
+ "strum_macros",
 ]
 
 [[package]]

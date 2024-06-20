@@ -96,7 +96,8 @@ pub fn re_spawn_world(
         // TODO: display side-at-side ?
         if let Some(materials) = materials {
             for (material, _) in materials {
-                if let Some((tile_index, _)) = &tileset.select_tile(&material_tile_name(material).0) {
+                if let Some((tile_index, _)) = &tileset.select_tile(&material_tile_name(material).0)
+                {
                     commands.spawn(spawn_tile(atlas, tile_index, scene_point.into(), color));
                 }
             }

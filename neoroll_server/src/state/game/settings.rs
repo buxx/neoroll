@@ -1,6 +1,6 @@
 use neoroll_world::gameplay::{
     material::{Material, Resource},
-    target::{QuantityPerHuman, Target},
+    target::{Target, TargetQuantity},
     Quantity,
 };
 
@@ -19,7 +19,7 @@ impl Default for TribeSettings {
         Self {
             targets: vec![Target::KeepStock(
                 Material::Resource(Resource::Food),
-                QuantityPerHuman(Quantity(2000)),
+                TargetQuantity::PerHuman(Quantity(2000)),
             )],
         }
     }

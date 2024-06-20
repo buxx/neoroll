@@ -38,6 +38,9 @@ impl Floor {
 
                 Floor::FruitBush(_) => Some(Quantity(500)),
             },
+            CollectType::RawFlint => match self {
+                Floor::Nothing | Floor::ShortGrass | Floor::FruitBush(_) => None,
+            },
         }
     }
 
@@ -47,6 +50,9 @@ impl Floor {
                 Floor::Nothing | Floor::ShortGrass => None,
 
                 Floor::FruitBush(filled) => Some(filled),
+            },
+            CollectType::RawFlint => match self {
+                Floor::Nothing | Floor::ShortGrass | Floor::FruitBush(_) => None,
             },
         }
     }
@@ -58,6 +64,9 @@ impl Floor {
 
                 Floor::FruitBush(_) => Some(Material::Resource(Resource::Food)),
             },
+            CollectType::RawFlint => match self {
+                Floor::Nothing | Floor::ShortGrass | Floor::FruitBush(_) => None,
+            },
         }
     }
 
@@ -67,6 +76,9 @@ impl Floor {
                 Floor::Nothing | Floor::ShortGrass => None,
 
                 Floor::FruitBush(_) => Some(Quantity(2000)),
+            },
+            CollectType::RawFlint => match self {
+                Floor::Nothing | Floor::ShortGrass | Floor::FruitBush(_) => None,
             },
         }
     }

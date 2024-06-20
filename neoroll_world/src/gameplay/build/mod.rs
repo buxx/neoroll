@@ -32,7 +32,7 @@ impl<'a> TryBuild<'a> {
                 Ground::FreshWater => {
                     return Err(TryBuildError::IncompatibleGround(ground.clone()))
                 }
-                Ground::Soil => {}
+                Ground::Soil | Ground::SoilFlint(_) => {}
             }
         }
 

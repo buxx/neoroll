@@ -13,7 +13,7 @@ use crate::{
     gameplay::{
         material::Material,
         tribe::{structure::StructureOwn, TribeId},
-        Quantity,
+        CollectType, Quantity,
     },
     space::{layer::Layers, AbsoluteWorldPoint},
     utils::Direction,
@@ -200,6 +200,21 @@ impl World {
 
     pub fn layers_mut(&mut self) -> &mut Layers {
         &mut self.layers
+    }
+
+    pub fn can_collect(&self, point: &AbsoluteWorldPoint, collect_type: CollectType) -> bool {
+        self.structure(point)
+            .as_ref()
+            .and_then(|s| s.collectable(collect_type).map(|f| !f.is_empty()))
+            .unwrap_or(false)
+            || self
+                .floor(point)
+                .and_then(|s| s.collectable(collect_type).map(|f| !f.is_empty()))
+                .unwrap_or(false)
+            || self
+                .ground(point)
+                .and_then(|s| s.collectable(collect_type).map(|f| !f.is_empty()))
+                .unwrap_or(false)
     }
 
     pub fn materials_on(

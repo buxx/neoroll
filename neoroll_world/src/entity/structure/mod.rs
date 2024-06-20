@@ -16,7 +16,8 @@ pub enum Structure {
     Storage,
 }
 
-// TODO: trait for collect/reduced/etc
+// FIXME BS NOW: refactor filled/collect_quantity/etc code
+// FIXME BS NOW: find an "mapping" way to automatically match CollectType / Resources, etc (and do not have multiples matches)
 impl Structure {
     pub fn hide(&self) -> bool {
         match self {
@@ -49,6 +50,13 @@ impl Structure {
 
                 Structure::FruitTree(_) => Some(Quantity(1000)),
             },
+            CollectType::RawFlint => match self {
+                Structure::Nothing
+                | Structure::BigLeafTree
+                | Structure::Campfire
+                | Structure::Storage
+                | Structure::FruitTree(_) => None,
+            },
         }
     }
 
@@ -62,6 +70,13 @@ impl Structure {
 
                 Structure::FruitTree(_) => Some(Quantity(25000)),
             },
+            CollectType::RawFlint => match self {
+                Structure::Nothing
+                | Structure::BigLeafTree
+                | Structure::Campfire
+                | Structure::Storage
+                | Structure::FruitTree(_) => None,
+            },
         }
     }
 
@@ -73,6 +88,13 @@ impl Structure {
                 | Structure::Campfire
                 | Structure::Storage => None,
                 Structure::FruitTree(filled) => Some(filled),
+            },
+            CollectType::RawFlint => match self {
+                Structure::Nothing
+                | Structure::BigLeafTree
+                | Structure::Campfire
+                | Structure::Storage
+                | Structure::FruitTree(_) => None,
             },
         }
     }
@@ -86,6 +108,13 @@ impl Structure {
                 | Structure::Storage => None,
 
                 Structure::FruitTree(_) => Some(Material::Resource(Resource::Food)),
+            },
+            CollectType::RawFlint => match self {
+                Structure::Nothing
+                | Structure::BigLeafTree
+                | Structure::Campfire
+                | Structure::Storage
+                | Structure::FruitTree(_) => None,
             },
         }
     }

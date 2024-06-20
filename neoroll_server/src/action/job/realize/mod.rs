@@ -1,5 +1,5 @@
-use food::RealizeSearchFood;
 use neoroll_world::{entity::creature::CreatureId, gameplay::job::Job};
+use search::RealizeSearchResource;
 
 use crate::{
     action::{Action, ActionId, BodyTick, NextTick},
@@ -7,7 +7,7 @@ use crate::{
     state::{State, StateChange},
 };
 
-pub mod food;
+pub mod search;
 
 const TICK_FREQUENCY: u64 = TICK_BASE_PERIOD;
 
@@ -24,7 +24,9 @@ impl BodyTick<RealizeJobChange> for RealizeJob {
 
         match creature.job() {
             Job::Idle => {}
-            Job::SearchFood => changes.extend(RealizeSearchFood::new(creature, state).changes()),
+            Job::SearchResource(resource) => {
+                changes.extend(RealizeSearchResource::new(creature, state, *resource).changes())
+            }
         }
 
         (NextTick(*state.frame_i() + TICK_FREQUENCY), changes)

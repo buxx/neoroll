@@ -6,7 +6,7 @@ use neoroll_world::{
         behavior::Behavior,
         material::{Material, Resource},
         tribe::{structure::StructureOwn, TribeId},
-        CollectType, Quantity,
+        Weight,
     },
 };
 
@@ -18,40 +18,49 @@ use crate::{
     state::{game::GameState, State, StateChange},
 };
 
-const FOOD_LIMIT_QUANTITY: Quantity = Quantity(4000);
+const LIMIT_WEIGHT: Weight = Weight(4000);
 
-pub struct RealizeSearchFood<'a> {
+pub struct RealizeSearchResource<'a> {
     creature: &'a Creature,
     state: &'a State,
+    resource: Resource,
 }
 
-impl<'a> RealizeSearchFood<'a> {
-    pub fn new(creature: &'a Creature, state: &'a State) -> Self {
-        Self { creature, state }
+impl<'a> RealizeSearchResource<'a> {
+    pub fn new(creature: &'a Creature, state: &'a State, resource: Resource) -> Self {
+        Self {
+            creature,
+            state,
+            resource,
+        }
     }
 
-    fn food_to_collect_on_place(&self) -> bool {
-        let world = self.state.world();
-
-        let can_from_structure = world
-            .structure(self.creature.point())
-            .as_ref()
-            .and_then(|s| s.collectable(CollectType::Food).map(|f| !f.is_empty()))
-            .unwrap_or(false);
-        let can_from_floor = world
-            .floor(self.creature.point())
-            .and_then(|s| s.collectable(CollectType::Food).map(|f| !f.is_empty()))
-            .unwrap_or(false);
-
-        can_from_floor | can_from_structure
+    fn can_collect(&self) -> bool {
+        self.state
+            .world()
+            .can_collect(self.creature.point(), self.resource.into())
     }
 
-    fn already_collecting(&self) -> bool {
+    fn carrying(&self) -> bool {
+        self.creature
+            .carrying_quantity(Some(Material::Resource(self.resource)))
+            .0
+            > 0
+    }
+
+    fn collecting(&self) -> bool {
         matches!(self.creature.behavior(), Behavior::Collect(_))
     }
 
-    fn already_dropping_off(&self) -> bool {
+    fn dropping_off(&self) -> bool {
         matches!(self.creature.behavior(), Behavior::DropOff)
+    }
+
+    fn carrying_too_much(&self) -> bool {
+        self.resource
+            .weight(&self.creature.carrying_quantity(None))
+            .0
+            >= LIMIT_WEIGHT.0
     }
 
     pub fn nearest_storages(
@@ -64,17 +73,12 @@ impl<'a> RealizeSearchFood<'a> {
     }
 
     pub fn changes(&self) -> Vec<StateChange> {
-        let carrying_food = self
-            .creature
-            .carrying_quantity(Some(Material::Resource(Resource::Food)))
-            .0
-            > 0;
-        let already_collecting = self.already_collecting();
-        let already_dropping_off = self.already_dropping_off();
-        let carrying_too_much_food =
-            self.creature.carrying_quantity(None).0 >= FOOD_LIMIT_QUANTITY.0;
+        let carrying = self.carrying();
+        let collecting = self.collecting();
+        let dropping_off = self.dropping_off();
+        let carrying_too_much = self.carrying_too_much();
 
-        if !already_dropping_off && carrying_food && carrying_too_much_food {
+        if !dropping_off && carrying && carrying_too_much {
             let tribe_id = self.creature.tribe_id();
             let game = self.state.game();
             if let Some(storage) = self.nearest_storages(tribe_id, &game).first() {
@@ -82,19 +86,19 @@ impl<'a> RealizeSearchFood<'a> {
                 let action = Action::DropOff(DropOff::new(
                     *self.creature.id(),
                     *storage.point(),
-                    Material::Resource(Resource::Food),
+                    Material::Resource(self.resource),
                 ));
                 return vec![StateChange::Action(action_id, ActionChange::New(action))];
             }
         }
 
-        if self.food_to_collect_on_place() && !already_collecting && !already_dropping_off {
+        if self.can_collect() && !collecting && !dropping_off {
             let action_id = ActionId::new();
             let action = CollectBuilder::new(*self.creature.id()).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];
         }
 
-        if !already_collecting && !already_dropping_off {
+        if !collecting && !dropping_off {
             let action_id = ActionId::new();
             let action = MoveRandomlyBuilder::new(*self.creature.id()).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];

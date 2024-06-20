@@ -5,7 +5,7 @@ pub mod floor;
 pub mod ground;
 pub mod structure;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Clone, Deserialize, Serialize, PartialEq, Eq, Hash, Debug)]
 pub struct Filled(pub u8);
 
 impl Filled {

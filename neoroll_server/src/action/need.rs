@@ -1,12 +1,6 @@
 use neoroll_world::{
     entity::structure::Structure,
-    gameplay::{
-        material::{Material, Resource},
-        need::Need,
-        target::Target,
-        tribe::TribeId,
-        Quantity,
-    },
+    gameplay::{material::Material, need::Need, target::Target, tribe::TribeId, Quantity},
 };
 
 use crate::{
@@ -15,6 +9,7 @@ use crate::{
         game::{need::ComputedNeed, GameChange},
         State, StateChange,
     },
+    target::IntoQuantity,
 };
 
 use super::{ActionId, BodyTick, NextTick};
@@ -68,19 +63,13 @@ trait IntoNeeds {
 
 impl IntoNeeds for Target {
     fn needs(&self, tribe_id: &TribeId, state: &State) -> Vec<Need> {
-        let world = state.world();
-
         match self {
-            Target::KeepStock(material, quantity) => match material {
-                Material::Resource(Resource::Food) => {
-                    // TODO: Filter Humans ?
-                    let tribe_humans = world.tribe_creature_ids(tribe_id).unwrap_or(&vec![]).len();
-                    vec![Need::MaterialInStorages(
-                        *material,
-                        Quantity(quantity.0 .0 * tribe_humans as u64),
-                    )]
-                }
-            },
+            Target::KeepStock(material, quantity) => {
+                vec![Need::MaterialInStorages(
+                    *material,
+                    quantity.resolve_quantity(state, tribe_id),
+                )]
+            }
         }
     }
 }

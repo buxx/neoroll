@@ -33,7 +33,7 @@ pub fn display_build_cursor(
     mut cursor: Query<(&BuildCursor, &mut Transform)>,
     camera: Query<(&Camera, &GlobalTransform), (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
 ) {
-    if let Current::Build(_) = state.current() {
+    if let Current::Build(_) = state.current_mode() {
         let window = windows.single();
         if let Ok((_, mut transform)) = cursor.get_single_mut() {
             let (camera, camera_transform) = camera.single();
@@ -59,7 +59,7 @@ pub fn display_build_outline(
     mut outline: Query<(&BuildOutline, &mut Transform)>,
     camera: Query<(&Camera, &GlobalTransform), (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
 ) {
-    if let Current::Build(_) = state.current() {
+    if let Current::Build(_) = state.current_mode() {
         let window = windows.single();
         if let Ok((_, mut transform)) = outline.get_single_mut() {
             let (camera, camera_transform) = camera.single();
@@ -105,8 +105,8 @@ pub fn spawn_build_cursor(commands: &mut Commands, buildable: Buildable, tileset
 
 pub fn spawn_build_outline(
     commands: &mut Commands,
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<ColorMaterial>>,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<ColorMaterial>,
 ) {
     commands.spawn((
         BuildOutline,
@@ -147,7 +147,7 @@ pub fn try_build(
     mut mouse: EventReader<MouseButtonInput>,
     mut commands: Commands,
 ) {
-    if let Current::Build(building) = state.current() {
+    if let Current::Build(building) = state.current_mode() {
         if let Some(event) = mouse.iter().last() {
             if let ButtonState::Pressed = event.state {
                 let window = windows.single();
