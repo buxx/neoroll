@@ -1,6 +1,12 @@
 use neoroll_world::{
     entity::structure::Structure,
-    gameplay::{material::Material, need::Need, target::Target, tribe::TribeId, Quantity},
+    gameplay::{
+        material::Material,
+        need::Need,
+        target::{Target, TargetId},
+        tribe::TribeId,
+        Quantity,
+    },
 };
 
 use crate::{
@@ -34,12 +40,18 @@ impl BodyTick<ComputeTribeNeedsChange> for ComputeTribeNeeds {
         let all_needs = tribe_settings
             .targets()
             .iter()
-            .map(|t| t.needs(&self.tribe_id, state))
-            .collect::<Vec<Vec<Need>>>()
+            .map(|(id, t)| t.needs(id, &self.tribe_id, state))
+            .collect::<Vec<Vec<(TargetId, Need)>>>()
             .concat();
         let computed_needs = all_needs
             .iter()
-            .map(|need| ComputedNeed(need.satisfied(&self.tribe_id, state), need.clone()))
+            .map(|(target_id, need)| {
+                ComputedNeed(
+                    *target_id,
+                    need.satisfied(&self.tribe_id, state),
+                    need.clone(),
+                )
+            })
             .collect::<Vec<ComputedNeed>>();
 
         (
@@ -58,16 +70,26 @@ impl BodyTick<ComputeTribeNeedsChange> for ComputeTribeNeeds {
 pub enum ComputeTribeNeedsChange {}
 
 trait IntoNeeds {
-    fn needs(&self, tribe_id: &TribeId, state: &State) -> Vec<Need>;
+    fn needs(
+        &self,
+        target_id: &TargetId,
+        tribe_id: &TribeId,
+        state: &State,
+    ) -> Vec<(TargetId, Need)>;
 }
 
 impl IntoNeeds for Target {
-    fn needs(&self, tribe_id: &TribeId, state: &State) -> Vec<Need> {
+    fn needs(
+        &self,
+        target_id: &TargetId,
+        tribe_id: &TribeId,
+        state: &State,
+    ) -> Vec<(TargetId, Need)> {
         match self {
             Target::KeepStock(material, quantity) => {
-                vec![Need::MaterialInStorages(
-                    *material,
-                    quantity.resolve_quantity(state, tribe_id),
+                vec![(
+                    *target_id,
+                    Need::MaterialInStorages(*material, quantity.resolve_quantity(state, tribe_id)),
                 )]
             }
         }

@@ -7,7 +7,7 @@ use neoroll_world::{
 use crate::{
     action::{Action, ActionId, BodyTick, NextTick},
     run::TICK_BASE_PERIOD,
-    state::{State, StateChange},
+    state::{game::need::ComputedNeed, State, StateChange},
 };
 
 const TICK_FREQUENCY: u64 = TICK_BASE_PERIOD * 5;
@@ -29,45 +29,40 @@ impl BodyTick<AffectJobChange> for AffectJob {
             .get(&self.tribe_id)
             .unwrap_or(&default)
             .iter()
-            .filter(|n| !n.0)
-            .map(|n| &n.1)
-            .collect::<Vec<&Need>>();
+            .filter(|n| !n.1)
+            .collect::<Vec<&ComputedNeed>>();
         let not_needs = game
             .tribe_needs()
             .get(&self.tribe_id)
             .unwrap_or(&default)
             .iter()
-            .filter(|n| n.0)
-            .map(|n| &n.1)
-            .collect::<Vec<&Need>>();
+            .filter(|n| n.1)
+            .collect::<Vec<&ComputedNeed>>();
 
         for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
             let human = world.creatures().get(human_id).unwrap();
-            match human.job() {
-                Job::Idle => {
-                    if let Some(need) = needs.pop() {
-                        match need {
-                            Need::MaterialInStorages(material, _) => {
-                                changes.push(StateChange::World(WorldChange::Creature(
-                                    *human.id(),
-                                    CreatureChange::SetJob(Job::from(material)),
-                                )));
-                            }
+            if let Job::Idle = human.job() {
+                if let Some(need) = needs.pop() {
+                    match need.2 {
+                        Need::MaterialInStorages(material, _) => {
+                            changes.push(StateChange::World(WorldChange::Creature(
+                                *human.id(),
+                                CreatureChange::SetJob(Job::from(&material)),
+                            )));
                         }
                     }
                 }
-                _ => {}
             }
         }
 
         for not_need in not_needs {
-            match not_need {
+            match not_need.2 {
                 Need::MaterialInStorages(Material::Resource(resource), _) => {
                     // Disable job of workers
                     for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {
                         match world.creatures().get(human_id).unwrap().job() {
                             Job::SearchResource(job_resource) => {
-                                if resource == job_resource {
+                                if &resource == job_resource {
                                     changes.push(StateChange::World(WorldChange::Creature(
                                         *human_id,
                                         CreatureChange::SetJob(Job::Idle),

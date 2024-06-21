@@ -1,4 +1,5 @@
 pub mod targets;
+
 pub mod paint;
 pub mod root;
 
@@ -13,7 +14,8 @@ use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
 };
-use neoroll_world::gameplay::build::Buildable;
+use neoroll_server::{server::ClientMessage, state::game::{ClientGameMessage, TargetMessage}};
+use neoroll_world::gameplay::{build::Buildable, target::{Target, TargetId}};
 use paint::Painter;
 use state::GuiState;
 use strum_macros::EnumIter;
@@ -83,22 +85,15 @@ fn gui(
     let mut effects = vec![];
 
     if state.display_window() {
-        let context = contexts.ctx_mut();
+        let ctx = contexts.ctx_mut();
 
-        egui::Window::new("").show(context, |ui| {
+        egui::Window::new("").show(ctx, |ui| {
             if let Some(game) = game_state.state() {
-                effects.extend(
-                    Painter::new(
-                        game,
-                        &mut state,
-                        &gateway,
-                    )
-                    .paint(ui),
-                );
+                effects.extend(Painter::new(game, &mut state, &gateway).paint(ui));
             }
         });
 
-        hover = context.is_pointer_over_area();
+        hover = ctx.is_pointer_over_area();
     }
 
     for effect in effects {
@@ -109,6 +104,9 @@ fn gui(
                 spawn_build_outline(&mut commands, &mut meshes, &mut materials);
                 spawn_build_cursor(&mut commands, buildable, &tilesets);
             }
+            GuiAction::Target(target_id, target_action) => {
+                gateway.send(ClientMessage::Game(ClientGameMessage::Target(target_id, target_action.into())))
+            },
         }
     }
 
@@ -147,4 +145,17 @@ impl Display for Panel {
 
 pub enum GuiAction {
     Build(Buildable),
+    Target(TargetId, TargetAction)
+}
+
+pub enum TargetAction{
+    Set(Target)
+}
+
+impl From<TargetAction> for TargetMessage {
+    fn from(value: TargetAction) -> Self {
+        match value {
+            TargetAction::Set(target) => TargetMessage::Set(target),
+        }
+    }
 }

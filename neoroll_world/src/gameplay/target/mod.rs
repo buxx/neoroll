@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use super::{material::Material, Quantity};
 
@@ -12,4 +13,27 @@ pub enum Target {
 pub enum TargetQuantity {
     Fixed(Quantity),
     PerHuman(Quantity),
+}
+
+impl Target {
+    pub fn name(&self) -> String {
+        match self {
+            Target::KeepStock(material, _) => format!("Keep stock of {}", &material.to_string()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct TargetId(Uuid);
+
+impl TargetId {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
+
+impl Default for TargetId {
+    fn default() -> Self {
+        Self::new()
+    }
 }

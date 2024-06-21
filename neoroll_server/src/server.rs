@@ -13,7 +13,7 @@ use crate::{
     run::RunnerBuilder,
     state::{
         client::ClientGameState,
-        game::{ClientGameMessage, GameState, ServerGameMessage},
+        game::{ClientGameMessage, GameChange, GameState, ServerGameMessage, TargetMessage},
         State, StateChange,
     },
     subscriptions::{Subscriptions, SubscriptionsMessage},
@@ -246,9 +246,30 @@ impl Server {
                             .unwrap(),
                     }
                 }
-                ClientGameMessage::RequestServerSpeed(speed) => self
-                    .game_mut()
-                    .set_client_speed_request(client_id, *speed.min(&200).max(&1)),
+                ClientGameMessage::RequestServerSpeed(speed) => {
+                    self.game_mut()
+                        .set_client_speed_request(client_id, *speed.min(&200).max(&1));
+                }
+                ClientGameMessage::Target(id, message) => match message {
+                    TargetMessage::Set(target) => {
+                        let game = self.game();
+                        let tribe_id = *game.client_tribe_id(&client_id).unwrap();
+                        // Required because read game as mut line after
+                        drop(game);
+
+                        self.game_mut()
+                            .tribe_settings_mut()
+                            .entry(tribe_id)
+                            .or_default()
+                            .targets_mut()
+                            .insert(*id, target.clone());
+                        self.server_sender
+                            .send(StateChange::Game(
+                                GameChange::ImmediateClientGameStateRefresh(client_id),
+                            ))
+                            .unwrap();
+                    }
+                },
             },
         }
     }

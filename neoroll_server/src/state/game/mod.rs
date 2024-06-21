@@ -7,6 +7,7 @@ use neoroll_world::{
     entity::structure::Structure,
     gameplay::{
         build::{Buildable, TryBuildError},
+        target::{Target, TargetId},
         tribe::{structure::StructureOwn, Tribe, TribeId},
     },
     space::AbsoluteWorldPoint,
@@ -108,6 +109,10 @@ impl GameState {
         &self.tribe_settings
     }
 
+    pub fn tribe_settings_mut(&mut self) -> &mut HashMap<TribeId, TribeSettings> {
+        &mut self.tribe_settings
+    }
+
     pub fn tribe_needs(&self) -> &HashMap<TribeId, Vec<ComputedNeed>> {
         &self.tribe_needs
     }
@@ -122,10 +127,12 @@ pub enum ClientGameMessage {
     CreateTribe(Tribe),
     TryBuild(Buildable, AbsoluteWorldPoint),
     RequestServerSpeed(u8),
+    Target(TargetId, TargetMessage),
 }
 
 #[derive(Debug)]
 pub enum GameChange {
+    ImmediateClientGameStateRefresh(ClientId),
     SendClientGameState(ClientId, ClientGameState),
     SetTribeNeeds(TribeId, Vec<ComputedNeed>),
 }
@@ -133,4 +140,9 @@ pub enum GameChange {
 #[derive(Debug, Clone, PartialEq)]
 pub enum ServerGameMessage {
     TryBuildError(ClientGameMessage, TryBuildError),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TargetMessage {
+    Set(Target),
 }

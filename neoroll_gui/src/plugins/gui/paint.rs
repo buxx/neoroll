@@ -46,16 +46,15 @@ impl<'a> Painter<'a> {
         self.game
     }
 
-    pub fn state(&self) -> &&'a mut GuiState {
+    pub fn state(&self) -> &GuiState {
         &self.state
     }
 
     pub fn gateway(&self) -> &GatewayWrapper {
         self.gateway
     }
-    
-    pub fn state_mut(&mut self) -> &mut &'a mut GuiState {
+
+    pub fn state_mut(&mut self) -> &mut GuiState {
         &mut self.state
     }
-
 }

@@ -7,6 +7,7 @@ use std::{
     sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard},
 };
 
+use client::builder::ClientGameStateBuilder;
 use game::{GameChange, GameState};
 use neoroll_world::{
     map::Map,
@@ -150,16 +151,29 @@ impl State {
                     .apply(change);
                 }
                 StateChange::Game(change) => match change {
-                    GameChange::SendClientGameState(client_id, state) => gateways
-                        .read()
-                        .unwrap()
-                        .send(ServerMessageEnveloppe::To(
-                            client_id,
-                            ServerMessage::NewClientGameState(state),
-                        ))
-                        .unwrap(),
+                    GameChange::SendClientGameState(client_id, state) => {
+                        gateways
+                            .read()
+                            .unwrap()
+                            .send(ServerMessageEnveloppe::To(
+                                client_id,
+                                ServerMessage::NewClientGameState(state),
+                            ))
+                            .unwrap();
+                    }
                     GameChange::SetTribeNeeds(tribe_id, needs) => {
                         self.game_mut().set_tribe_needs(tribe_id, needs);
+                    }
+                    GameChange::ImmediateClientGameStateRefresh(client_id) => {
+                        let client_state = ClientGameStateBuilder::new(self).build(&client_id);
+                        gateways
+                            .read()
+                            .unwrap()
+                            .send(ServerMessageEnveloppe::To(
+                                client_id,
+                                ServerMessage::NewClientGameState(client_state),
+                            ))
+                            .unwrap();
                     }
                 },
             };
