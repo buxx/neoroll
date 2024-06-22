@@ -3,7 +3,10 @@ use neoroll_world::{
     gameplay::{
         material::Material,
         need::Need,
-        target::{Target, TargetId},
+        target::{
+            need::{ComputedNeed, NeedState, WaitingReason},
+            Target, TargetId,
+        },
         tribe::TribeId,
         Quantity,
     },
@@ -11,10 +14,7 @@ use neoroll_world::{
 
 use crate::{
     run::TICK_BASE_PERIOD,
-    state::{
-        game::{need::ComputedNeed, GameChange},
-        State, StateChange,
-    },
+    state::{game::GameChange, State, StateChange},
     target::IntoQuantity,
 };
 
@@ -97,17 +97,18 @@ impl IntoNeeds for Target {
 }
 
 trait Satisfied {
-    fn satisfied(&self, tribe_id: &TribeId, state: &State) -> bool;
+    fn satisfied(&self, tribe_id: &TribeId, state: &State) -> NeedState;
 }
 
 impl Satisfied for Need {
-    fn satisfied(&self, tribe_id: &TribeId, state: &State) -> bool {
+    fn satisfied(&self, tribe_id: &TribeId, state: &State) -> NeedState {
         let game = state.game();
         let world = state.world();
 
         match self {
             Need::MaterialInStorages(material, quantity) => {
-                game.tribe_structures(tribe_id, Some(Structure::Storage))
+                let covered = game
+                    .tribe_structures(tribe_id, Some(Structure::Storage))
                     .iter()
                     .map(|s| world.materials_on(s.point(), Some(*material)))
                     .collect::<Vec<Vec<&(Material, Quantity)>>>()
@@ -116,7 +117,13 @@ impl Satisfied for Need {
                     .map(|(_, q)| q.clone())
                     .sum::<Quantity>()
                     .0
-                    >= quantity.0
+                    >= quantity.0;
+
+                if covered {
+                    return NeedState::Covered;
+                }
+
+                NeedState::Waiting(WaitingReason::NotEnoughMaterial(material.clone()))
             }
         }
     }

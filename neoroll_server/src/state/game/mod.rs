@@ -1,13 +1,10 @@
-pub mod need;
-pub mod settings;
 use std::collections::HashMap;
 
-use need::ComputedNeed;
 use neoroll_world::{
     entity::structure::Structure,
     gameplay::{
         build::{Buildable, TryBuildError},
-        target::{Target, TargetId},
+        target::{need::ComputedNeed, Target, TargetId},
         tribe::{structure::StructureOwn, Tribe, TribeId},
     },
     space::AbsoluteWorldPoint,
@@ -17,6 +14,8 @@ use settings::TribeSettings;
 use crate::gateway::ClientId;
 
 use super::client::ClientGameState;
+
+pub mod settings;
 
 #[derive(Default)]
 pub struct GameState {

@@ -10,15 +10,12 @@ use material::MaterialsState;
 use neoroll_world::gameplay::tribe::TribeId;
 use target::TargetsGameState;
 
-use super::game::need::ComputedNeed;
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct ClientGameState {
     tribe_id: TribeId,
     human: HumanGameState,
     build: BuildGameState,
     target: TargetsGameState,
-    needs: Vec<ComputedNeed>,
     materials: MaterialsState,
 }
 
@@ -28,7 +25,6 @@ impl ClientGameState {
         human: HumanGameState,
         build: BuildGameState,
         target: TargetsGameState,
-        needs: Vec<ComputedNeed>,
         materials: MaterialsState,
     ) -> Self {
         Self {
@@ -36,7 +32,6 @@ impl ClientGameState {
             human,
             build,
             target,
-            needs,
             materials,
         }
     }
@@ -60,10 +55,6 @@ impl ClientGameState {
     pub fn can_configure_targets(&self) -> bool {
         // For now, consider simply as this
         true
-    }
-
-    pub fn needs(&self) -> &[ComputedNeed] {
-        &self.needs
     }
 
     pub fn materials(&self) -> &MaterialsState {

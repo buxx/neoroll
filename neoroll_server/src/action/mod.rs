@@ -177,6 +177,7 @@ pub enum UpdateAction {
     DropOff(DropOffChange),
 }
 
+// TODO: move T into Self::Type
 pub trait BodyTick<T> {
     /// When action is added to sate, return here one shot world changes to apply
     fn stamp(&self) -> Vec<WorldChange> {

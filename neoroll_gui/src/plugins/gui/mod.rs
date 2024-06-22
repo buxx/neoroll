@@ -14,8 +14,14 @@ use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
 };
-use neoroll_server::{server::ClientMessage, state::game::{ClientGameMessage, TargetMessage}};
-use neoroll_world::gameplay::{build::Buildable, target::{Target, TargetId}};
+use neoroll_server::{
+    server::ClientMessage,
+    state::game::{ClientGameMessage, TargetMessage},
+};
+use neoroll_world::gameplay::{
+    build::Buildable,
+    target::{Target, TargetId},
+};
 use paint::Painter;
 use state::GuiState;
 use strum_macros::EnumIter;
@@ -104,9 +110,9 @@ fn gui(
                 spawn_build_outline(&mut commands, &mut meshes, &mut materials);
                 spawn_build_cursor(&mut commands, buildable, &tilesets);
             }
-            GuiAction::Target(target_id, target_action) => {
-                gateway.send(ClientMessage::Game(ClientGameMessage::Target(target_id, target_action.into())))
-            },
+            GuiAction::Target(target_id, target_action) => gateway.send(ClientMessage::Game(
+                ClientGameMessage::Target(target_id, target_action.into()),
+            )),
         }
     }
 
@@ -145,11 +151,11 @@ impl Display for Panel {
 
 pub enum GuiAction {
     Build(Buildable),
-    Target(TargetId, TargetAction)
+    Target(TargetId, TargetAction),
 }
 
-pub enum TargetAction{
-    Set(Target)
+pub enum TargetAction {
+    Set(Target),
 }
 
 impl From<TargetAction> for TargetMessage {

@@ -1,7 +1,7 @@
 pub mod keep_stock;
 
 use bevy_egui::egui::{Grid, Ui};
-use neoroll_world::gameplay::target::{Target, TargetId};
+use neoroll_world::gameplay::target::{ComputedTarget, Target};
 
 use super::GuiAction;
 
@@ -20,7 +20,7 @@ impl<'a> Painter<'a> {
         let mut actions = vec![];
 
         Grid::new("targets").show(ui, |ui| {
-            for target in self.game().target().targets() {
+            for target in self.game().target().targets().values() {
                 actions.extend(self.target_row(ui, target));
                 ui.end_row();
             }
@@ -29,14 +29,14 @@ impl<'a> Painter<'a> {
         actions
     }
 
-    fn target_row(&self, ui: &mut Ui, target: (&TargetId, &Target)) -> Vec<GuiAction> {
+    fn target_row(&self, ui: &mut Ui, target: &ComputedTarget) -> Vec<GuiAction> {
         let mut actions = vec![];
 
         ui.horizontal(|ui| {
-            ui.label(target.1.name());
+            ui.label(target.target().name());
         });
 
-        match target.1 {
+        match target.target() {
             Target::KeepStock(_, _) => {
                 actions.extend(self.keep_stock_resume(ui, target));
                 actions.extend(self.keep_stock_settings(ui, target));

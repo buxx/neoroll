@@ -20,9 +20,8 @@ impl<'a> ClientGameStateBuilder<'a> {
         let human = HumanGameStateBuilder::new(self.state).build(tribe_id);
         let build = BuildGameStateBuilder::new(self.state).build(tribe_id);
         let target = TargetGameStateBuilder::new(self.state).build(tribe_id);
-        let needs = game.tribe_needs().get(tribe_id).unwrap_or(&vec![]).clone();
         let materials = MaterialsStateBuilder::new(self.state).build(tribe_id);
 
-        ClientGameState::new(*tribe_id, human, build, target, needs, materials)
+        ClientGameState::new(*tribe_id, human, build, target, materials)
     }
 }

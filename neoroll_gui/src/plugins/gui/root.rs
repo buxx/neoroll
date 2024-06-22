@@ -29,7 +29,7 @@ impl<'a> Painter<'a> {
             }
         }
 
-        for need in self.game().needs() {
+        for need in self.game().target().needs() {
             ui.label(&format!("need: {:?}", need));
         }
 

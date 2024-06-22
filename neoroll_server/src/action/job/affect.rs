@@ -1,13 +1,15 @@
 use neoroll_world::{
     entity::creature::CreatureChange,
-    gameplay::{job::Job, material::Material, need::Need, tribe::TribeId},
+    gameplay::{
+        job::Job, material::Material, need::Need, target::need::ComputedNeed, tribe::TribeId,
+    },
     space::world::WorldChange,
 };
 
 use crate::{
     action::{Action, ActionId, BodyTick, NextTick},
     run::TICK_BASE_PERIOD,
-    state::{game::need::ComputedNeed, State, StateChange},
+    state::{State, StateChange},
 };
 
 const TICK_FREQUENCY: u64 = TICK_BASE_PERIOD * 5;
@@ -29,14 +31,14 @@ impl BodyTick<AffectJobChange> for AffectJob {
             .get(&self.tribe_id)
             .unwrap_or(&default)
             .iter()
-            .filter(|n| !n.1)
+            .filter(|n| !n.1.is_satisfied())
             .collect::<Vec<&ComputedNeed>>();
         let not_needs = game
             .tribe_needs()
             .get(&self.tribe_id)
             .unwrap_or(&default)
             .iter()
-            .filter(|n| n.1)
+            .filter(|n| n.1.is_satisfied())
             .collect::<Vec<&ComputedNeed>>();
 
         for human_id in world.tribe_creature_ids(&self.tribe_id).unwrap_or(&vec![]) {

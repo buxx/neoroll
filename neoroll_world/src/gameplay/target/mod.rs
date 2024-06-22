@@ -1,3 +1,5 @@
+pub mod need;
+use need::WaitingReason;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -35,5 +37,56 @@ impl TargetId {
 impl Default for TargetId {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ComputedTarget {
+    id: TargetId,
+    target: Target,
+    state: TargetState,
+    affected: usize,
+}
+
+impl ComputedTarget {
+    pub fn new(id: TargetId, target: Target, state: TargetState, affected: usize) -> Self {
+        Self {
+            id,
+            target,
+            state,
+            affected,
+        }
+    }
+
+    pub fn id(&self) -> &TargetId {
+        &self.id
+    }
+
+    pub fn target(&self) -> &Target {
+        &self.target
+    }
+
+    pub fn state(&self) -> &TargetState {
+        &self.state
+    }
+
+    pub fn affected(&self) -> usize {
+        self.affected
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum TargetState {
+    Covered,
+    InProgress(Vec<WaitingReason>),
+    Waiting(Vec<WaitingReason>),
+}
+
+impl TargetState {
+    pub fn is_satisfied(&self) -> bool {
+        match self {
+            TargetState::Covered => true,
+            TargetState::InProgress(_) | TargetState::Waiting(_) => false,
+        }
     }
 }

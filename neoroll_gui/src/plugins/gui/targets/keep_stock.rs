@@ -1,20 +1,20 @@
 use bevy_egui::egui::{Slider, Ui};
 use neoroll_world::gameplay::{
-    target::{Target, TargetId, TargetQuantity},
+    target::{ComputedTarget, Target, TargetQuantity},
     Quantity,
 };
 
 use crate::plugins::gui::{paint::Painter, GuiAction, TargetAction};
 
 impl<'a> Painter<'a> {
-    pub fn keep_stock_resume(&self, ui: &mut Ui, _target: (&TargetId, &Target)) -> Vec<GuiAction> {
+    pub fn keep_stock_resume(&self, ui: &mut Ui, _target: &ComputedTarget) -> Vec<GuiAction> {
         ui.label("TODO");
 
         vec![]
     }
 
-    pub fn keep_stock_settings(&self, ui: &mut Ui, target: (&TargetId, &Target)) -> Vec<GuiAction> {
-        match target.1 {
+    pub fn keep_stock_settings(&self, ui: &mut Ui, target: &ComputedTarget) -> Vec<GuiAction> {
+        match target.target() {
             Target::KeepStock(material, quantity) => match quantity {
                 // TODO: choice of target quantity type
                 TargetQuantity::Fixed(_) => todo!(),
@@ -24,7 +24,7 @@ impl<'a> Painter<'a> {
                     if ui.add(Slider::new(&mut value, 0..=100000)).changed() {
                         let new_target =
                             Target::KeepStock(*material, TargetQuantity::PerHuman(Quantity(value)));
-                        return vec![GuiAction::Target(*target.0, TargetAction::Set(new_target))];
+                        return vec![GuiAction::Target(*target.id(), TargetAction::Set(new_target))];
                     }
                 }
             },
