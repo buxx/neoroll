@@ -1,5 +1,5 @@
 pub mod drop;
-pub mod need;
+pub mod target;
 use client::{ComputeAndSendClientStates, ComputeAndSendClientStatesChange};
 use collect::{Collect, CollectChange};
 use drop::{DropOff, DropOffChange};
@@ -9,8 +9,8 @@ use job::{
 };
 use migrant::{IncomingMigrant, IncomingMigrantChange};
 use move_::{MoveRandomly, MoveRandomlyChange, MoveTo, MoveToChange};
-use need::{ComputeTribeNeeds, ComputeTribeNeedsChange};
 use neoroll_world::space::world::WorldChange;
+use target::{ComputeTargets, ComputeTargetsChange};
 use uuid::Uuid;
 
 use crate::state::{FrameI, State, StateChange};
@@ -29,9 +29,9 @@ pub enum Action {
     SayHello(SayHello),
     MoveTo(MoveTo),
     MoveRandomly(MoveRandomly),
+    ComputeTargets(ComputeTargets),
     ComputeAndSendClientStates(ComputeAndSendClientStates),
     IncomingMigrant(IncomingMigrant),
-    ComputeTribeNeeds(ComputeTribeNeeds),
     AffectJob(AffectJob),
     RealizeJob(RealizeJob),
     Collect(Collect),
@@ -44,12 +44,12 @@ impl Action {
             Action::SayHello(body) => body.tick(id, state),
             Action::MoveTo(body) => body.tick(id, state),
             Action::MoveRandomly(body) => body.tick(id, state),
+            Action::ComputeTargets(body) => body.tick(id, state),
             Action::ComputeAndSendClientStates(body) => body.tick(id, state),
             Action::IncomingMigrant(body) => body.tick(id, state),
             Action::AffectJob(body) => body.tick(id, state),
             Action::RealizeJob(body) => body.tick(id, state),
             Action::Collect(body) => body.tick(id, state),
-            Action::ComputeTribeNeeds(body) => body.tick(id, state),
             Action::DropOff(body) => body.tick(id, state),
         }
     }
@@ -59,12 +59,12 @@ impl Action {
             Action::SayHello(body) => body.stamp(),
             Action::MoveTo(body) => body.stamp(),
             Action::MoveRandomly(body) => body.stamp(),
+            Action::ComputeTargets(body) => body.stamp(),
             Action::ComputeAndSendClientStates(body) => body.stamp(),
             Action::IncomingMigrant(body) => body.stamp(),
             Action::AffectJob(body) => body.stamp(),
             Action::RealizeJob(body) => body.stamp(),
             Action::Collect(body) => body.stamp(),
-            Action::ComputeTribeNeeds(body) => body.stamp(),
             Action::DropOff(body) => body.stamp(),
         }
     }
@@ -74,12 +74,12 @@ impl Action {
             Action::SayHello(body) => body.take_off(),
             Action::MoveTo(body) => body.take_off(),
             Action::MoveRandomly(body) => body.take_off(),
+            Action::ComputeTargets(body) => body.take_off(),
             Action::ComputeAndSendClientStates(body) => body.take_off(),
             Action::IncomingMigrant(body) => body.take_off(),
             Action::AffectJob(body) => body.take_off(),
             Action::RealizeJob(body) => body.take_off(),
             Action::Collect(body) => body.take_off(),
-            Action::ComputeTribeNeeds(body) => body.take_off(),
             Action::DropOff(body) => body.take_off(),
         }
     }
@@ -98,6 +98,11 @@ impl Action {
             }
             Action::MoveRandomly(body) => {
                 if let UpdateAction::MoveRandomly(change) = change {
+                    body.apply(change)
+                }
+            }
+            Action::ComputeTargets(body) => {
+                if let UpdateAction::ComputeTargets(change) = change {
                     body.apply(change)
                 }
             }
@@ -123,11 +128,6 @@ impl Action {
             }
             Action::Collect(body) => {
                 if let UpdateAction::Collect(change) = change {
-                    body.apply(change)
-                }
-            }
-            Action::ComputeTribeNeeds(body) => {
-                if let UpdateAction::ComputeTribeNeeds(change) = change {
                     body.apply(change)
                 }
             }
@@ -168,9 +168,9 @@ pub enum UpdateAction {
     SayHello(SayHelloChange),
     MoveTo(MoveToChange),
     MoveRandomly(MoveRandomlyChange),
+    ComputeTargets(ComputeTargetsChange),
     ComputeAndSendClientStates(ComputeAndSendClientStatesChange),
     IncomingMigrant(IncomingMigrantChange),
-    ComputeTribeNeeds(ComputeTribeNeedsChange),
     AffectJob(AffectJobChange),
     RealizeJob(RealizeJobChange),
     Collect(CollectChange),

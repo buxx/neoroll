@@ -7,8 +7,19 @@ use neoroll_world::gameplay::{
 use crate::plugins::gui::{paint::Painter, GuiAction, TargetAction};
 
 impl<'a> Painter<'a> {
-    pub fn keep_stock_resume(&self, ui: &mut Ui, _target: &ComputedTarget) -> Vec<GuiAction> {
-        ui.label("TODO");
+    pub fn keep_stock_resume(&self, ui: &mut Ui, target: &ComputedTarget) -> Vec<GuiAction> {
+        ui.vertical(|ui| {
+            let state_value = target.state_string();
+            ui.label(&format!("State: {}", state_value));
+
+            ui.label(&format!("Affected: {}", target.affected()));
+
+            if !target.covered() {
+                ui.label(&format!("Require: {}", "TODO"));
+            };
+        });
+        
+        
 
         vec![]
     }

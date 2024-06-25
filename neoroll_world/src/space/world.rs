@@ -194,6 +194,14 @@ impl World {
         self.tribes_creatures.get(tribe_id)
     }
 
+    pub fn tribe_creatures(&self, tribe_id: &TribeId) -> Vec<&Creature> {
+        self.tribe_creature_ids(tribe_id)
+            .unwrap_or(&vec![])
+            .iter()
+            .map(|i| self.creatures().get(i).expect("Id just given"))
+            .collect()
+    }
+
     pub fn layers(&self) -> &Layers {
         &self.layers
     }

@@ -4,7 +4,7 @@ use neoroll_world::{
     entity::structure::Structure,
     gameplay::{
         build::{Buildable, TryBuildError},
-        target::{need::ComputedNeed, Target, TargetId},
+        target::{ComputedTarget, Target, TargetId, WaitingReason},
         tribe::{structure::StructureOwn, Tribe, TribeId},
     },
     space::AbsoluteWorldPoint,
@@ -24,7 +24,8 @@ pub struct GameState {
     structures_own: HashMap<TribeId, Vec<StructureOwn>>,
     client_speed_requests: HashMap<ClientId, u8>,
     tribe_settings: HashMap<TribeId, TribeSettings>,
-    tribe_needs: HashMap<TribeId, Vec<ComputedNeed>>,
+    tribe_targets: HashMap<TribeId, Vec<ComputedTarget>>,
+    tribe_waitings: HashMap<TribeId, HashMap<TargetId, Vec<WaitingReason>>>,
 }
 
 // FIXME BS NOW: need default value of speed for each clients (connected or not)
@@ -112,12 +113,28 @@ impl GameState {
         &mut self.tribe_settings
     }
 
-    pub fn tribe_needs(&self) -> &HashMap<TribeId, Vec<ComputedNeed>> {
-        &self.tribe_needs
+    pub fn tribe_waitings(&self) -> &HashMap<TribeId, HashMap<TargetId, Vec<WaitingReason>>> {
+        &self.tribe_waitings
     }
 
-    pub fn set_tribe_needs(&mut self, tribe_id: TribeId, value: Vec<ComputedNeed>) {
-        self.tribe_needs.insert(tribe_id, value);
+    pub fn set_waitings(
+        &mut self,
+        tribe_id: &TribeId,
+        target_id: &TargetId,
+        waitings: Vec<WaitingReason>,
+    ) {
+        self.tribe_waitings
+            .entry(*tribe_id)
+            .or_default()
+            .insert(*target_id, waitings);
+    }
+
+    pub fn tribe_targets(&self) -> &HashMap<TribeId, Vec<ComputedTarget>> {
+        &self.tribe_targets
+    }
+
+    pub fn set_tribe_targets(&mut self, tribe_id: TribeId, value: Vec<ComputedTarget>) {
+        self.tribe_targets.insert(tribe_id, value);
     }
 }
 
@@ -133,7 +150,8 @@ pub enum ClientGameMessage {
 pub enum GameChange {
     ImmediateClientGameStateRefresh(ClientId),
     SendClientGameState(ClientId, ClientGameState),
-    SetTribeNeeds(TribeId, Vec<ComputedNeed>),
+    ComputedTarget(TribeId, ComputedTargetChange),
+    Waiting(TribeId, WaitingChange),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -144,4 +162,14 @@ pub enum ServerGameMessage {
 #[derive(Debug, Clone, PartialEq)]
 pub enum TargetMessage {
     Set(Target),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ComputedTargetChange {
+    Set(Vec<ComputedTarget>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WaitingChange {
+    Set(TargetId, Vec<WaitingReason>),
 }

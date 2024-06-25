@@ -8,7 +8,7 @@ use std::{
 };
 
 use client::builder::ClientGameStateBuilder;
-use game::{GameChange, GameState};
+use game::{ComputedTargetChange, GameChange, GameState, WaitingChange};
 use neoroll_world::{
     map::Map,
     space::world::{World, WorldChange},
@@ -161,9 +161,6 @@ impl State {
                             ))
                             .unwrap();
                     }
-                    GameChange::SetTribeNeeds(tribe_id, needs) => {
-                        self.game_mut().set_tribe_needs(tribe_id, needs);
-                    }
                     GameChange::ImmediateClientGameStateRefresh(client_id) => {
                         let client_state = ClientGameStateBuilder::new(self).build(&client_id);
                         gateways
@@ -174,6 +171,21 @@ impl State {
                                 ServerMessage::NewClientGameState(client_state),
                             ))
                             .unwrap();
+                    }
+                    GameChange::ComputedTarget(tribe_id, change) => {
+                        match change {
+                            ComputedTargetChange::Set(targets) => {
+                                self.game_mut().set_tribe_targets(tribe_id, targets);
+                            }
+                        };
+                    }
+                    GameChange::Waiting(tribe_id, change) => {
+                        match change {
+                            WaitingChange::Set(target_id, waitings) => {
+                                self.game_mut()
+                                    .set_waitings(&tribe_id, &target_id, waitings);
+                            }
+                        };
                     }
                 },
             };

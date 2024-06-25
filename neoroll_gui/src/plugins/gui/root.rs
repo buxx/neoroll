@@ -29,10 +29,6 @@ impl<'a> Painter<'a> {
             }
         }
 
-        for need in self.game().target().needs() {
-            ui.label(&format!("need: {:?}", need));
-        }
-
         ui.label(&format!("{:?}", self.game().materials().total()));
 
         // TODO: self.state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)

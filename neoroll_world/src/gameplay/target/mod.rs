@@ -1,9 +1,7 @@
-pub mod need;
-use need::WaitingReason;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{material::Material, Quantity};
+use super::{job::Job, material::Material, need::Need, Quantity};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Target {
@@ -44,17 +42,25 @@ impl Default for TargetId {
 pub struct ComputedTarget {
     id: TargetId,
     target: Target,
-    state: TargetState,
+    covered: bool,
     affected: usize,
+    needs: Vec<Need>,
 }
 
 impl ComputedTarget {
-    pub fn new(id: TargetId, target: Target, state: TargetState, affected: usize) -> Self {
+    pub fn new(
+        id: TargetId,
+        target: Target,
+        covered: bool,
+        affected: usize,
+        needs: Vec<Need>,
+    ) -> Self {
         Self {
             id,
             target,
-            state,
+            covered,
             affected,
+            needs,
         }
     }
 
@@ -66,27 +72,46 @@ impl ComputedTarget {
         &self.target
     }
 
-    pub fn state(&self) -> &TargetState {
-        &self.state
-    }
-
     pub fn affected(&self) -> usize {
         self.affected
+    }
+
+    pub fn needs(&self) -> &Vec<Need> {
+        &self.needs
+    }
+
+    pub fn covered(&self) -> bool {
+        self.covered
+    }
+
+    pub fn state_string(&self) -> &str {
+        if self.covered {
+            return "Covered";
+        }
+
+        if self.affected != 0 {
+            return "On Going";
+        }
+
+        "Waiting"
+    }
+}
+
+impl From<&Target> for Job {
+    fn from(value: &Target) -> Self {
+        match value {
+            Target::KeepStock(material, _) => {
+                //
+                match material {
+                    Material::Resource(resource) => Job::SearchResource(*resource),
+                }
+            }
+        }
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum TargetState {
-    Covered,
-    InProgress(Vec<WaitingReason>),
-    Waiting(Vec<WaitingReason>),
-}
-
-impl TargetState {
-    pub fn is_satisfied(&self) -> bool {
-        match self {
-            TargetState::Covered => true,
-            TargetState::InProgress(_) | TargetState::Waiting(_) => false,
-        }
-    }
+pub enum WaitingReason {
+    NotEnoughWorker,
+    NotEnoughMaterial(Material),
 }

@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     action::{
-        job::affect::AffectJobBuilder, need::ComputeTribeNeeds, Action, ActionChange, ActionId,
+        job::affect::AffectJobBuilder, target::ComputeTargets, Action, ActionChange, ActionId,
     },
     gateway::{ClientId, ClientMessageEnveloppe, Gateways},
     meta::MetaState,
@@ -206,12 +206,11 @@ impl Server {
                             ActionChange::New(AffectJobBuilder::new(*tribe.id()).build()),
                         ))
                         .unwrap();
-
-                    let compute_needs_action_id = ActionId::new();
+                    let compute_targets_action_id = ActionId::new();
                     self.server_sender
                         .send(StateChange::Action(
-                            compute_needs_action_id,
-                            ActionChange::New(Action::ComputeTribeNeeds(ComputeTribeNeeds::new(
+                            compute_targets_action_id,
+                            ActionChange::New(Action::ComputeTargets(ComputeTargets::new(
                                 *tribe.id(),
                             ))),
                         ))

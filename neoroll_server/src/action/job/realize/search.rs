@@ -4,6 +4,7 @@ use neoroll_world::{
     entity::{creature::Creature, structure::Structure},
     gameplay::{
         behavior::Behavior,
+        job::{requirement, Job},
         material::{Material, Resource},
         tribe::{structure::StructureOwn, TribeId},
         Weight,
@@ -41,6 +42,14 @@ impl<'a> RealizeSearchResource<'a> {
             .can_collect(self.creature.point(), self.resource.into())
     }
 
+    fn solving(&self) -> bool {
+        for _requirement in Job::SearchResource(self.resource).requirements() {
+            // FIXME: for SearchQualityWood, must own or going to pick up axe
+        }
+
+        true
+    }
+
     fn carrying(&self) -> bool {
         self.creature
             .carrying_quantity(Some(Material::Resource(self.resource)))
@@ -73,6 +82,7 @@ impl<'a> RealizeSearchResource<'a> {
     }
 
     pub fn changes(&self) -> Vec<StateChange> {
+        let _solving = self.solving();
         let carrying = self.carrying();
         let collecting = self.collecting();
         let dropping_off = self.dropping_off();
