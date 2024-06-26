@@ -20,7 +20,6 @@ impl GameStateWrapper {
     }
 
     pub fn set_state(&mut self, state: Option<ClientGameState>) {
-        println!("set_state");
         self.state = state;
     }
 }

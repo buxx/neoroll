@@ -250,32 +250,37 @@ impl Server {
                         .set_client_speed_request(client_id, *speed.min(&200).max(&1));
                 }
                 ClientGameMessage::Target(id, message) => match message {
-                    TargetMessage::Set(target) => {
+                    TargetMessage::Set(new_target) => {
                         let game = self.game();
                         let tribe_id = *game.client_tribe_id(&client_id).unwrap();
                         // Required because read game as mut line after
                         drop(game);
 
-                        self.game_mut()
+                        let mut game = self.game_mut();
+                        let targets = game
                             .tribe_settings_mut()
                             .entry(tribe_id)
                             .or_default()
-                            .targets_mut()
-                            .insert(*id, target.clone());
+                            .targets_mut();
+                        if let Some((_, target)) = targets.iter_mut().find(|(i, _)| i == id) {
+                            *target = new_target.clone();
+                        } else {
+                            targets.push((*id, new_target.clone()))
+                        }
                         self.server_sender
                             .send(StateChange::Game(
                                 GameChange::ImmediateClientGameStateRefresh(client_id),
                             ))
                             .unwrap();
                     }
-                    TargetMessage::New(target) => {
+                    TargetMessage::New(new_target) => {
                         let game = self.game();
                         let tribe_id = *game.client_tribe_id(&client_id).unwrap();
                         // Required because read game as mut line after
 
                         // Check if this target already exist
                         for target_ in game.tribe_targets().get(&tribe_id).unwrap_or(&vec![]) {
-                            if target_.target().is_same(target) {
+                            if target_.target().is_same(new_target) {
                                 return;
                             }
                         }
@@ -288,7 +293,7 @@ impl Server {
                             .entry(tribe_id)
                             .or_default()
                             .targets_mut()
-                            .insert(*id, target.clone());
+                            .push((*id, new_target.clone()));
                         self.server_sender
                             .send(StateChange::Game(
                                 GameChange::ImmediateClientGameStateRefresh(client_id),
