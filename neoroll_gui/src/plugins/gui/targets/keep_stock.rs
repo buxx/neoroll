@@ -1,4 +1,5 @@
 use bevy_egui::egui::{Slider, Ui};
+use neoroll_server::state::game::settings::TargetSetting;
 use neoroll_world::gameplay::{
     target::{ComputedTarget, Target, TargetQuantity},
     Quantity,
@@ -42,10 +43,10 @@ impl<'a> Painter<'a> {
                             Target::KeepStock(*material, TargetQuantity::Fixed(Quantity(value)));
                         return vec![GuiAction::Target(
                             *target.id(),
-                            TargetAction::Set(new_target),
+                            TargetAction::Set(TargetSetting::new(new_target, target.priority())),
                         )];
                     }
-                },
+                }
                 TargetQuantity::PerHuman(quantity) => {
                     let mut value = quantity.0;
                     // TODO: range by target
@@ -54,7 +55,7 @@ impl<'a> Painter<'a> {
                             Target::KeepStock(*material, TargetQuantity::PerHuman(Quantity(value)));
                         return vec![GuiAction::Target(
                             *target.id(),
-                            TargetAction::Set(new_target),
+                            TargetAction::Set(TargetSetting::new(new_target, target.priority())),
                         )];
                     }
                 }

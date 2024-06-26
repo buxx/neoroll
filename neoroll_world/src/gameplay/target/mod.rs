@@ -81,6 +81,7 @@ pub struct ComputedTarget {
     covered: bool,
     affected: usize,
     needs: Vec<Need>,
+    priority: usize,
 }
 
 impl ComputedTarget {
@@ -90,6 +91,7 @@ impl ComputedTarget {
         covered: bool,
         affected: usize,
         needs: Vec<Need>,
+        priority: usize,
     ) -> Self {
         Self {
             id,
@@ -97,6 +99,7 @@ impl ComputedTarget {
             covered,
             affected,
             needs,
+            priority,
         }
     }
 
@@ -130,6 +133,10 @@ impl ComputedTarget {
         }
 
         "Waiting"
+    }
+
+    pub fn priority(&self) -> usize {
+        self.priority
     }
 }
 

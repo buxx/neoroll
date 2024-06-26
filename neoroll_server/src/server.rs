@@ -280,7 +280,7 @@ impl Server {
 
                         // Check if this target already exist
                         for target_ in game.tribe_targets().get(&tribe_id).unwrap_or(&vec![]) {
-                            if target_.target().is_same(new_target) {
+                            if target_.target().is_same(new_target.target()) {
                                 return;
                             }
                         }

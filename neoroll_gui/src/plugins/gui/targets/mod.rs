@@ -1,6 +1,7 @@
 pub mod keep_stock;
 
 use bevy_egui::egui::{ComboBox, Grid, Ui};
+use neoroll_server::state::game::settings::TargetSetting;
 use neoroll_world::gameplay::material::Material;
 use neoroll_world::gameplay::target::{ComputedTarget, Target, TargetId};
 
@@ -25,8 +26,12 @@ impl<'a> Painter<'a> {
     fn active_targets(&self, ui: &mut Ui) -> Vec<GuiAction> {
         let mut actions = vec![];
 
-        Grid::new("targets").show(ui, |ui| {
-            for target in self.game().target().targets().values() {
+        Grid::new("targets").min_col_width(200.).show(ui, |ui| {
+            let mut targets: Vec<&ComputedTarget> =
+                self.game().target().targets().values().collect();
+            targets.sort_by_key(|t| t.priority());
+
+            for target in targets {
                 actions.extend(self.target_row(ui, target));
                 ui.end_row();
             }
@@ -37,6 +42,8 @@ impl<'a> Painter<'a> {
 
     fn target_row(&self, ui: &mut Ui, target: &ComputedTarget) -> Vec<GuiAction> {
         let mut actions = vec![];
+
+        ui.label(format!("{}", target.priority()));
 
         ui.horizontal(|ui| {
             ui.label(target.target().name());
@@ -97,11 +104,13 @@ impl<'a> Painter<'a> {
 
                         if ui.button("Add").clicked() {
                             let material: Material = material.to_owned().into();
+                            let priority = self.game().target().targets().len() + 1;
                             actions.extend(vec![GuiAction::Target(
                                 TargetId::new(),
-                                TargetAction::New(
+                                TargetAction::New(TargetSetting::new(
                                     Target::KeepStock(material, Default::default()).default(),
-                                ),
+                                    priority,
+                                )),
                             )]);
                         }
                     }

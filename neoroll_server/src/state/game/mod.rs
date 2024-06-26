@@ -9,7 +9,7 @@ use neoroll_world::{
     },
     space::AbsoluteWorldPoint,
 };
-use settings::TribeSettings;
+use settings::{TargetSetting, TribeSettings};
 
 use crate::gateway::ClientId;
 
@@ -161,8 +161,8 @@ pub enum ServerGameMessage {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TargetMessage {
-    Set(Target),
-    New(Target),
+    Set(TargetSetting),
+    New(TargetSetting),
 }
 
 #[derive(Debug, Clone, PartialEq)]

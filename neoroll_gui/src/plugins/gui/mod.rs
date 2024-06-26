@@ -16,12 +16,9 @@ use build::{
 };
 use neoroll_server::{
     server::ClientMessage,
-    state::game::{ClientGameMessage, TargetMessage},
+    state::game::{settings::TargetSetting, ClientGameMessage, TargetMessage},
 };
-use neoroll_world::gameplay::{
-    build::Buildable,
-    target::{Target, TargetId},
-};
+use neoroll_world::gameplay::{build::Buildable, target::TargetId};
 use paint::Painter;
 use state::GuiState;
 use strum_macros::EnumIter;
@@ -155,8 +152,8 @@ pub enum GuiAction {
 }
 
 pub enum TargetAction {
-    New(Target),
-    Set(Target),
+    New(TargetSetting),
+    Set(TargetSetting),
 }
 
 impl From<TargetAction> for TargetMessage {

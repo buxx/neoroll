@@ -30,7 +30,9 @@ impl<'a> ComputedTargetBuilder<'a> {
         let mut computed_targets = vec![];
 
         for (target_id, target) in targets {
-            let needs = target.satisfaction_needs(&self.tribe_id, self.state);
+            let needs = target
+                .target()
+                .satisfaction_needs(&self.tribe_id, self.state);
             let satisfied = needs
                 .iter()
                 .all(|n| n.satisfied(&self.tribe_id, self.state));
@@ -40,16 +42,17 @@ impl<'a> ComputedTargetBuilder<'a> {
                 .unwrap_or(&vec![])
                 .iter()
                 .map(|i| world.creatures().get(i).expect("Id just retrieved"))
-                .filter(|c| c.job() == &Job::from(&target))
+                .filter(|c| c.job() == &Job::from(target.target()))
                 .collect::<Vec<&Creature>>()
                 .len();
 
             computed_targets.push(ComputedTarget::new(
                 target_id,
-                target,
+                target.target().clone(),
                 satisfied,
                 affected,
                 needs.clone(),
+                target.priority(),
             ));
         }
 
