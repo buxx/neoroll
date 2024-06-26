@@ -2,8 +2,7 @@ use std::collections::HashMap;
 
 use neoroll_world::gameplay::{
     material::{Material, Resource},
-    target::{Target, TargetId, TargetQuantity},
-    Quantity,
+    target::{Target, TargetId},
 };
 
 pub struct TribeSettings {
@@ -25,10 +24,7 @@ impl Default for TribeSettings {
         Self {
             targets: HashMap::from([(
                 TargetId::default(),
-                Target::KeepStock(
-                    Material::Resource(Resource::Food),
-                    TargetQuantity::PerHuman(Quantity(2000)),
-                ),
+                Target::KeepStock(Material::Resource(Resource::Food), Default::default()).default(),
             )]),
         }
     }

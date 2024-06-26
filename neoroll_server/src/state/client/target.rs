@@ -1,28 +1,26 @@
 use std::collections::HashMap;
 
-use neoroll_world::{
-    entity::{creature::Creature, structure::Structure},
-    gameplay::{
-        job::Job,
-        material::Material,
-        need::Need,
-        target::{ComputedTarget, Target, TargetId},
-        tribe::TribeId,
-        Quantity,
-    },
+use neoroll_world::gameplay::{
+    target::{ComputedTarget, TargetId, WaitingReason},
+    tribe::TribeId,
 };
 
-use crate::{state::State, target::IntoQuantity};
+use crate::state::State;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TargetsGameState {
     targets: HashMap<TargetId, ComputedTarget>,
+    waitings: HashMap<TargetId, Vec<WaitingReason>>,
 }
 
 impl TargetsGameState {
-    pub fn new(targets: Vec<ComputedTarget>) -> Self {
+    pub fn new(
+        targets: Vec<ComputedTarget>,
+        waitings: HashMap<TargetId, Vec<WaitingReason>>,
+    ) -> Self {
         Self {
             targets: targets.iter().map(|t| (*t.id(), t.clone())).collect(),
+            waitings,
         }
     }
 
@@ -32,6 +30,10 @@ impl TargetsGameState {
 
     pub fn targets_mut(&mut self) -> &mut HashMap<TargetId, ComputedTarget> {
         &mut self.targets
+    }
+
+    pub fn waitings(&self) -> &HashMap<TargetId, Vec<WaitingReason>> {
+        &self.waitings
     }
 }
 
@@ -52,6 +54,13 @@ impl<'a> TargetGameStateBuilder<'a> {
             .get(tribe_id)
             .cloned()
             .unwrap_or_default();
-        TargetsGameState::new(computed_targets)
+        let waiting = self
+            .state
+            .game()
+            .tribe_waitings()
+            .get(tribe_id)
+            .cloned()
+            .unwrap_or_default();
+        TargetsGameState::new(computed_targets, waiting)
     }
 }

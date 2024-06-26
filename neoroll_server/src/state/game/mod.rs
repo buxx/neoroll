@@ -162,6 +162,7 @@ pub enum ServerGameMessage {
 #[derive(Debug, Clone, PartialEq)]
 pub enum TargetMessage {
     Set(Target),
+    New(Target),
 }
 
 #[derive(Debug, Clone, PartialEq)]

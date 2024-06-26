@@ -21,6 +21,7 @@ use crate::{
     meta::MetaState,
     server::{ServerMessage, ServerMessageEnveloppe},
     subscriptions::Subscriptions,
+    target::ComputedTargetBuilder,
 };
 
 pub struct State {
@@ -162,6 +163,14 @@ impl State {
                             .unwrap();
                     }
                     GameChange::ImmediateClientGameStateRefresh(client_id) => {
+                        let game = self.game();
+                        let tribe_id = *game.client_tribe_id(&client_id).unwrap();
+
+                        // TODO: not elegant
+                        let computed_targets = ComputedTargetBuilder::new(self, tribe_id).build();
+                        drop(game);
+                        self.game_mut()
+                            .set_tribe_targets(tribe_id, computed_targets);
                         let client_state = ClientGameStateBuilder::new(self).build(&client_id);
                         gateways
                             .read()

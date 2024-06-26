@@ -47,7 +47,7 @@ impl<'a> Painter<'a> {
     }
 
     pub fn state(&self) -> &GuiState {
-        &self.state
+        self.state
     }
 
     pub fn gateway(&self) -> &GatewayWrapper {
@@ -55,6 +55,6 @@ impl<'a> Painter<'a> {
     }
 
     pub fn state_mut(&mut self) -> &mut GuiState {
-        &mut self.state
+        self.state
     }
 }

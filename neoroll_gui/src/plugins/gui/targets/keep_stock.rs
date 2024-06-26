@@ -15,27 +15,47 @@ impl<'a> Painter<'a> {
             ui.label(&format!("Affected: {}", target.affected()));
 
             if !target.covered() {
-                ui.label(&format!("Require: {}", "TODO"));
+                if let Some(waiting) = self.game().target().waitings().get(target.id()) {
+                    let waiting_str = waiting
+                        .iter()
+                        .map(|w| w.to_string())
+                        .collect::<Vec<String>>()
+                        .join(", ");
+                    ui.label(&format!("Require: {}", waiting_str));
+                }
             };
         });
-        
-        
 
         vec![]
     }
 
+    // FIXME BS NOW: gui send it several times (one by frame)
     pub fn keep_stock_settings(&self, ui: &mut Ui, target: &ComputedTarget) -> Vec<GuiAction> {
         match target.target() {
             Target::KeepStock(material, quantity) => match quantity {
                 // TODO: choice of target quantity type
-                TargetQuantity::Fixed(_) => todo!(),
-                TargetQuantity::PerHuman(quantity_value) => {
-                    let mut value = quantity_value.0;
+                TargetQuantity::Fixed(quantity) => {
+                    let mut value = quantity.0;
+                    // TODO: range by target
+                    if ui.add(Slider::new(&mut value, 0..=100000)).changed() {
+                        let new_target =
+                            Target::KeepStock(*material, TargetQuantity::Fixed(Quantity(value)));
+                        return vec![GuiAction::Target(
+                            *target.id(),
+                            TargetAction::Set(new_target),
+                        )];
+                    }
+                },
+                TargetQuantity::PerHuman(quantity) => {
+                    let mut value = quantity.0;
                     // TODO: range by target
                     if ui.add(Slider::new(&mut value, 0..=100000)).changed() {
                         let new_target =
                             Target::KeepStock(*material, TargetQuantity::PerHuman(Quantity(value)));
-                        return vec![GuiAction::Target(*target.id(), TargetAction::Set(new_target))];
+                        return vec![GuiAction::Target(
+                            *target.id(),
+                            TargetAction::Set(new_target),
+                        )];
                     }
                 }
             },

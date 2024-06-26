@@ -155,6 +155,7 @@ pub enum GuiAction {
 }
 
 pub enum TargetAction {
+    New(Target),
     Set(Target),
 }
 
@@ -162,6 +163,7 @@ impl From<TargetAction> for TargetMessage {
     fn from(value: TargetAction) -> Self {
         match value {
             TargetAction::Set(target) => TargetMessage::Set(target),
+            TargetAction::New(target) => TargetMessage::New(target),
         }
     }
 }

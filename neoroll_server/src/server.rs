@@ -268,6 +268,33 @@ impl Server {
                             ))
                             .unwrap();
                     }
+                    TargetMessage::New(target) => {
+                        let game = self.game();
+                        let tribe_id = *game.client_tribe_id(&client_id).unwrap();
+                        // Required because read game as mut line after
+
+                        // Check if this target already exist
+                        for target_ in game.tribe_targets().get(&tribe_id).unwrap_or(&vec![]) {
+                            if target_.target().is_same(target) {
+                                return;
+                            }
+                        }
+
+                        // Required because read game as mut line after
+                        drop(game);
+
+                        self.game_mut()
+                            .tribe_settings_mut()
+                            .entry(tribe_id)
+                            .or_default()
+                            .targets_mut()
+                            .insert(*id, target.clone());
+                        self.server_sender
+                            .send(StateChange::Game(
+                                GameChange::ImmediateClientGameStateRefresh(client_id),
+                            ))
+                            .unwrap();
+                    }
                 },
             },
         }

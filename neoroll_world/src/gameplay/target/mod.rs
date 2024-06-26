@@ -1,7 +1,14 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::{job::Job, material::Material, need::Need, Quantity};
+use super::{
+    job::Job,
+    material::{Material, Resource},
+    need::Need,
+    Quantity,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Target {
@@ -15,10 +22,39 @@ pub enum TargetQuantity {
     PerHuman(Quantity),
 }
 
+impl Default for TargetQuantity {
+    fn default() -> Self {
+        Self::Fixed(Quantity(0))
+    }
+}
+
 impl Target {
     pub fn name(&self) -> String {
         match self {
             Target::KeepStock(material, _) => format!("Keep stock of {}", &material.to_string()),
+        }
+    }
+
+    pub fn default(&self) -> Target {
+        match self {
+            Target::KeepStock(material, _) => match material {
+                Material::Resource(Resource::Food) => Target::KeepStock(
+                    Material::Resource(Resource::Food),
+                    TargetQuantity::PerHuman(Quantity(2000)),
+                ),
+                Material::Resource(Resource::RawFlint) => Target::KeepStock(
+                    Material::Resource(Resource::RawFlint),
+                    TargetQuantity::Fixed(Quantity(100)),
+                ),
+            },
+        }
+    }
+
+    pub fn is_same(&self, target: &Target) -> bool {
+        match self {
+            Target::KeepStock(material, _) => match target {
+                Target::KeepStock(material_, _) => material.eq(material_),
+            },
         }
     }
 }
@@ -114,4 +150,13 @@ impl From<&Target> for Job {
 pub enum WaitingReason {
     NotEnoughWorker,
     NotEnoughMaterial(Material),
+}
+
+impl Display for WaitingReason {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WaitingReason::NotEnoughWorker => f.write_str("Worker"),
+            WaitingReason::NotEnoughMaterial(material) => f.write_str(&material.to_string()),
+        }
+    }
 }
