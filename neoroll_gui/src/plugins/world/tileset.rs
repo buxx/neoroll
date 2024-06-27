@@ -13,7 +13,7 @@ pub fn ground_tile_name(ground: &Ground) -> TileName {
         Ground::FreshWater => TileName("FreshWater".to_string()),
         Ground::Soil => TileName("Soil".to_string()),
         Ground::SoilFlint(filled) => match filled.0 {
-            0 => TileName("Bush".to_string()),
+            0 => TileName("Soil".to_string()),
             1..=50 => TileName("SoilFlint".to_string()),
             51..=128 => TileName("SoilFlint".to_string()),
             129..=255 => TileName("SoilFlint".to_string()),

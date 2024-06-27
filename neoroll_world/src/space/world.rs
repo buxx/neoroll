@@ -164,6 +164,14 @@ impl World {
         self.layers.floors_mut().set(i, floor);
     }
 
+    pub fn set_ground(&mut self, point: AbsoluteWorldPoint, ground: Ground) {
+        let row_i = point.row_i().0 as usize;
+        let col_i = point.col_i().0 as usize;
+
+        let i = row_i * self.columns + col_i;
+        self.layers.grounds_mut().set(i, ground);
+    }
+
     pub fn add_material(
         &mut self,
         point: AbsoluteWorldPoint,
@@ -315,6 +323,7 @@ impl World {
 pub enum WorldChange {
     Structure(AbsoluteWorldPoint, StructureChange),
     Floor(AbsoluteWorldPoint, FloorChange),
+    Ground(AbsoluteWorldPoint, GroundChange),
     Material(AbsoluteWorldPoint, MaterialChange),
     Creature(CreatureId, CreatureChange),
 }
@@ -328,6 +337,11 @@ pub enum StructureChange {
 #[derive(Debug)]
 pub enum FloorChange {
     Set(Floor),
+}
+
+#[derive(Debug)]
+pub enum GroundChange {
+    Set(Ground),
 }
 
 #[derive(Debug)]

@@ -1,7 +1,7 @@
 use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId},
-    gameplay::{behavior::Behavior, progress::Progress, CollectType},
-    space::world::{FloorChange, StructureChange, WorldChange},
+    gameplay::{behavior::Behavior, material::Resource, progress::Progress},
+    space::world::{FloorChange, GroundChange, StructureChange, WorldChange},
 };
 
 use crate::{
@@ -15,13 +15,14 @@ use super::{ActionChange, UpdateAction};
 const TICK_PERIOD: u64 = TICK_BASE_PERIOD / 2;
 
 #[derive(Debug, PartialEq)]
-pub struct Collect {
+pub struct CollectResource {
     creature_id: CreatureId,
     start: Option<FrameI>,
     end: Option<FrameI>,
+    resource: Resource,
 }
 
-impl Collect {
+impl CollectResource {
     fn is_start(&self) -> bool {
         self.start.is_none() || self.end.is_none()
     }
@@ -37,6 +38,7 @@ impl Collect {
             StateChange::Action(
                 id,
                 ActionChange::Update(UpdateAction::Collect(CollectChange::SetEnd(
+                    // FIXME: collect duration according to resource
                     *state.frame_i() + TICK_PERIOD * 10,
                 ))),
             ),
@@ -55,9 +57,9 @@ impl Collect {
                 let world = state.world();
                 let creature = world.creatures().get(&self.creature_id).unwrap();
                 if let Some(structure) = &world.structure(creature.point()) {
-                    if let Some(material) = structure.collect_material(CollectType::Food) {
+                    if let Some(material) = structure.collect_material(self.resource.into()) {
                         let (new_structure, collected_quantity) =
-                            structure.reduced(CollectType::Food);
+                            structure.reduced(self.resource.into());
                         if collected_quantity.0 > 0 {
                             changes.extend(vec![
                                 StateChange::World(WorldChange::Structure(
@@ -74,13 +76,31 @@ impl Collect {
                     }
                 }
                 if let Some(floor) = world.floor(creature.point()) {
-                    if let Some(material) = floor.collect_material(CollectType::Food) {
-                        let (new_floor, collected_quantity) = floor.reduced(CollectType::Food);
+                    if let Some(material) = floor.collect_material(self.resource.into()) {
+                        let (new_floor, collected_quantity) = floor.reduced(self.resource.into());
                         if collected_quantity.0 > 0 {
                             changes.extend(vec![
                                 StateChange::World(WorldChange::Floor(
                                     *creature.point(),
                                     FloorChange::Set(new_floor),
+                                )),
+                                StateChange::World(WorldChange::Creature(
+                                    self.creature_id,
+                                    CreatureChange::AddToCarrying(material, collected_quantity),
+                                )),
+                            ]);
+                            return changes;
+                        }
+                    }
+                }
+                if let Some(ground) = world.ground(creature.point()) {
+                    if let Some(material) = ground.collect_material(self.resource.into()) {
+                        let (new_ground, collected_quantity) = ground.reduced(self.resource.into());
+                        if collected_quantity.0 > 0 {
+                            changes.extend(vec![
+                                StateChange::World(WorldChange::Ground(
+                                    *creature.point(),
+                                    GroundChange::Set(new_ground),
                                 )),
                                 StateChange::World(WorldChange::Creature(
                                     self.creature_id,
@@ -115,7 +135,7 @@ impl Collect {
     }
 }
 
-impl BodyTick<CollectChange> for Collect {
+impl BodyTick<CollectChange> for CollectResource {
     fn stamp(&self) -> Vec<WorldChange> {
         vec![WorldChange::Creature(
             self.creature_id,
@@ -163,18 +183,23 @@ pub enum CollectChange {
 
 pub struct CollectBuilder {
     creature_id: CreatureId,
+    resource: Resource,
 }
 
 impl CollectBuilder {
-    pub fn new(creature_id: CreatureId) -> Self {
-        Self { creature_id }
+    pub fn new(creature_id: CreatureId, resource: Resource) -> Self {
+        Self {
+            creature_id,
+            resource,
+        }
     }
 
     pub fn build(&self) -> Action {
-        Action::Collect(Collect {
+        Action::Collect(CollectResource {
             creature_id: self.creature_id,
             start: Default::default(),
             end: Default::default(),
+            resource: self.resource,
         })
     }
 }

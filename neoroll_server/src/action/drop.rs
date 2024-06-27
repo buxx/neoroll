@@ -1,9 +1,6 @@
 use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId},
-    gameplay::{
-        behavior::Behavior,
-        material::{Material, Resource},
-    },
+    gameplay::{behavior::Behavior, material::Material},
     space::{
         world::{MaterialChange, WorldChange},
         AbsoluteWorldPoint,
@@ -70,6 +67,7 @@ impl BodyTick<DropOffChange> for DropOff {
                 if world.can_walk(try_point) {
                     if let Some(next_point) = meta.book(try_point) {
                         let new_path = path[1..].to_vec();
+                        println!("move on next point");
                         (
                             NextTick(*state.frame_i() + TICK_FREQUENCY),
                             vec![
@@ -86,10 +84,12 @@ impl BodyTick<DropOffChange> for DropOff {
                             ],
                         )
                     } else {
+                        println!("place busy");
                         // Place is busy, wait next tick
                         (NextTick(*state.frame_i() + TICK_FREQUENCY), vec![])
                     }
                 } else {
+                    println!("path corrupted");
                     // Path seems corrupted, try another one
                     (
                         NextTick(*state.frame_i() + TICK_FREQUENCY),
@@ -102,21 +102,21 @@ impl BodyTick<DropOffChange> for DropOff {
                     )
                 }
             } else {
+                println!("drop");
                 // Drop + remove this action
                 let world = state.world();
                 let creature = world.creatures().get(&self.creature_id).unwrap();
-                let food_quantity =
-                    creature.carrying_quantity(Some(Material::Resource(Resource::Food)));
+                let quantity = creature.carrying_quantity(Some(self.material));
                 (
                     NextTick(*state.frame_i()),
                     vec![
                         StateChange::World(WorldChange::Material(
                             *creature.point(),
-                            MaterialChange::Add(self.material, food_quantity.clone()),
+                            MaterialChange::Add(self.material, quantity.clone()),
                         )),
                         StateChange::World(WorldChange::Creature(
                             self.creature_id,
-                            CreatureChange::RemoveFromCarrying(self.material, food_quantity),
+                            CreatureChange::RemoveFromCarrying(self.material, quantity),
                         )),
                         StateChange::Action(id, ActionChange::Remove),
                     ],
@@ -125,6 +125,7 @@ impl BodyTick<DropOffChange> for DropOff {
 
         // If path found, use it at next step
         } else if let Some(path) = self.find_path(state) {
+            println!("new path");
             (
                 NextTick(*state.frame_i() + TICK_FREQUENCY),
                 vec![StateChange::Action(

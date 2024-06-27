@@ -4,10 +4,10 @@ use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId, PartialCreatureChange},
     space::{
         part::{
-            WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMaterialMessage,
-            WorldPartMessage, WorldPartStructureMessage,
+            WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartGroundMessage,
+            WorldPartMaterialMessage, WorldPartMessage, WorldPartStructureMessage,
         },
-        world::{FloorChange, MaterialChange, StructureChange, World, WorldChange},
+        world::{FloorChange, GroundChange, MaterialChange, StructureChange, World, WorldChange},
         AbsoluteWorldPoint,
     },
 };
@@ -160,6 +160,19 @@ impl<'a> WorldModifier<'a> {
                         ServerMessage::WorldPart(WorldPartMessage::Floor(
                             point,
                             WorldPartFloorMessage::Set(floor.clone()),
+                        )),
+                    );
+                }
+            },
+            WorldChange::Ground(point, change) => match change {
+                GroundChange::Set(ground) => {
+                    self.world.set_ground(point, ground.clone());
+
+                    self.send_to_point_clients(
+                        &point,
+                        ServerMessage::WorldPart(WorldPartMessage::Ground(
+                            point,
+                            WorldPartGroundMessage::Set(ground.clone()),
                         )),
                     );
                 }

@@ -57,6 +57,15 @@ impl Target {
             },
         }
     }
+
+    pub fn carrying_enough_quantity(&self) -> Quantity {
+        match self {
+            Target::KeepStock(material, _) => match material {
+                Material::Resource(Resource::Food) => Quantity(4000),
+                Material::Resource(Resource::RawFlint) => Quantity(30),
+            },
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

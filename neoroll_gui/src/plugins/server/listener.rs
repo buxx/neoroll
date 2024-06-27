@@ -8,8 +8,7 @@ use neoroll_server::{
 use neoroll_world::{
     entity::creature::{CreatureId, PartialCreatureChange},
     space::part::{
-        WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartMaterialMessage,
-        WorldPartMessage, WorldPartStructureMessage,
+        WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartGroundMessage, WorldPartMaterialMessage, WorldPartMessage, WorldPartStructureMessage
     },
 };
 
@@ -140,6 +139,12 @@ pub fn listen(
                 WorldPartMessage::Floor(point, change) => match change {
                     WorldPartFloorMessage::Set(floor) => {
                         world_part.0.set_floor(&point, floor);
+                        world_container_refreshed.send(WorldPartContainerRefreshed);
+                    }
+                },
+                WorldPartMessage::Ground(point, change) => match change {
+                    WorldPartGroundMessage::Set(ground) => {
+                        world_part.0.set_ground(&point, ground);
                         world_container_refreshed.send(WorldPartContainerRefreshed);
                     }
                 },

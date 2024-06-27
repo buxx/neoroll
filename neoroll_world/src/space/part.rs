@@ -172,6 +172,11 @@ impl WorldPart {
         self.layers.floors_mut().set(i, Some(floor));
     }
 
+    pub fn set_ground(&mut self, point: &AbsoluteWorldPoint, ground: Ground) {
+        let i = self.index(point);
+        self.layers.grounds_mut().set(i, Some(ground));
+    }
+
     pub fn add_creature(&mut self, creature: PartialCreature) {
         self.creatures.insert(*creature.id(), creature);
     }
@@ -287,6 +292,7 @@ impl LayersPart {
 pub enum WorldPartMessage {
     Structure(AbsoluteWorldPoint, WorldPartStructureMessage),
     Floor(AbsoluteWorldPoint, WorldPartFloorMessage),
+    Ground(AbsoluteWorldPoint, WorldPartGroundMessage),
     Creature(CreatureId, WorldPartCreatureMessage),
     Material(AbsoluteWorldPoint, WorldPartMaterialMessage),
 }
@@ -299,6 +305,11 @@ pub enum WorldPartStructureMessage {
 #[derive(Debug, Clone, PartialEq)]
 pub enum WorldPartFloorMessage {
     Set(Floor),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum WorldPartGroundMessage {
+    Set(Ground),
 }
 
 #[derive(Debug, Clone, PartialEq)]

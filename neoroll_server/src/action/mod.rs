@@ -1,7 +1,7 @@
 pub mod drop;
 pub mod target;
 use client::{ComputeAndSendClientStates, ComputeAndSendClientStatesChange};
-use collect::{Collect, CollectChange};
+use collect::{CollectChange, CollectResource};
 use drop::{DropOff, DropOffChange};
 use job::{
     affect::{AffectJob, AffectJobChange},
@@ -34,7 +34,7 @@ pub enum Action {
     IncomingMigrant(IncomingMigrant),
     AffectJob(AffectJob),
     RealizeJob(RealizeJob),
-    Collect(Collect),
+    Collect(CollectResource),
     DropOff(DropOff),
 }
 

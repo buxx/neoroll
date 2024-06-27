@@ -4,10 +4,10 @@ use neoroll_world::{
     entity::{creature::Creature, structure::Structure},
     gameplay::{
         behavior::Behavior,
-        job::{requirement, Job},
+        job::Job,
         material::{Material, Resource},
+        target::Target,
         tribe::{structure::StructureOwn, TribeId},
-        Weight,
     },
 };
 
@@ -18,8 +18,6 @@ use crate::{
     },
     state::{game::GameState, State, StateChange},
 };
-
-const LIMIT_WEIGHT: Weight = Weight(4000);
 
 pub struct RealizeSearchResource<'a> {
     creature: &'a Creature,
@@ -65,11 +63,18 @@ impl<'a> RealizeSearchResource<'a> {
         matches!(self.creature.behavior(), Behavior::DropOff)
     }
 
-    fn carrying_too_much(&self) -> bool {
-        self.resource
-            .weight(&self.creature.carrying_quantity(None))
-            .0
-            >= LIMIT_WEIGHT.0
+    fn carrying_enough(&self) -> bool {
+        let carrying_quantity = self
+            .creature
+            .carrying_quantity(Some(Material::Resource(self.resource)))
+            .0;
+        let enough_quantity =
+            Target::KeepStock(Material::Resource(self.resource), Default::default())
+                .carrying_enough_quantity()
+                .0;
+
+        println!("{} >= {}", carrying_quantity, enough_quantity);
+        carrying_quantity >= enough_quantity
     }
 
     pub fn nearest_storages(
@@ -86,9 +91,12 @@ impl<'a> RealizeSearchResource<'a> {
         let carrying = self.carrying();
         let collecting = self.collecting();
         let dropping_off = self.dropping_off();
-        let carrying_too_much = self.carrying_too_much();
+        let carrying_enough = self.carrying_enough();
 
-        if !dropping_off && carrying && carrying_too_much {
+        // dbg!((carrying, collecting, dropping_off, carrying_enough,));
+
+        if !dropping_off && carrying && carrying_enough {
+            // println!("1");
             let tribe_id = self.creature.tribe_id();
             let game = self.state.game();
             if let Some(storage) = self.nearest_storages(tribe_id, &game).first() {
@@ -103,17 +111,20 @@ impl<'a> RealizeSearchResource<'a> {
         }
 
         if self.can_collect() && !collecting && !dropping_off {
+            // println!("2");
             let action_id = ActionId::new();
-            let action = CollectBuilder::new(*self.creature.id()).build();
+            let action = CollectBuilder::new(*self.creature.id(), self.resource).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];
         }
 
         if !collecting && !dropping_off {
+            // println!("3");
             let action_id = ActionId::new();
             let action = MoveRandomlyBuilder::new(*self.creature.id()).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];
         }
 
+        // println!("4");
         vec![]
     }
 }
