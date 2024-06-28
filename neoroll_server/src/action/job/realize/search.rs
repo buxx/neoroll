@@ -93,10 +93,7 @@ impl<'a> RealizeSearchResource<'a> {
         let dropping_off = self.dropping_off();
         let carrying_enough = self.carrying_enough();
 
-        // dbg!((carrying, collecting, dropping_off, carrying_enough,));
-
         if !dropping_off && carrying && carrying_enough {
-            // println!("1");
             let tribe_id = self.creature.tribe_id();
             let game = self.state.game();
             if let Some(storage) = self.nearest_storages(tribe_id, &game).first() {
@@ -111,20 +108,17 @@ impl<'a> RealizeSearchResource<'a> {
         }
 
         if self.can_collect() && !collecting && !dropping_off {
-            // println!("2");
             let action_id = ActionId::new();
             let action = CollectBuilder::new(*self.creature.id(), self.resource).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];
         }
 
         if !collecting && !dropping_off {
-            // println!("3");
             let action_id = ActionId::new();
             let action = MoveRandomlyBuilder::new(*self.creature.id()).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];
         }
 
-        // println!("4");
         vec![]
     }
 }
