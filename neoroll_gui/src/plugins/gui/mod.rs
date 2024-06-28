@@ -5,10 +5,10 @@ pub mod root;
 
 use std::fmt::Display;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::{
-    egui::{self},
-    EguiContexts,
+    egui,
+    EguiContexts, EguiSettings,
 };
 use bevy_tileset::prelude::Tilesets;
 use build::{
@@ -40,6 +40,7 @@ impl Plugin for GuiPlugin {
                 Update,
                 (
                     gui,
+                    update_ui_scale_factor,
                     switch_gui_display,
                     display_build_cursor,
                     display_build_outline,
@@ -114,6 +115,15 @@ fn gui(
     }
 
     state.set_is_pointer_over_area(hover);
+}
+
+fn update_ui_scale_factor(
+    mut egui_settings: ResMut<EguiSettings>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+) {
+    if let Ok(window) = windows.get_single() {
+        egui_settings.scale_factor = 2. / window.scale_factor();
+    }
 }
 
 impl TileName for Buildable {
