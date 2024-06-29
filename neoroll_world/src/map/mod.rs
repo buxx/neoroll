@@ -1,3 +1,4 @@
+pub mod find;
 use self::{area::MapArea, sector::Sector};
 use crate::space::AbsoluteWorldPoint;
 use serde::{Deserialize, Serialize};

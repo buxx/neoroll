@@ -43,6 +43,13 @@ impl AbsoluteWorldPoint {
             AbsoluteWorldColI(self.1 .0 + modifier.1 as isize),
         )
     }
+
+    pub fn apply(&self, modifier: (isize, isize)) -> AbsoluteWorldPoint {
+        AbsoluteWorldPoint(
+            AbsoluteWorldRowI(self.0 .0 + modifier.0),
+            AbsoluteWorldColI(self.1 .0 + modifier.1),
+        )
+    }
 }
 
 impl From<AbsoluteMapPoint> for AbsoluteWorldPoint {
@@ -108,11 +115,13 @@ mod test {
         let grounds = (0..25).map(|_| Ground::Soil).collect();
         let floors = (0..25).map(|_| Floor::Nothing).collect();
         let structures = (0..25).map(|_| None).collect();
+        let materials = (0..25).map(|_| vec![]).collect();
         World::new(
             Layers::new(
                 FilledLayer::new(grounds),
                 FilledLayer::new(floors),
                 CompositeLayer::new(structures),
+                FilledLayer::new(materials),
             ),
             lines,
             columns,

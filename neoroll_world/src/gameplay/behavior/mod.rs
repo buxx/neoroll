@@ -7,6 +7,7 @@ pub enum Behavior {
     Idle,
     Collect(Progress),
     DropOff,
+    MoveTo,
 }
 impl Behavior {
     pub fn progress(&self) -> Option<&Progress> {
@@ -14,6 +15,7 @@ impl Behavior {
             Behavior::Idle => None,
             Behavior::Collect(progress) => Some(progress),
             Behavior::DropOff => None,
+            Behavior::MoveTo => None,
         }
     }
 }

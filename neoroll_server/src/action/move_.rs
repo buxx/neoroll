@@ -3,6 +3,7 @@ use strum::IntoEnumIterator;
 
 use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId},
+    gameplay::behavior::Behavior,
     space::{world::WorldChange, AbsoluteWorldPoint},
     utils::Direction,
 };
@@ -12,71 +13,138 @@ use crate::{
     state::{State, StateChange},
 };
 
-use super::{Action, ActionChange, ActionId, BodyTick, NextTick};
+use super::{Action, ActionChange, ActionId, BodyTick, NextTick, UpdateAction};
 
+const TICK_PERIOD: u64 = TICK_BASE_PERIOD;
+
+// TODO: Probable duplicate code with DropOff
 #[derive(Debug, PartialEq)]
 pub struct MoveTo {
     creature_id: CreatureId,
-    target_point: AbsoluteWorldPoint,
+    point: AbsoluteWorldPoint,
+    path: Option<Vec<AbsoluteWorldPoint>>,
 }
 
 impl MoveTo {
-    pub fn new(creature_id: CreatureId, target_point: AbsoluteWorldPoint) -> Self {
+    pub fn new(creature_id: CreatureId, point: AbsoluteWorldPoint) -> Self {
         Self {
             creature_id,
-            target_point,
+            point,
+            path: None,
         }
+    }
+
+    pub fn find_path(&self, state: &State) -> Option<Vec<AbsoluteWorldPoint>> {
+        let world = state.world();
+        let creature = world.creatures().get(&self.creature_id).unwrap();
+        state
+            .world()
+            .find_path(creature.point(), &self.point)
+            .map(|p| p.0)
     }
 }
 
 impl BodyTick<MoveToChange> for MoveTo {
-    fn tick(&self, _id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
-        let mut changes = vec![];
-        let mut meta = state.meta_mut();
-        let world = state.world();
+    fn stamp(&self) -> Vec<WorldChange> {
+        vec![WorldChange::Creature(
+            self.creature_id,
+            CreatureChange::SetBehavior(Behavior::MoveTo),
+        )]
+    }
 
-        // TODO: find smooth move solution for gui
-        let creature = world.creatures().get(&self.creature_id).unwrap();
-        let try_point = creature.point().next(&Direction::Right);
+    fn take_off(&self) -> Vec<WorldChange> {
+        vec![WorldChange::Creature(
+            self.creature_id,
+            CreatureChange::SetBehavior(Behavior::Idle),
+        )]
+    }
+    fn tick(&self, id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
+        if let Some(path) = &self.path {
+            println!("There is a pth");
+            if let Some(try_point) = path.iter().next() {
+                println!("Still have point in path");
+                let mut meta = state.meta_mut();
+                let world = state.world();
 
-        if let Some(next_point) = meta.book(&try_point) {
-            changes.push(StateChange::World(WorldChange::Creature(
-                self.creature_id,
-                CreatureChange::SetPoint(next_point),
-            )));
+                if world.can_walk(try_point) {
+                    println!("Can walk on this path");
+                    if let Some(next_point) = meta.book(try_point) {
+                        println!("Can book: Move !");
+                        let new_path = path[1..].to_vec();
+                        (
+                            NextTick(*state.frame_i() + TICK_PERIOD),
+                            vec![
+                                StateChange::World(WorldChange::Creature(
+                                    self.creature_id,
+                                    CreatureChange::SetPoint(next_point),
+                                )),
+                                StateChange::Action(
+                                    id,
+                                    ActionChange::Update(UpdateAction::MoveTo(
+                                        MoveToChange::SetPath(Some(new_path)),
+                                    )),
+                                ),
+                            ],
+                        )
+                    } else {
+                        println!("Place is busy");
+                        // Place is busy, wait next tick
+                        (NextTick(*state.frame_i() + TICK_PERIOD), vec![])
+                    }
+                } else {
+                    println!("Path corrupted");
+                    // Path seems corrupted, try another one
+                    (
+                        NextTick(*state.frame_i() + TICK_PERIOD),
+                        vec![StateChange::Action(
+                            id,
+                            ActionChange::Update(UpdateAction::MoveTo(MoveToChange::SetPath(None))),
+                        )],
+                    )
+                }
+            } else {
+                println!("Path empty, end");
+                // Drop + remove this action
+                (
+                    NextTick(*state.frame_i()),
+                    vec![StateChange::Action(id, ActionChange::Remove)],
+                )
+            }
+
+        // If path found, use it at next step
+        } else if let Some(path) = self.find_path(state) {
+            println!("Founded a new path");
+            (
+                NextTick(*state.frame_i() + TICK_PERIOD),
+                vec![StateChange::Action(
+                    id,
+                    ActionChange::Update(UpdateAction::MoveTo(MoveToChange::SetPath(Some(path)))),
+                )],
+            )
+
+        // If path cant be find, cancel this action
+        } else {
+            println!("No path found, abort");
+            (
+                NextTick(*state.frame_i()),
+                vec![StateChange::Action(id, ActionChange::Remove)],
+            )
         }
-
-        (NextTick(*state.frame_i() + 1), changes)
     }
 
     fn apply(&mut self, change: MoveToChange) {
-        match change {}
+        match change {
+            MoveToChange::SetPath(path) => self.path = path,
+        }
     }
 }
 
 #[derive(Debug)]
-pub enum MoveToChange {}
-
-pub struct MoveToBuilder {
-    creature_id: CreatureId,
-    target_point: AbsoluteWorldPoint,
-}
-
-impl MoveToBuilder {
-    pub fn new(creature_id: CreatureId, target_point: AbsoluteWorldPoint) -> Self {
-        Self {
-            creature_id,
-            target_point,
-        }
-    }
-
-    pub fn build(&self) -> Action {
-        Action::MoveTo(MoveTo::new(self.creature_id, self.target_point))
-    }
+pub enum MoveToChange {
+    SetPath(Option<Vec<AbsoluteWorldPoint>>),
 }
 
 ///////
-const TICK_PERIOD: u64 = TICK_BASE_PERIOD;
 
 #[derive(Debug, PartialEq)]
 pub struct MoveRandomly {

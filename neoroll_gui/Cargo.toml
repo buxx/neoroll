@@ -8,7 +8,7 @@ rand = "0.8.5"
 neoroll_server = { path = "../neoroll_server" }
 neoroll_world = { path = "../neoroll_world" }
 # WARNING : remove dynamic_linking feature for production !!
-bevy = { version = "0.11.2", features = ["dynamic_linking"] }
+bevy = { version = "0.11.2" }
 bevy_tileset = "0.8.0"
 crossbeam = "0.8.4"
 bevy_egui = "0.22"

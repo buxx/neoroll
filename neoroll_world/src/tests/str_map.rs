@@ -35,6 +35,7 @@ impl<'a> WorldFromStrBuilder<'a> {
                 FilledLayer::new(grounds),
                 FilledLayer::new(vec![Floor::Nothing; lines.len() * columns]),
                 CompositeLayer::new(vec![None; lines.len() * columns]),
+                FilledLayer::new(vec![vec![]; lines.len() * columns]),
             ),
             lines.len(),
             columns,

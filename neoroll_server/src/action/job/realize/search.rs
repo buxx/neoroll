@@ -9,12 +9,13 @@ use neoroll_world::{
         target::Target,
         tribe::{structure::StructureOwn, TribeId},
     },
+    map::find::AroundTileFinder,
+    space::AbsoluteWorldPoint,
 };
 
 use crate::{
     action::{
-        collect::CollectBuilder, drop::DropOff, move_::MoveRandomlyBuilder, Action, ActionChange,
-        ActionId,
+        collect::CollectBuilder, drop::DropOff, move_::MoveTo, Action, ActionChange, ActionId,
     },
     state::{game::GameState, State, StateChange},
 };
@@ -63,6 +64,10 @@ impl<'a> RealizeSearchResource<'a> {
         matches!(self.creature.behavior(), Behavior::DropOff)
     }
 
+    fn moving_to(&self) -> bool {
+        matches!(self.creature.behavior(), Behavior::MoveTo)
+    }
+
     fn carrying_enough(&self) -> bool {
         let carrying_quantity = self
             .creature
@@ -73,7 +78,6 @@ impl<'a> RealizeSearchResource<'a> {
                 .carrying_enough_quantity()
                 .0;
 
-        println!("{} >= {}", carrying_quantity, enough_quantity);
         carrying_quantity >= enough_quantity
     }
 
@@ -86,14 +90,21 @@ impl<'a> RealizeSearchResource<'a> {
         game.tribe_structures(tribe_id, Some(Structure::Storage))
     }
 
+    pub fn find_collect_tile_point(&self) -> Option<AbsoluteWorldPoint> {
+        AroundTileFinder::new(&self.state.world(), *self.creature.point())
+            .collect(Some(self.resource.into()))
+            .search()
+    }
+
     pub fn changes(&self) -> Vec<StateChange> {
         let _solving = self.solving();
         let carrying = self.carrying();
         let collecting = self.collecting();
+        let moving_to = self.moving_to();
         let dropping_off = self.dropping_off();
         let carrying_enough = self.carrying_enough();
 
-        if !dropping_off && carrying && carrying_enough {
+        if !dropping_off && carrying && carrying_enough && !moving_to {
             let tribe_id = self.creature.tribe_id();
             let game = self.state.game();
             if let Some(storage) = self.nearest_storages(tribe_id, &game).first() {
@@ -107,16 +118,21 @@ impl<'a> RealizeSearchResource<'a> {
             }
         }
 
-        if self.can_collect() && !collecting && !dropping_off {
+        if self.can_collect() && !collecting && !dropping_off && !moving_to {
             let action_id = ActionId::new();
             let action = CollectBuilder::new(*self.creature.id(), self.resource).build();
             return vec![StateChange::Action(action_id, ActionChange::New(action))];
         }
 
-        if !collecting && !dropping_off {
-            let action_id = ActionId::new();
-            let action = MoveRandomlyBuilder::new(*self.creature.id()).build();
-            return vec![StateChange::Action(action_id, ActionChange::New(action))];
+        // FIXME BS NOW DEV: AroundTileFinder must be configured to ensure (and return) a walkable path to the result
+        if !collecting && !dropping_off && !moving_to {
+            println!("ADD mov to");
+            if let Some(point) = self.find_collect_tile_point() {
+                println!("ADD mov to {:?}", point);
+                let action_id = ActionId::new();
+                let action = Action::MoveTo(MoveTo::new(*self.creature.id(), point));
+                return vec![StateChange::Action(action_id, ActionChange::New(action))];
+            }
         }
 
         vec![]

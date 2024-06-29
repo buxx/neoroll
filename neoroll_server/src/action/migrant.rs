@@ -17,7 +17,7 @@ pub struct IncomingMigrant;
 impl IncomingMigrant {
     fn tick_tribe(&self, tribe_id: &TribeId, state: &State) -> Vec<StateChange> {
         let mut changes = vec![];
-        let max_population = 5; // Later, it will be computed by complex algorithm
+        let max_population = 1; // Later, it will be computed by complex algorithm
         let population_count = state
             .world()
             .tribe_creature_ids(tribe_id)
