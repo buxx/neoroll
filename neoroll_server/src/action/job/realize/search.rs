@@ -126,9 +126,7 @@ impl<'a> RealizeSearchResource<'a> {
 
         // FIXME BS NOW DEV: AroundTileFinder must be configured to ensure (and return) a walkable path to the result
         if !collecting && !dropping_off && !moving_to {
-            println!("ADD mov to");
             if let Some(point) = self.find_collect_tile_point() {
-                println!("ADD mov to {:?}", point);
                 let action_id = ActionId::new();
                 let action = Action::MoveTo(MoveTo::new(*self.creature.id(), point));
                 return vec![StateChange::Action(action_id, ActionChange::New(action))];

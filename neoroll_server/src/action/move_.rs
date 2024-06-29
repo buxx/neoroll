@@ -60,16 +60,12 @@ impl BodyTick<MoveToChange> for MoveTo {
     }
     fn tick(&self, id: ActionId, state: &State) -> (NextTick, Vec<StateChange>) {
         if let Some(path) = &self.path {
-            println!("There is a pth");
             if let Some(try_point) = path.iter().next() {
-                println!("Still have point in path");
                 let mut meta = state.meta_mut();
                 let world = state.world();
 
                 if world.can_walk(try_point) {
-                    println!("Can walk on this path");
                     if let Some(next_point) = meta.book(try_point) {
-                        println!("Can book: Move !");
                         let new_path = path[1..].to_vec();
                         (
                             NextTick(*state.frame_i() + TICK_PERIOD),
@@ -87,12 +83,10 @@ impl BodyTick<MoveToChange> for MoveTo {
                             ],
                         )
                     } else {
-                        println!("Place is busy");
                         // Place is busy, wait next tick
                         (NextTick(*state.frame_i() + TICK_PERIOD), vec![])
                     }
                 } else {
-                    println!("Path corrupted");
                     // Path seems corrupted, try another one
                     (
                         NextTick(*state.frame_i() + TICK_PERIOD),
@@ -103,7 +97,6 @@ impl BodyTick<MoveToChange> for MoveTo {
                     )
                 }
             } else {
-                println!("Path empty, end");
                 // Drop + remove this action
                 (
                     NextTick(*state.frame_i()),
@@ -113,7 +106,6 @@ impl BodyTick<MoveToChange> for MoveTo {
 
         // If path found, use it at next step
         } else if let Some(path) = self.find_path(state) {
-            println!("Founded a new path");
             (
                 NextTick(*state.frame_i() + TICK_PERIOD),
                 vec![StateChange::Action(
@@ -124,7 +116,6 @@ impl BodyTick<MoveToChange> for MoveTo {
 
         // If path cant be find, cancel this action
         } else {
-            println!("No path found, abort");
             (
                 NextTick(*state.frame_i()),
                 vec![StateChange::Action(id, ActionChange::Remove)],
