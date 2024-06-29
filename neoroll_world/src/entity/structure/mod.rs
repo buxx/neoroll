@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::gameplay::{
     build::Buildable,
     material::{Material, Resource},
@@ -167,6 +169,18 @@ impl From<Buildable> for Structure {
         match value {
             Buildable::Campfire => Structure::Campfire,
             Buildable::Storage => Structure::Storage,
+        }
+    }
+}
+
+impl Display for Structure {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Structure::Nothing => f.write_str("Nothing"),
+            Structure::BigLeafTree => f.write_str("BigLeafTree"),
+            Structure::FruitTree(_) => f.write_str("FruitTree"),
+            Structure::Campfire => f.write_str("Campfire"),
+            Structure::Storage => f.write_str("Storage"),
         }
     }
 }

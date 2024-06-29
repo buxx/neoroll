@@ -1,8 +1,8 @@
 use neoroll_world::{
-    entity::creature::CreatureChange,
+    entity::{creature::CreatureChange, structure::Structure},
     gameplay::{
         job::Job,
-        target::{ComputedTarget, WaitingReason},
+        target::{ComputedTarget, Target, WaitingReason},
         tribe::TribeId,
     },
     space::world::WorldChange,
@@ -32,6 +32,13 @@ impl AffectJob {
             return self.disband_target_worker(target, state);
         }
 
+        if let Some(waitings) = self.global_waitings(state, target.target()) {
+            return vec![StateChange::Game(GameChange::Waiting(
+                self.tribe_id,
+                WaitingChange::Set(*target.id(), waitings),
+            ))];
+        }
+
         let world = state.world();
         let creatures = world.tribe_creatures(&self.tribe_id);
         let idles = creatures.filter_job(&Job::Idle);
@@ -53,6 +60,23 @@ impl AffectJob {
         }
 
         changes
+    }
+
+    pub fn global_waitings(&self, state: &State, target: &Target) -> Option<Vec<WaitingReason>> {
+        match target {
+            Target::KeepStock(_, _) => {
+                if state
+                    .game()
+                    .tribe_structures(&self.tribe_id, Some(Structure::Storage))
+                    .first()
+                    .is_none()
+                {
+                    return Some(vec![WaitingReason::NeedOwnedStructure(Structure::Storage)]);
+                }
+            }
+        }
+
+        None
     }
 
     fn disband_target_worker(&self, target: &ComputedTarget, state: &State) -> Vec<StateChange> {

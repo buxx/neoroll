@@ -3,6 +3,8 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::entity::structure::Structure;
+
 use super::{
     job::Job,
     material::{Material, Resource},
@@ -166,6 +168,7 @@ impl From<&Target> for Job {
 pub enum WaitingReason {
     NotEnoughWorker,
     NotEnoughMaterial(Material),
+    NeedOwnedStructure(Structure),
 }
 
 impl Display for WaitingReason {
@@ -173,6 +176,7 @@ impl Display for WaitingReason {
         match self {
             WaitingReason::NotEnoughWorker => f.write_str("Worker"),
             WaitingReason::NotEnoughMaterial(material) => f.write_str(&material.to_string()),
+            WaitingReason::NeedOwnedStructure(structure) => f.write_str(&structure.to_string()),
         }
     }
 }
