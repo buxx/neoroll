@@ -18,17 +18,6 @@ impl<'a> Painter<'a> {
             return vec![GuiAction::Build(Buildable::Storage)];
         }
 
-        if self.game().can_configure_targets() {
-            ui.label(&format!(
-                "targets: {}",
-                self.game().target().targets().len()
-            ));
-
-            for target in self.game().target().targets() {
-                ui.label(&format!("{:?}", target));
-            }
-        }
-
         ui.label(&format!("{:?}", self.game().materials().total()));
 
         // TODO: self.state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)
