@@ -8,7 +8,8 @@ use neoroll_server::{
 use neoroll_world::{
     entity::creature::{CreatureId, PartialCreatureChange},
     space::part::{
-        WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartGroundMessage, WorldPartMaterialMessage, WorldPartMessage, WorldPartStructureMessage
+        WorldPartCreatureMessage, WorldPartFloorMessage, WorldPartGroundMessage,
+        WorldPartMaterialMessage, WorldPartMessage, WorldPartStructureMessage,
     },
 };
 

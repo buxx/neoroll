@@ -6,10 +6,7 @@ pub mod root;
 use std::fmt::Display;
 
 use bevy::{prelude::*, window::PrimaryWindow};
-use bevy_egui::{
-    egui,
-    EguiContexts, EguiSettings,
-};
+use bevy_egui::{egui, EguiContexts, EguiSettings};
 use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
@@ -122,7 +119,7 @@ fn update_ui_scale_factor(
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     if let Ok(window) = windows.get_single() {
-        egui_settings.scale_factor = 2. / window.scale_factor();
+        egui_settings.scale_factor = 1.6 / window.scale_factor();
     }
 }
 
