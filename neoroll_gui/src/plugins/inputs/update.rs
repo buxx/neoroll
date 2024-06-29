@@ -12,7 +12,7 @@ use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::AlphaByScale,
     plugins::{
-        gui::{state::GuiState, SwitchDisplayWindow},
+        gui::{state::GuiState, Current, Panel, SwitchDisplayWindow},
         map::container::{
             MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed,
         },
@@ -55,7 +55,7 @@ pub fn update_inputs(
     for event in keyboard_events.iter() {
         if let Some(KeyCode::Space) = event.key_code {
             if let ButtonState::Released = event.state {
-                switch_gui_display.send(SwitchDisplayWindow)
+                switch_gui_display.send(SwitchDisplayWindow(Panel::Root))
             }
         }
     }

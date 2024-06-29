@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 use super::progress::Progress;
@@ -23,5 +25,18 @@ impl Behavior {
 impl Default for Behavior {
     fn default() -> Self {
         Self::Idle
+    }
+}
+
+impl Display for Behavior {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Behavior::Idle => f.write_str("Idle"),
+            Behavior::Collect(progress) => {
+                f.write_str(&format!("Collect ({}%)", progress.percent()))
+            }
+            Behavior::DropOff => f.write_str("Drop off"),
+            Behavior::MoveTo => f.write_str("Move"),
+        }
     }
 }

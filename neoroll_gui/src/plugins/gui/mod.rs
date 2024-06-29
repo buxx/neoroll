@@ -1,5 +1,6 @@
 pub mod targets;
 
+pub mod detail;
 pub mod paint;
 pub mod root;
 
@@ -11,6 +12,7 @@ use bevy_tileset::prelude::Tilesets;
 use build::{
     display_build_cursor, display_build_outline, spawn_build_cursor, spawn_build_outline, try_build,
 };
+use detail::details;
 use neoroll_server::{
     server::ClientMessage,
     state::game::{settings::TargetSetting, ClientGameMessage, TargetMessage},
@@ -22,7 +24,9 @@ use strum_macros::EnumIter;
 
 use crate::utils::{EventReaderShortcuts, TileName};
 
-use super::{game::GameStateWrapper, server::gateway::GatewayWrapper};
+use super::{
+    game::GameStateWrapper, server::gateway::GatewayWrapper, world::container::WorldPartContainer,
+};
 
 pub mod build;
 pub mod state;
@@ -42,6 +46,7 @@ impl Plugin for GuiPlugin {
                     display_build_cursor,
                     display_build_outline,
                     try_build,
+                    details,
                 ),
             );
     }
@@ -59,7 +64,7 @@ impl Default for Current {
 }
 
 #[derive(Event)]
-pub struct SwitchDisplayWindow;
+pub struct SwitchDisplayWindow(pub Panel);
 
 fn switch_gui_display(
     mut state: ResMut<GuiState>,
@@ -81,6 +86,7 @@ fn gui(
     tilesets: Tilesets,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    world_part: Res<WorldPartContainer>,
 ) {
     let mut hover = false;
     let mut effects = vec![];
@@ -90,7 +96,7 @@ fn gui(
 
         egui::Window::new("").show(ctx, |ui| {
             if let Some(game) = game_state.state() {
-                effects.extend(Painter::new(game, &mut state, &gateway).paint(ui));
+                effects.extend(Painter::new(game, &mut state, &world_part.0, &gateway).paint(ui));
             }
         });
 
@@ -136,6 +142,7 @@ impl TileName for Buildable {
 pub enum Panel {
     Root,
     Targets,
+    Details,
 }
 
 impl Default for Panel {
@@ -149,6 +156,7 @@ impl Display for Panel {
         match self {
             Panel::Root => f.write_str("Resume"),
             Panel::Targets => f.write_str("Targets"),
+            Panel::Details => f.write_str("Details"),
         }
     }
 }

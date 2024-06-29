@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use requirement::JobRequirement;
 use serde::{Deserialize, Serialize};
 
@@ -34,6 +36,15 @@ impl Job {
                 Resource::Food => vec![],
                 Resource::RawFlint => vec![],
             },
+        }
+    }
+}
+
+impl Display for Job {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Job::Idle => f.write_str("Idle"),
+            Job::SearchResource(resource) => f.write_str(&format!("Search {}", resource)),
         }
     }
 }

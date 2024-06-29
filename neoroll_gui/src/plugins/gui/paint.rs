@@ -1,5 +1,6 @@
 use crate::plugins::server::gateway::GatewayWrapper;
 use bevy_egui::egui::Ui;
+use neoroll_world::space::part::WorldPart;
 use strum::IntoEnumIterator;
 
 use super::{state::GuiState, GuiAction, Panel};
@@ -8,6 +9,7 @@ use neoroll_server::state::client::ClientGameState;
 pub struct Painter<'a> {
     game: &'a ClientGameState,
     state: &'a mut GuiState,
+    world: &'a WorldPart,
     gateway: &'a GatewayWrapper,
 }
 
@@ -15,11 +17,13 @@ impl<'a> Painter<'a> {
     pub fn new(
         game: &'a ClientGameState,
         state: &'a mut GuiState,
+        world: &'a WorldPart,
         gateway: &'a GatewayWrapper,
     ) -> Self {
         Self {
             game,
             state,
+            world,
             gateway,
         }
     }
@@ -30,6 +34,7 @@ impl<'a> Painter<'a> {
         match self.state.current_panel() {
             Panel::Root => self.root(ui),
             Panel::Targets => self.targets(ui),
+            Panel::Details => self.details(ui),
         }
     }
 
@@ -56,5 +61,9 @@ impl<'a> Painter<'a> {
 
     pub fn state_mut(&mut self) -> &mut GuiState {
         self.state
+    }
+
+    pub fn world(&self) -> &WorldPart {
+        self.world
     }
 }

@@ -1,7 +1,11 @@
 use std::fmt::Display;
 
 use bevy::prelude::Resource as BevyResource;
-use neoroll_world::gameplay::material::{Material, Resource};
+use neoroll_world::{
+    entity::creature::CreatureId,
+    gameplay::material::{Material, Resource},
+    space::AbsoluteWorldPoint,
+};
 
 use super::{Current, Panel};
 
@@ -12,6 +16,7 @@ pub struct GuiState {
     display_window: bool,
     server_speed_request: u8,
     is_pointer_over_area: bool,
+    selected: Selected,
 
     // TODO: In separated struct
     add_target_selection: AddTarget,
@@ -74,6 +79,14 @@ impl GuiState {
     pub fn add_keep_stock_material_mut(&mut self) -> &mut AddKeepStockTargetMaterial {
         &mut self.add_keep_stock_material
     }
+
+    pub fn selected(&self) -> &Selected {
+        &self.selected
+    }
+
+    pub fn selected_mut(&mut self) -> &mut Selected {
+        &mut self.selected
+    }
 }
 
 #[derive(Eq, PartialEq)]
@@ -129,5 +142,36 @@ impl From<AddKeepStockTargetMaterial> for Material {
             AddKeepStockTargetMaterial::Food => Material::Resource(Resource::Food),
             AddKeepStockTargetMaterial::RawFlint => Material::Resource(Resource::RawFlint),
         }
+    }
+}
+
+#[derive(Default)]
+pub struct Selected {
+    tile: Option<AbsoluteWorldPoint>,
+    creature: Option<CreatureId>,
+}
+
+impl Selected {
+    pub fn reset(&mut self) {
+        self.creature = None;
+        self.tile = None;
+    }
+
+    pub fn select_tile(&mut self, point: AbsoluteWorldPoint) {
+        self.tile = Some(point);
+        self.creature = None;
+    }
+
+    pub fn select_creature(&mut self, creature_id: CreatureId) {
+        self.creature = Some(creature_id);
+        self.tile = None;
+    }
+
+    pub fn tile(&self) -> Option<AbsoluteWorldPoint> {
+        self.tile
+    }
+
+    pub fn creature(&self) -> Option<CreatureId> {
+        self.creature
     }
 }

@@ -11,6 +11,10 @@ impl Progress {
     pub fn full(&self) -> bool {
         self.0 == 255
     }
+
+    pub fn percent(&self) -> u8 {
+        ((self.0 as f32 / 255.) * 100.) as u8
+    }
 }
 
 impl From<f32> for Progress {
