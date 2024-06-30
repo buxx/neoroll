@@ -5,11 +5,12 @@ use bevy::{
     transform::components::GlobalTransform,
     window::Window,
 };
-use bevy_egui::egui::Ui;
+use bevy_egui::egui::{Ui, Vec2};
 use neoroll_world::{entity::creature::PartialCreature, space::AbsoluteWorldPoint};
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
+    graphics::REGION_TILE_WIDTH,
     plugins::{inputs::state::InputState, world::container::WorldPartContainer},
     scene::{FromScenePoint, ScenePoint},
 };
@@ -38,6 +39,12 @@ pub fn details(
                         if let Some(world_position) = window.cursor_position().and_then(|cursor| {
                             camera.viewport_to_world_2d(camera_transform, cursor)
                         }) {
+                            // NOTE: there is a display decal
+                            let world_position = Vec2::new(
+                                world_position.x + REGION_TILE_WIDTH as f32 / 2.,
+                                world_position.y - REGION_TILE_WIDTH as f32 / 2.,
+                            );
+
                             let point = AbsoluteWorldPoint::from_scene_point(ScenePoint::new(
                                 world_position.x,
                                 -world_position.y,
@@ -49,16 +56,12 @@ pub fn details(
                                 .iter()
                                 .find(|(_, c)| c.point() == &point)
                             {
-                                println!("1");
                                 if state.selected().creature().is_none() {
-                                    println!("2");
                                     state.selected_mut().select_creature(*id);
                                 } else {
-                                    println!("3");
                                     state.selected_mut().select_tile(point);
                                 }
                             } else {
-                                println!("4");
                                 state.selected_mut().select_tile(point);
                             }
 
