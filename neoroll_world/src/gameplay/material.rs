@@ -8,6 +8,18 @@ use super::{Quantity, Weight};
 pub enum Material {
     Resource(Resource),
 }
+impl Material {
+    pub fn quantity_string(&self, quantity: &Quantity) -> String {
+        let (unit, divide) = match self {
+            Material::Resource(resource) => match resource {
+                Resource::Food => ("Kg", 1000),
+                Resource::RawFlint => ("u", 1),
+            },
+        };
+
+        format!("{}{}", quantity.0 / divide, unit)
+    }
+}
 
 impl Display for Material {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

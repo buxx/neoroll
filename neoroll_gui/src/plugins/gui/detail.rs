@@ -5,7 +5,7 @@ use bevy::{
     transform::components::GlobalTransform,
     window::Window,
 };
-use bevy_egui::egui::{Ui, Vec2};
+use bevy_egui::egui::{Grid, Ui, Vec2};
 use neoroll_world::{entity::creature::PartialCreature, space::AbsoluteWorldPoint};
 
 use crate::{
@@ -85,7 +85,7 @@ impl<'a> Painter<'a> {
                 actions.extend(self.creature_detail(ui, creature));
             }
         } else if let Some(point) = selected.tile() {
-            ui.label(format!("{:?}", point));
+            actions.extend(self.tile_detail(ui, &point));
         } else {
             ui.label("nothing");
         }
@@ -97,6 +97,43 @@ impl<'a> Painter<'a> {
         ui.label("Creature");
         ui.label(format!("Job: {}", creature.job()));
         ui.label(format!("Behavior: {}", creature.behavior()));
+
+        vec![]
+    }
+
+    fn tile_detail(&self, ui: &mut Ui, point: &AbsoluteWorldPoint) -> Vec<GuiAction> {
+        let world = self.world();
+
+        if let Some(ground) = world.ground(point) {
+            ui.label(format!("Ground: {}", ground.detail_string()));
+            ui.separator();
+        }
+
+        if let Some(floor) = world.floor(point) {
+            ui.label(format!("Floor: {}", floor.detail_string()));
+            ui.separator();
+        }
+
+        if let Some(structure) = world.structure(point) {
+            ui.label(format!("Structure: {}", structure.detail_string()));
+            ui.separator();
+        }
+
+        if let Some(materials) = world.material(point) {
+            ui.label("Material:");
+            Grid::new("materials")
+            .min_col_width(100.)
+            .spacing(Vec2::new(10., 10.))
+            .striped(true)
+            .show(ui, |ui| {
+                for (material, quantity) in materials {
+                    ui.label(material.to_string());
+                    ui.label(material.quantity_string(quantity));
+                    ui.end_row();
+                }
+            });
+        }
+
         vec![]
     }
 }

@@ -1,6 +1,7 @@
 pub mod material;
 pub mod target;
 use std::{
+    fmt::Display,
     iter::Sum,
     ops::{Add, AddAssign, Mul},
 };

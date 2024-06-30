@@ -117,4 +117,12 @@ impl Floor {
             }
         }
     }
+
+    pub fn detail_string(&self) -> String {
+        match self {
+            Floor::Nothing => "Nothing".to_string(),
+            Floor::ShortGrass => "Short grass".to_string(),
+            Floor::FruitBush(_) => "Fruit bush".to_string(),
+        }
+    }
 }

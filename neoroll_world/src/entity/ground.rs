@@ -106,4 +106,12 @@ impl Ground {
             }
         }
     }
+
+    pub fn detail_string(&self) -> String {
+        match self {
+            Ground::FreshWater => "Fresh Water".to_string(),
+            Ground::Soil => "Soil".to_string(),
+            Ground::SoilFlint(_) => "Soil with flint".to_string(),
+        }
+    }
 }

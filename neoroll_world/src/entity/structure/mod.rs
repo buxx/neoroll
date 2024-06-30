@@ -162,6 +162,16 @@ impl Structure {
             }
         }
     }
+
+    pub fn detail_string(&self) -> String {
+        match self {
+            Structure::Nothing => "Nothing".to_string(),
+            Structure::BigLeafTree => "Big leaf tree".to_string(),
+            Structure::FruitTree(_) => "Fruit tree".to_string(),
+            Structure::Campfire => "Campfire".to_string(),
+            Structure::Storage => "Storage".to_string(),
+        }
+    }
 }
 
 impl From<Buildable> for Structure {
