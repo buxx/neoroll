@@ -5,14 +5,11 @@ use bevy::{
     transform::components::GlobalTransform,
     window::Window,
 };
-use bevy_egui::egui::{Grid, Ui, Vec2};
+use bevy_egui::egui::{self, Grid, Ui, Vec2};
 use neoroll_world::{entity::creature::PartialCreature, space::AbsoluteWorldPoint};
 
 use crate::{
-    camera::{BackgroundCamera, SceneItemsCamera},
-    graphics::REGION_TILE_WIDTH,
-    plugins::{inputs::state::InputState, world::container::WorldPartContainer},
-    scene::{FromScenePoint, ScenePoint},
+    camera::{BackgroundCamera, SceneItemsCamera}, graphics::REGION_TILE_WIDTH, image::Illustration, plugins::{inputs::state::InputState, world::{container::WorldPartContainer, illustration::IntoIllustration}}, scene::{FromScenePoint, ScenePoint}
 };
 
 use super::{paint::Painter, state::GuiState, Current, GuiAction, Panel};
@@ -116,22 +113,30 @@ impl<'a> Painter<'a> {
 
         if let Some(structure) = world.structure(point) {
             ui.label(format!("Structure: {}", structure.detail_string()));
+            if let Some(illustration) = structure.illustration() {
+                ui.add(
+                    egui::Image::new(illustration.data())
+                        .rounding(5.0).max_height(75.)
+                );
+            }
             ui.separator();
         }
 
         if let Some(materials) = world.material(point) {
-            ui.label("Material:");
-            Grid::new("materials")
-            .min_col_width(100.)
-            .spacing(Vec2::new(10., 10.))
-            .striped(true)
-            .show(ui, |ui| {
-                for (material, quantity) in materials {
-                    ui.label(material.to_string());
-                    ui.label(material.quantity_string(quantity));
-                    ui.end_row();
-                }
-            });
+            if !materials.is_empty() {
+                ui.label("Material:");
+                Grid::new("materials")
+                    .min_col_width(100.)
+                    .spacing(Vec2::new(10., 10.))
+                    .striped(true)
+                    .show(ui, |ui| {
+                        for (material, quantity) in materials {
+                            ui.label(material.to_string());
+                            ui.label(material.quantity_string(quantity));
+                            ui.end_row();
+                        }
+                    });
+            }
         }
 
         vec![]

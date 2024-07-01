@@ -1,3 +1,4 @@
+pub mod illustration;
 use bevy::prelude::*;
 use container::WorldPartContainerRefreshed;
 use creature::{CreaturesMap, ProgressMap};

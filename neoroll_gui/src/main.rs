@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::EguiPlugin;
+use bevy_egui::{egui, EguiPlugin};
 use bevy_prototype_lyon::prelude::*;
 use bevy_tileset::prelude::*;
 
@@ -24,6 +24,7 @@ mod scene;
 mod setup;
 mod shortcut;
 mod utils;
+mod image;
 
 fn main() {
     // FIXME: When server behind network, gateways must be built server side and managed by network connections

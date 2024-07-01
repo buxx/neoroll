@@ -14,6 +14,8 @@ crossbeam = "0.8.4"
 bevy_egui = "0.22"
 strum = "0.25"
 strum_macros = "0.25.2"
+egui_extras = { version = "0.23", features = ["all_loaders"] }
+image = { version = "0.24", features = ["png"] } # Add the types you want support for
 # tests
 rstest = "0.18.1"
 bevy_prototype_lyon = "0.9.0"

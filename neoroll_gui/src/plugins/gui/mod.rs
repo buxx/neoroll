@@ -93,6 +93,7 @@ fn gui(
 
     if state.display_window() {
         let ctx = contexts.ctx_mut();
+        egui_extras::install_image_loaders(ctx);
 
         egui::Window::new("").show(ctx, |ui| {
             if let Some(game) = game_state.state() {
