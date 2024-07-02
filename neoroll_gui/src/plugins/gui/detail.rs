@@ -120,7 +120,8 @@ impl<'a> Painter<'a> {
             if !materials.is_empty() {
                 ui.label("Material:");
                 Grid::new("materials")
-                    .min_col_width(100.)
+                    .min_col_width(175.)
+                    .min_row_height(50.)
                     .spacing(Vec2::new(10., 10.))
                     .striped(true)
                     .show(ui, |ui| {
