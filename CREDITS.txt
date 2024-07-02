@@ -1,0 +1,11 @@
+Artocarpus_altilis.png: https://upload.wikimedia.org/wikipedia/commons/5/58/Artocarpus_altilis.jpg
+soil1.png: https://upload.wikimedia.org/wikipedia/commons/6/65/Backdrop_-_Overcast_Soil_2_-_03_RAW-Export_%28Sergej_Majboroda_via_Poly_Haven%29.png
+Short_dry_grass.png: https://upload.wikimedia.org/wikipedia/commons/e/e4/Short_dry_grass.jpg
+Abuluntu_Empetrum_nigrum.png: https://upload.wikimedia.org/wikipedia/commons/3/31/Abuluntu_Empetrum_nigrum.jpg
+Flint_Quary.png: https://commons.wikimedia.org/wiki/File:Alibates_Flint_Queries_National_Monument_-_Flint_Quary_Closeup.jpg
+ApricotTree.png: https://commons.wikimedia.org/wiki/File:%D0%A9%D0%B5%D0%B4%D1%80%D0%BE_%D0%B2%D1%80%D0%BE%D0%B4%D0%B8%D0%BB%D0%B0_%D0%B0%D0%B1%D1%80%D0%B8%D0%BA%D0%BE%D1%81%D0%B0_%D0%B4%D0%B8%D1%87%D0%BA%D0%B0.jpg
+Campfire.png: https://commons.wikimedia.org/wiki/File:Campfire_4213.jpg
+Fruits1.png: https://commons.wikimedia.org/wiki/File:Nos_fruits_et_l%C3%A9gumes_3.jpg
+CurvedFlint1.png: https://commons.wikimedia.org/wiki/File:Neolithic_Flint_Arrowhead_(FindID_210337).jpg
+FreshWater1.ong: https://commons.wikimedia.org/wiki/File:Colorful_clouds_and_blue_sky_with_water_reflection_of_an_island_hosting_trees_at_sunrise_in_Si_Phan_Don,_Laos.jpg
+RawFlint1.ong: https://commons.wikimedia.org/wiki/File:Alfl_flint_rocks.jpg

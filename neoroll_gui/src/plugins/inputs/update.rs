@@ -61,14 +61,15 @@ pub fn update_inputs(
     }
 
     // Clicks and Drags
+    input_state.reset_clicked();
     for event in mouse_button_input_events.iter() {
+        let point = input_state.cursor();
         match event.state {
             ButtonState::Pressed => {
-                let point = input_state.cursor();
-                input_state.start_click(event.button, point);
+                input_state.start_clicking(event.button, point);
             }
             ButtonState::Released => {
-                input_state.end_click();
+                input_state.end_clicking(event.button, point);
             }
         }
     }
@@ -104,7 +105,7 @@ pub fn update_inputs(
 
     // Motion
     for event in cursor_moved_events.iter() {
-        if input_state.click().is_some() {
+        if input_state.clicking().is_some() {
             let reference = input_state.cursor();
             let vector = Vec3::new(
                 event.position.x - reference.x,

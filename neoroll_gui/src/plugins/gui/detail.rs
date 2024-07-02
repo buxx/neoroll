@@ -1,6 +1,5 @@
 use bevy::{
-    input::{mouse::MouseButtonInput, ButtonState},
-    prelude::{EventReader, Query, ResMut, With, Without},
+    prelude::{Query, ResMut, With, Without},
     render::camera::Camera,
     transform::components::GlobalTransform,
     window::Window,
@@ -9,7 +8,13 @@ use bevy_egui::egui::{self, Grid, Ui, Vec2};
 use neoroll_world::{entity::creature::PartialCreature, space::AbsoluteWorldPoint};
 
 use crate::{
-    camera::{BackgroundCamera, SceneItemsCamera}, graphics::REGION_TILE_WIDTH, image::Illustration, plugins::{inputs::state::InputState, world::{container::WorldPartContainer, illustration::IntoIllustration}}, scene::{FromScenePoint, ScenePoint}
+    camera::{BackgroundCamera, SceneItemsCamera},
+    graphics::REGION_TILE_WIDTH,
+    plugins::{
+        inputs::state::InputState,
+        world::{container::WorldPartContainer, illustration::IntoIllustration},
+    },
+    scene::{FromScenePoint, ScenePoint},
 };
 
 use super::{paint::Painter, state::GuiState, Current, GuiAction, Panel};
@@ -19,54 +24,46 @@ use super::{paint::Painter, state::GuiState, Current, GuiAction, Panel};
 pub fn details(
     mut state: ResMut<GuiState>,
     input_state: ResMut<InputState>,
-    mut mouse: EventReader<MouseButtonInput>,
     camera: Query<(&Camera, &GlobalTransform), (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
     world_part: ResMut<WorldPartContainer>,
     windows: Query<&Window>,
 ) {
-    // TODO: refactor this big code part (click => point)
-    if let Some(event) = mouse.iter().last() {
-        if let ButtonState::Released = event.state {
-            let point = input_state.cursor();
-            if let Some(click) = input_state.click() {
-                if click.1 == point {
-                    if let Current::Explore = state.current_mode() {
-                        let window = windows.single();
-                        let (camera, camera_transform) = camera.single();
-                        if let Some(world_position) = window.cursor_position().and_then(|cursor| {
-                            camera.viewport_to_world_2d(camera_transform, cursor)
-                        }) {
-                            // NOTE: there is a display decal
-                            let world_position = Vec2::new(
-                                world_position.x + REGION_TILE_WIDTH as f32 / 2.,
-                                world_position.y - REGION_TILE_WIDTH as f32 / 2.,
-                            );
+    if input_state.clicked().is_some() {
+        if let Current::Explore = state.current_mode() {
+            let window = windows.single();
+            let (camera, camera_transform) = camera.single();
+            if let Some(world_position) = window
+                .cursor_position()
+                .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
+            {
+                // NOTE: there is a display decal
+                let world_position = Vec2::new(
+                    world_position.x + REGION_TILE_WIDTH as f32 / 2.,
+                    world_position.y - REGION_TILE_WIDTH as f32 / 2.,
+                );
 
-                            let point = AbsoluteWorldPoint::from_scene_point(ScenePoint::new(
-                                world_position.x,
-                                -world_position.y,
-                            ));
+                let point = AbsoluteWorldPoint::from_scene_point(ScenePoint::new(
+                    world_position.x,
+                    -world_position.y,
+                ));
 
-                            if let Some((id, _)) = world_part
-                                .0
-                                .creatures()
-                                .iter()
-                                .find(|(_, c)| c.point() == &point)
-                            {
-                                if state.selected().creature().is_none() {
-                                    state.selected_mut().select_creature(*id);
-                                } else {
-                                    state.selected_mut().select_tile(point);
-                                }
-                            } else {
-                                state.selected_mut().select_tile(point);
-                            }
-
-                            *state.display_window_mut() = true;
-                            *state.current_panel_mut() = Panel::Details;
-                        }
+                if let Some((id, _)) = world_part
+                    .0
+                    .creatures()
+                    .iter()
+                    .find(|(_, c)| c.point() == &point)
+                {
+                    if state.selected().creature().is_none() {
+                        state.selected_mut().select_creature(*id);
+                    } else {
+                        state.selected_mut().select_tile(point);
                     }
+                } else {
+                    state.selected_mut().select_tile(point);
                 }
+
+                *state.display_window_mut() = true;
+                *state.current_panel_mut() = Panel::Details;
             }
         }
     }
@@ -103,22 +100,19 @@ impl<'a> Painter<'a> {
 
         if let Some(ground) = world.ground(point) {
             ui.label(format!("Ground: {}", ground.detail_string()));
+            self.illustration(ui, ground);
             ui.separator();
         }
 
         if let Some(floor) = world.floor(point) {
             ui.label(format!("Floor: {}", floor.detail_string()));
+            self.illustration(ui, floor);
             ui.separator();
         }
 
         if let Some(structure) = world.structure(point) {
             ui.label(format!("Structure: {}", structure.detail_string()));
-            if let Some(illustration) = structure.illustration() {
-                ui.add(
-                    egui::Image::new(illustration.data())
-                        .rounding(5.0).max_height(75.)
-                );
-            }
+            self.illustration(ui, structure);
             ui.separator();
         }
 
@@ -132,6 +126,7 @@ impl<'a> Painter<'a> {
                     .show(ui, |ui| {
                         for (material, quantity) in materials {
                             ui.label(material.to_string());
+                            self.illustration(ui, material);
                             ui.label(material.quantity_string(quantity));
                             ui.end_row();
                         }
@@ -140,5 +135,15 @@ impl<'a> Painter<'a> {
         }
 
         vec![]
+    }
+
+    fn illustration(&self, ui: &mut Ui, source: &dyn IntoIllustration) {
+        if let Some(illustration) = source.illustration() {
+            ui.add(
+                egui::Image::new(illustration.data())
+                    .rounding(5.0)
+                    .max_height(75.),
+            );
+        }
     }
 }
