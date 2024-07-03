@@ -43,6 +43,7 @@ pub fn update_inputs(
     mut world_part: ResMut<WorldPartContainer>,
     mut map_part: ResMut<MapPartContainer>,
     gateway: Res<GatewayWrapper>,
+    mut gui: Res<GuiState>,
 ) {
     let mut camera = camera.single_mut();
 
@@ -100,7 +101,7 @@ pub fn update_inputs(
 
     // Motion
     for event in cursor_moved_events.iter() {
-        if input_state.clicking().is_some() {
+        if !gui.is_pointer_over_area() && input_state.clicking().is_some() {
             let reference = input_state.cursor();
             let vector = Vec3::new(
                 event.position.x - reference.x,
