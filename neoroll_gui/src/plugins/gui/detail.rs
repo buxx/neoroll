@@ -28,7 +28,7 @@ pub fn details(
     world_part: ResMut<WorldPartContainer>,
     windows: Query<&Window>,
 ) {
-    if input_state.clicked().is_some() {
+    if !state.is_pointer_over_area() && input_state.clicked().is_some() {
         if let Current::Explore = state.current_mode() {
             let window = windows.single();
             let (camera, camera_transform) = camera.single();

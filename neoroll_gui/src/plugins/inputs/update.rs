@@ -42,13 +42,8 @@ pub fn update_inputs(
     mut dragged_screen: EventWriter<DraggedScreen>,
     mut world_part: ResMut<WorldPartContainer>,
     mut map_part: ResMut<MapPartContainer>,
-    gui: ResMut<GuiState>,
     gateway: Res<GatewayWrapper>,
 ) {
-    if gui.is_pointer_over_area() {
-        return;
-    }
-
     let mut camera = camera.single_mut();
 
     // Keyboard
