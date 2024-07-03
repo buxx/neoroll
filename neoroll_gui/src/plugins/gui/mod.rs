@@ -123,10 +123,12 @@ fn gui(
 
 fn update_ui_scale_factor(
     mut egui_settings: ResMut<EguiSettings>,
+    state: Res<GuiState>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
+    let zoom = *state.zoom();
     if let Ok(window) = windows.get_single() {
-        egui_settings.scale_factor = 1.6 / window.scale_factor();
+        egui_settings.scale_factor = zoom.factor() / window.scale_factor();
     }
 }
 

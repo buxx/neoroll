@@ -17,6 +17,7 @@ pub struct GuiState {
     server_speed_request: u8,
     is_pointer_over_area: bool,
     selected: Selected,
+    zoom: GuiZoom,
 
     // TODO: In separated struct
     add_target_selection: AddTarget,
@@ -86,6 +87,14 @@ impl GuiState {
 
     pub fn selected_mut(&mut self) -> &mut Selected {
         &mut self.selected
+    }
+
+    pub fn zoom(&self) -> &GuiZoom {
+        &self.zoom
+    }
+
+    pub fn zoom_mut(&mut self) -> &mut GuiZoom {
+        &mut self.zoom
     }
 }
 
@@ -173,5 +182,29 @@ impl Selected {
 
     pub fn creature(&self) -> Option<CreatureId> {
         self.creature
+    }
+}
+
+
+#[derive(Eq, PartialEq, Clone, Copy)]
+pub enum GuiZoom {
+    Normal,
+    Big,
+    VeryBig,
+}
+
+impl GuiZoom {
+    pub fn factor(&self) -> f64 {
+        match self {
+            GuiZoom::Normal => 1.,
+            GuiZoom::Big => 1.5,
+            GuiZoom::VeryBig => 2.,
+        }
+    }
+}
+
+impl Default for GuiZoom {
+    fn default() -> Self {
+        Self::Big
     }
 }

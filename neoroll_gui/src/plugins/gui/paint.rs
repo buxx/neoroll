@@ -1,9 +1,9 @@
 use crate::plugins::server::gateway::GatewayWrapper;
-use bevy_egui::egui::Ui;
+use bevy_egui::egui::{ComboBox, Ui};
 use neoroll_world::space::part::WorldPart;
 use strum::IntoEnumIterator;
 
-use super::{state::GuiState, GuiAction, Panel};
+use super::{state::{GuiState, GuiZoom}, GuiAction, Panel};
 use neoroll_server::state::client::ClientGameState;
 
 pub struct Painter<'a> {
@@ -44,6 +44,29 @@ impl<'a> Painter<'a> {
                 let text = panel.to_string();
                 ui.selectable_value(self.state.current_panel_mut(), panel, &text);
             }
+
+            ui.separator();
+
+            let gui_zoom = self.state_mut().zoom_mut();
+            ComboBox::from_id_source("zoom")
+                    .selected_text("Zoom")
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(
+                            gui_zoom,
+                            GuiZoom::Normal,
+                            "Normal",
+                        );
+                        ui.selectable_value(
+                            gui_zoom,
+                            GuiZoom::Big,
+                            "Big",
+                        );
+                        ui.selectable_value(
+                            gui_zoom,
+                            GuiZoom::VeryBig,
+                            "VeryBig",
+                        );
+                    });
         });
     }
 
