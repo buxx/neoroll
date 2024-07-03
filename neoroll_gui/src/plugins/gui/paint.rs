@@ -3,7 +3,10 @@ use bevy_egui::egui::{ComboBox, Ui};
 use neoroll_world::space::part::WorldPart;
 use strum::IntoEnumIterator;
 
-use super::{state::{GuiState, GuiZoom}, GuiAction, Panel};
+use super::{
+    state::{GuiState, GuiZoom},
+    GuiAction, Panel,
+};
 use neoroll_server::state::client::ClientGameState;
 
 pub struct Painter<'a> {
@@ -49,24 +52,16 @@ impl<'a> Painter<'a> {
 
             let gui_zoom = self.state_mut().zoom_mut();
             ComboBox::from_id_source("zoom")
-                    .selected_text("Zoom")
-                    .show_ui(ui, |ui| {
-                        ui.selectable_value(
-                            gui_zoom,
-                            GuiZoom::Normal,
-                            "Normal",
-                        );
-                        ui.selectable_value(
-                            gui_zoom,
-                            GuiZoom::Big,
-                            "Big",
-                        );
-                        ui.selectable_value(
-                            gui_zoom,
-                            GuiZoom::VeryBig,
-                            "VeryBig",
-                        );
-                    });
+                .selected_text("Zoom")
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(gui_zoom, GuiZoom::Normal, "Normal");
+                    ui.selectable_value(gui_zoom, GuiZoom::Big, "Big");
+                    ui.selectable_value(gui_zoom, GuiZoom::VeryBig, "VeryBig");
+                });
+
+            if ui.button("Close").clicked() {
+                *self.state_mut().display_window_mut() = false;
+            }
         });
     }
 

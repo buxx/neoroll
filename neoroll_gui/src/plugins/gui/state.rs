@@ -185,7 +185,6 @@ impl Selected {
     }
 }
 
-
 #[derive(Eq, PartialEq, Clone, Copy)]
 pub enum GuiZoom {
     Normal,
