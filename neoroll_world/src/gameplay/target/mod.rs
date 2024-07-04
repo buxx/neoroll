@@ -68,6 +68,12 @@ impl Target {
             },
         }
     }
+
+    pub fn material(&self) -> Option<&Material> {
+        match self {
+            Target::KeepStock(material, _) => Some(material),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

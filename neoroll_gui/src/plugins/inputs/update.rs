@@ -12,7 +12,7 @@ use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::AlphaByScale,
     plugins::{
-        gui::{state::GuiState, Current, Panel, SwitchDisplayWindow},
+        gui::{state::GuiState, Panel, SwitchDisplayWindow},
         map::container::{
             MapPartContainer, MapPartContainerNeedRefresh, MapPartContainerRefreshed,
         },
@@ -43,7 +43,7 @@ pub fn update_inputs(
     mut world_part: ResMut<WorldPartContainer>,
     mut map_part: ResMut<MapPartContainer>,
     gateway: Res<GatewayWrapper>,
-    mut gui: Res<GuiState>,
+    gui: Res<GuiState>,
 ) {
     let mut camera = camera.single_mut();
 

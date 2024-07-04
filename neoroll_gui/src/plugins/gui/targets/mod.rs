@@ -27,7 +27,7 @@ impl<'a> Painter<'a> {
         let mut actions = vec![];
 
         Grid::new("targets")
-            .min_col_width(200.)
+            .min_col_width(115.)
             .spacing(Vec2::new(10., 10.))
             .striped(true)
             .show(ui, |ui| {
@@ -46,16 +46,23 @@ impl<'a> Painter<'a> {
 
     fn target_row(&self, ui: &mut Ui, target: &ComputedTarget) -> Vec<GuiAction> {
         let mut actions = vec![];
+        let target_ = target.target();
 
         ui.label(format!("{}", target.priority()));
 
         ui.horizontal(|ui| {
-            ui.label(target.target().name());
+            ui.label(target_.name());
         });
 
-        match target.target() {
+        match target_ {
             Target::KeepStock(_, _) => {
                 actions.extend(self.keep_stock_resume(ui, target));
+                if let Some(material) = target_.material() {
+                    self.illustration(ui, material);
+                } else {
+                    ui.label("");
+                }
+                ui.label("progress TODO");
                 actions.extend(self.keep_stock_settings(ui, target));
             }
         }

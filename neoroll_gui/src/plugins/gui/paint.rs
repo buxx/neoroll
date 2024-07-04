@@ -1,5 +1,5 @@
-use crate::plugins::server::gateway::GatewayWrapper;
-use bevy_egui::egui::{ComboBox, Ui};
+use crate::plugins::{server::gateway::GatewayWrapper, world::illustration::IntoIllustration};
+use bevy_egui::egui::{self, ComboBox, Ui};
 use neoroll_world::space::part::WorldPart;
 use strum::IntoEnumIterator;
 
@@ -83,5 +83,17 @@ impl<'a> Painter<'a> {
 
     pub fn world(&self) -> &WorldPart {
         self.world
+    }
+
+    pub fn illustration(&self, ui: &mut Ui, source: &dyn IntoIllustration) {
+        if let Some(illustration) = source.illustration() {
+            ui.add(
+                egui::Image::new(illustration.data())
+                    .rounding(5.0)
+                    .max_height(75.),
+            );
+        } else {
+            ui.label("");
+        }
     }
 }

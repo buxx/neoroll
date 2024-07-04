@@ -4,16 +4,13 @@ use bevy::{
     transform::components::GlobalTransform,
     window::Window,
 };
-use bevy_egui::egui::{self, Grid, Ui, Vec2};
+use bevy_egui::egui::{Grid, Ui, Vec2};
 use neoroll_world::{entity::creature::PartialCreature, space::AbsoluteWorldPoint};
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::REGION_TILE_WIDTH,
-    plugins::{
-        inputs::state::InputState,
-        world::{container::WorldPartContainer, illustration::IntoIllustration},
-    },
+    plugins::{inputs::state::InputState, world::container::WorldPartContainer},
     scene::{FromScenePoint, ScenePoint},
 };
 
@@ -136,15 +133,5 @@ impl<'a> Painter<'a> {
         }
 
         vec![]
-    }
-
-    fn illustration(&self, ui: &mut Ui, source: &dyn IntoIllustration) {
-        if let Some(illustration) = source.illustration() {
-            ui.add(
-                egui::Image::new(illustration.data())
-                    .rounding(5.0)
-                    .max_height(75.),
-            );
-        }
     }
 }
