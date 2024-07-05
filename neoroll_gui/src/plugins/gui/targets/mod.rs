@@ -62,7 +62,6 @@ impl<'a> Painter<'a> {
                 } else {
                     ui.label("");
                 }
-                ui.label("progress TODO");
                 actions.extend(self.keep_stock_settings(ui, target));
             }
         }

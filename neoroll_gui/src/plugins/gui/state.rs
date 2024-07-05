@@ -18,6 +18,7 @@ pub struct GuiState {
     is_pointer_over_area: bool,
     selected: Selected,
     zoom: GuiZoom,
+    storage: Option<AbsoluteWorldPoint>,
 
     // TODO: In separated struct
     add_target_selection: AddTarget,
@@ -95,6 +96,14 @@ impl GuiState {
 
     pub fn zoom_mut(&mut self) -> &mut GuiZoom {
         &mut self.zoom
+    }
+
+    pub fn storage(&self) -> Option<AbsoluteWorldPoint> {
+        self.storage
+    }
+
+    pub fn set_storage(&mut self, storage: Option<AbsoluteWorldPoint>) {
+        self.storage = storage;
     }
 }
 

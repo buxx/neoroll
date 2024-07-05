@@ -1,3 +1,4 @@
+pub mod stock;
 pub mod targets;
 
 pub mod detail;
@@ -145,7 +146,9 @@ impl TileName for Buildable {
 pub enum Panel {
     Root,
     Targets,
+    Build,
     Details,
+    Stock,
 }
 
 impl Default for Panel {
@@ -160,6 +163,8 @@ impl Display for Panel {
             Panel::Root => f.write_str("Resume"),
             Panel::Targets => f.write_str("Targets"),
             Panel::Details => f.write_str("Details"),
+            Panel::Build => f.write_str("Builds"),
+            Panel::Stock => f.write_str("Stocks"),
         }
     }
 }

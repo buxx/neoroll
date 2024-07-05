@@ -38,6 +38,8 @@ impl<'a> Painter<'a> {
             Panel::Root => self.root(ui),
             Panel::Targets => self.targets(ui),
             Panel::Details => self.details(ui),
+            Panel::Build => self.builds(ui),
+            Panel::Stock => self.stocks(ui),
         }
     }
 

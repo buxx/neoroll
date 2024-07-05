@@ -3,21 +3,22 @@ use std::collections::HashMap;
 use neoroll_world::{
     entity::structure::Structure,
     gameplay::{material::Material, tribe::TribeId, Quantity},
+    space::AbsoluteWorldPoint,
 };
 
 use crate::state::State;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MaterialsState {
-    total: Vec<(Material, Quantity)>,
+    points: Vec<(AbsoluteWorldPoint, Vec<(Material, Quantity)>)>,
 }
 impl MaterialsState {
-    fn new(total: Vec<(Material, Quantity)>) -> Self {
-        Self { total }
+    fn new(points: Vec<(AbsoluteWorldPoint, Vec<(Material, Quantity)>)>) -> Self {
+        Self { points }
     }
 
-    pub fn total(&self) -> &[(Material, Quantity)] {
-        &self.total
+    pub fn storages(&self) -> &[(AbsoluteWorldPoint, Vec<(Material, Quantity)>)] {
+        &self.points
     }
 }
 
@@ -31,23 +32,22 @@ impl<'a> MaterialsStateBuilder<'a> {
     }
 
     pub fn build(self, tribe_id: &TribeId) -> MaterialsState {
-        // FIXME BS NOW: count only tribe human creatures !
-        let mut total: HashMap<Material, Quantity> = HashMap::new();
+        let mut points = vec![];
         for storage in self
             .state
             .game()
             .tribe_structures(tribe_id, Some(Structure::Storage))
         {
-            for (material, quantity) in self.state.world().materials_on(storage.point(), None) {
-                total.entry(*material).or_default().0 += quantity.0;
-            }
+            let content = self
+                .state
+                .world()
+                .materials_on(storage.point(), None)
+                .iter()
+                .map(|(m, q)| (*m, q.clone()))
+                .collect();
+            points.push((*storage.point(), content));
         }
 
-        MaterialsState::new(
-            total
-                .iter()
-                .map(|(k, v)| (*k, v.clone()))
-                .collect::<Vec<(Material, Quantity)>>(),
-        )
+        MaterialsState::new(points)
     }
 }

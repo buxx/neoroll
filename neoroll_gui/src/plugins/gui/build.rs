@@ -4,6 +4,7 @@ use bevy::{
     render::view::RenderLayers,
     sprite::MaterialMesh2dBundle,
 };
+use bevy_egui::egui::Ui;
 use bevy_tileset::prelude::{TileIndex, Tilesets};
 use neoroll_server::{server::ClientMessage, state::game::ClientGameMessage};
 use neoroll_world::{gameplay::build::Buildable, space::AbsoluteWorldPoint};
@@ -17,7 +18,7 @@ use crate::{
     utils::TileName,
 };
 
-use super::{Current, GuiState};
+use super::{paint::Painter, Current, GuiAction, GuiState};
 
 #[derive(Component)]
 pub struct BuildCursor;
@@ -172,4 +173,18 @@ pub fn try_build(
 
 fn tile_point_from_world_xy(position: Vec2) -> AbsoluteWorldPoint {
     AbsoluteWorldPoint::from_scene_point(ScenePoint::new(position.x, -position.y))
+}
+
+impl<'a> Painter<'a> {
+    pub fn builds(&mut self, ui: &mut Ui) -> Vec<GuiAction> {
+        if self.game().build().can_build_campfire() && ui.button("Campfire").clicked() {
+            return vec![GuiAction::Build(Buildable::Campfire)];
+        }
+
+        if self.game().build().can_build_storage() && ui.button("Storage").clicked() {
+            return vec![GuiAction::Build(Buildable::Storage)];
+        }
+
+        vec![]
+    }
 }
