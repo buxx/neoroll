@@ -4,7 +4,7 @@ use bevy::{
     render::view::RenderLayers,
     sprite::MaterialMesh2dBundle,
 };
-use bevy_egui::egui::Ui;
+use bevy_egui::egui::{self, Ui};
 use bevy_tileset::prelude::{TileIndex, Tilesets};
 use neoroll_server::{server::ClientMessage, state::game::ClientGameMessage};
 use neoroll_world::{gameplay::build::Buildable, space::AbsoluteWorldPoint};
@@ -12,6 +12,7 @@ use neoroll_world::{gameplay::build::Buildable, space::AbsoluteWorldPoint};
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
     graphics::{REGION_TILE_HEIGHT, REGION_TILE_WIDTH},
+    image::Illustration,
     layer::LAYER_SCENE_ITEMS,
     plugins::{server::gateway::GatewayWrapper, world::tileset::WORLD_TILESET_NAME},
     scene::{FromScenePoint, ScenePoint},
@@ -177,14 +178,26 @@ fn tile_point_from_world_xy(position: Vec2) -> AbsoluteWorldPoint {
 
 impl<'a> Painter<'a> {
     pub fn builds(&mut self, ui: &mut Ui) -> Vec<GuiAction> {
-        if self.game().build().can_build_campfire() && ui.button("Campfire").clicked() {
-            return vec![GuiAction::Build(Buildable::Campfire)];
-        }
+        let mut actions = vec![];
 
-        if self.game().build().can_build_storage() && ui.button("Storage").clicked() {
-            return vec![GuiAction::Build(Buildable::Storage)];
-        }
+        ui.horizontal_wrapped(|ui| {
+            if self.game().build().can_build_campfire()
+                && ui
+                    .add_sized([75., 75.], egui::ImageButton::new(Illustration::CampfireButton.data()))
+                    .clicked()
+            {
+                actions.extend(vec![GuiAction::Build(Buildable::Campfire)]);
+            };
 
-        vec![]
+            if self.game().build().can_build_storage()
+                && ui
+                    .add_sized([75., 75.], egui::ImageButton::new(Illustration::ShortAndDryGrassButton.data()))
+                    .clicked()
+            {
+                actions.extend(vec![GuiAction::Build(Buildable::Storage)]);
+            };
+        });
+
+        actions
     }
 }

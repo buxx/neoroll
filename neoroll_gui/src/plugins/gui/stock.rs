@@ -25,7 +25,13 @@ impl<'a> Painter<'a> {
         self.state_mut().set_storage(selected_storage);
 
         if let Some(point) = self.state().storage() {
-            if let Some((_, stocks)) = self.game().materials().storages().iter().find(|(p, _)| p == &point) {
+            if let Some((_, stocks)) = self
+                .game()
+                .materials()
+                .storages()
+                .iter()
+                .find(|(p, _)| p == &point)
+            {
                 Grid::new("stock")
                     .min_col_width(175.)
                     .min_row_height(50.)

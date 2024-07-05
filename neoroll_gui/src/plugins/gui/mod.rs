@@ -163,7 +163,7 @@ impl Display for Panel {
             Panel::Root => f.write_str("Resume"),
             Panel::Targets => f.write_str("Targets"),
             Panel::Details => f.write_str("Details"),
-            Panel::Build => f.write_str("Builds"),
+            Panel::Build => f.write_str("Build"),
             Panel::Stock => f.write_str("Stocks"),
         }
     }
