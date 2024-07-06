@@ -96,7 +96,7 @@ fn gui(
         let ctx = contexts.ctx_mut();
         egui_extras::install_image_loaders(ctx);
 
-        egui::Window::new("").show(ctx, |ui| {
+        egui::Window::new("").auto_sized().show(ctx, |ui| {
             if let Some(game) = game_state.state() {
                 effects.extend(Painter::new(game, &mut state, &world_part.0, &gateway).paint(ui));
             }
