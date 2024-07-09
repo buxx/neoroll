@@ -4,7 +4,7 @@ use bevy::prelude::*;
 pub struct InputState {
     cursor: Vec2,
     clicking: Option<(MouseButton, Vec2)>,
-    clicked: Option<(MouseButton, Vec2)>,
+    clicked: Option<(MouseButton, Vec2, bool)>,
 }
 
 impl InputState {
@@ -20,10 +20,10 @@ impl InputState {
         self.clicking = Some((button, point))
     }
 
-    pub fn end_clicking(&mut self, button: MouseButton, point: Vec2) {
+    pub fn end_clicking(&mut self, button: MouseButton, point: Vec2, in_gui: bool) {
         if let Some((button_, point_)) = self.clicking() {
             if button_ == button && point_ == point {
-                self.clicked = Some((button, point));
+                self.clicked = Some((button, point, in_gui));
             }
         }
         self.clicking = None;
@@ -37,7 +37,19 @@ impl InputState {
         &mut self.cursor
     }
 
-    pub fn clicked(&self) -> Option<(MouseButton, Vec2)> {
+    pub fn clicked(&self) -> Option<(MouseButton, Vec2, bool)> {
         self.clicked
+    }
+
+    pub fn is_clicked(&self) -> bool {
+        self.clicked.is_some()
+    }
+
+    pub fn is_clicked_outside_gui(&self) -> bool {
+        if let Some((_, _, in_gui)) = self.clicked {
+            !in_gui
+        } else {
+            false
+        }
     }
 }

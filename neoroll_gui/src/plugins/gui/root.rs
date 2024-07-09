@@ -9,7 +9,7 @@ impl<'a> Painter<'a> {
     pub fn root(&mut self, ui: &mut Ui) -> Vec<GuiAction> {
         ui.label(
             "Establish your tribe by building a campfire.
- Then, ensure your tribesmen food and supplies by setting targets."
+ Then, ensure your tribesmen food and supplies by setting targets.",
         );
 
         // TODO: self.state.server_speed_request must be fixed by previously set value (when disconnect/reconnect)

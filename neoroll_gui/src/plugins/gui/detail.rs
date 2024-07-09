@@ -1,3 +1,5 @@
+use std::mem;
+
 use bevy::{
     prelude::{Query, ResMut, With, Without},
     render::camera::Camera,
@@ -5,7 +7,7 @@ use bevy::{
     window::Window,
 };
 use bevy_egui::egui::{Grid, Ui, Vec2};
-use neoroll_world::{entity::creature::PartialCreature, space::AbsoluteWorldPoint};
+use neoroll_world::{entity::{creature::PartialCreature, floor::Floor}, space::AbsoluteWorldPoint};
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
@@ -25,7 +27,7 @@ pub fn details(
     world_part: ResMut<WorldPartContainer>,
     windows: Query<&Window>,
 ) {
-    if !state.is_pointer_over_area() && input_state.clicked().is_some() {
+    if input_state.is_clicked_outside_gui() {
         if let Current::Explore = state.current_mode() {
             let window = windows.single();
             let (camera, camera_transform) = camera.single();
@@ -102,9 +104,12 @@ impl<'a> Painter<'a> {
         }
 
         if let Some(floor) = world.floor(point) {
-            ui.label(format!("Floor: {}", floor.detail_string()));
-            self.illustration(ui, floor);
-            ui.separator();
+            if mem::discriminant(floor) != mem::discriminant(&Floor::Nothing) {
+                ui.label(format!("Floor: {}", floor.detail_string()));
+                self.illustration(ui, floor);
+                ui.separator();
+            }
+            
         }
 
         if let Some(structure) = world.structure(point) {

@@ -65,7 +65,7 @@ pub fn update_inputs(
                 input_state.start_clicking(event.button, point);
             }
             ButtonState::Released => {
-                input_state.end_clicking(event.button, point);
+                input_state.end_clicking(event.button, point, gui.is_pointer_over_area());
             }
         }
     }

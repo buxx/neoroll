@@ -183,7 +183,10 @@ impl<'a> Painter<'a> {
         ui.horizontal_wrapped(|ui| {
             if self.game().build().can_build_campfire()
                 && ui
-                    .add_sized([75., 75.], egui::ImageButton::new(Illustration::CampfireButton.data()))
+                    .add_sized(
+                        [75., 75.],
+                        egui::ImageButton::new(Illustration::CampfireButton.data()),
+                    )
                     .clicked()
             {
                 actions.extend(vec![GuiAction::Build(Buildable::Campfire)]);
@@ -191,7 +194,10 @@ impl<'a> Painter<'a> {
 
             if self.game().build().can_build_storage()
                 && ui
-                    .add_sized([75., 75.], egui::ImageButton::new(Illustration::ShortAndDryGrassButton.data()))
+                    .add_sized(
+                        [75., 75.],
+                        egui::ImageButton::new(Illustration::ShortAndDryGrassButton.data()),
+                    )
                     .clicked()
             {
                 actions.extend(vec![GuiAction::Build(Buildable::Storage)]);
