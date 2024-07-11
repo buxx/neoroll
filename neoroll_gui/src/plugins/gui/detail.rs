@@ -7,7 +7,10 @@ use bevy::{
     window::Window,
 };
 use bevy_egui::egui::{Grid, Ui, Vec2};
-use neoroll_world::{entity::{creature::PartialCreature, floor::Floor}, space::AbsoluteWorldPoint};
+use neoroll_world::{
+    entity::{creature::PartialCreature, floor::Floor},
+    space::AbsoluteWorldPoint,
+};
 
 use crate::{
     camera::{BackgroundCamera, SceneItemsCamera},
@@ -109,7 +112,6 @@ impl<'a> Painter<'a> {
                 self.illustration(ui, floor);
                 ui.separator();
             }
-            
         }
 
         if let Some(structure) = world.structure(point) {

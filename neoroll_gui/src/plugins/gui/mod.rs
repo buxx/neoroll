@@ -96,11 +96,14 @@ fn gui(
         let ctx = contexts.ctx_mut();
         egui_extras::install_image_loaders(ctx);
 
-        egui::Window::new("").default_size([640., 300.]).show(ctx, |ui| {
-            if let Some(game) = game_state.state() {
-                effects.extend(Painter::new(game, &mut state, &world_part.0, &gateway).paint(ui));
-            }
-        });
+        egui::Window::new("")
+            .default_size([640., 300.])
+            .show(ctx, |ui| {
+                if let Some(game) = game_state.state() {
+                    effects
+                        .extend(Painter::new(game, &mut state, &world_part.0, &gateway).paint(ui));
+                }
+            });
 
         hover = ctx.is_pointer_over_area();
     }

@@ -27,26 +27,10 @@ use super::{drag::DraggedScreen, state::InputState};
 
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::type_complexity)]
-pub fn update_inputs(
-    mut input_state: ResMut<InputState>,
-    mut mouse_button_input_events: EventReader<MouseButtonInput>,
-    mut mouse_wheel_input_events: EventReader<MouseWheel>,
-    mut cursor_moved_events: EventReader<CursorMoved>,
+pub fn update_keyboard(
     mut keyboard_events: EventReader<KeyboardInput>,
-    mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
-    mut world_container_need_refresh: EventWriter<WorldPartContainerNeedRefresh>,
-    mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
-    mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
-    mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
     mut switch_gui_display: EventWriter<SwitchDisplayWindow>,
-    mut dragged_screen: EventWriter<DraggedScreen>,
-    mut world_part: ResMut<WorldPartContainer>,
-    mut map_part: ResMut<MapPartContainer>,
-    gateway: Res<GatewayWrapper>,
-    gui: Res<GuiState>,
 ) {
-    let mut camera = camera.single_mut();
-
     // Keyboard
     for event in keyboard_events.iter() {
         if let Some(KeyCode::Space) = event.key_code {
@@ -55,7 +39,15 @@ pub fn update_inputs(
             }
         }
     }
+}
 
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
+pub fn update_clicks(
+    mut input_state: ResMut<InputState>,
+    mut mouse_button_input_events: EventReader<MouseButtonInput>,
+    gui: Res<GuiState>,
+) {
     // Clicks and Drags
     input_state.reset_clicked();
     for event in mouse_button_input_events.iter() {
@@ -69,6 +61,22 @@ pub fn update_inputs(
             }
         }
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
+pub fn update_wheel(
+    mut mouse_wheel_input_events: EventReader<MouseWheel>,
+    mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
+    mut world_container_need_refresh: EventWriter<WorldPartContainerNeedRefresh>,
+    mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
+    mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
+    mut map_container_refreshed: EventWriter<MapPartContainerRefreshed>,
+    mut world_part: ResMut<WorldPartContainer>,
+    mut map_part: ResMut<MapPartContainer>,
+    gateway: Res<GatewayWrapper>,
+) {
+    let mut camera = camera.single_mut();
 
     // Wheel
     for event in mouse_wheel_input_events.iter() {
@@ -98,6 +106,19 @@ pub fn update_inputs(
             map_container_refreshed.send(MapPartContainerRefreshed);
         }
     }
+}
+#[allow(clippy::too_many_arguments)]
+#[allow(clippy::type_complexity)]
+pub fn update_motion(
+    mut input_state: ResMut<InputState>,
+    mut cursor_moved_events: EventReader<CursorMoved>,
+    mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
+    mut world_container_need_refresh: EventWriter<WorldPartContainerNeedRefresh>,
+    mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
+    mut dragged_screen: EventWriter<DraggedScreen>,
+    gui: Res<GuiState>,
+) {
+    let mut camera = camera.single_mut();
 
     // Motion
     for event in cursor_moved_events.iter() {

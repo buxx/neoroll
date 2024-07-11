@@ -1,9 +1,9 @@
 use bevy::prelude::*;
+use update::{update_clicks, update_keyboard, update_motion, update_wheel};
 
 use self::{
     drag::{on_dragged_screen, DraggedScreen},
     state::InputState,
-    update::update_inputs,
     window::on_window_resize,
 };
 
@@ -18,6 +18,16 @@ impl Plugin for UserInputsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InputState>()
             .add_event::<DraggedScreen>()
-            .add_systems(Update, (update_inputs, on_dragged_screen, on_window_resize));
+            .add_systems(
+                Update,
+                (
+                    update_keyboard,
+                    update_wheel,
+                    update_motion,
+                    update_clicks,
+                    on_dragged_screen,
+                    on_window_resize,
+                ),
+            );
     }
 }
