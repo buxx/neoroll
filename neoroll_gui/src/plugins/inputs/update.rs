@@ -66,8 +66,12 @@ pub fn update_clicks(
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::type_complexity)]
 pub fn update_wheel(
+    window: Query<&Window>,
     mut mouse_wheel_input_events: EventReader<MouseWheel>,
-    mut camera: Query<&mut Transform, (With<SceneItemsCamera>, Without<BackgroundCamera>)>,
+    mut camera: Query<
+        (&Camera, &mut Transform, &GlobalTransform),
+        (With<SceneItemsCamera>, Without<BackgroundCamera>),
+    >,
     mut world_container_need_refresh: EventWriter<WorldPartContainerNeedRefresh>,
     mut map_container_need_refresh: EventWriter<MapPartContainerNeedRefresh>,
     mut world_container_refreshed: EventWriter<WorldPartContainerRefreshed>,
@@ -76,34 +80,74 @@ pub fn update_wheel(
     mut map_part: ResMut<MapPartContainer>,
     gateway: Res<GatewayWrapper>,
 ) {
-    let mut camera = camera.single_mut();
+    let window = window.single();
+    let (camera, mut camera_transform, camera_global_transform) = camera.single_mut();
 
     // Wheel
-    for event in mouse_wheel_input_events.iter() {
-        camera.scale -= event.y / 5.;
-        camera.scale.x = camera.scale.x.clamp(0.25, 16.);
-        camera.scale.y = camera.scale.y.clamp(0.25, 16.);
+    if let Some(cursor_position) = window.cursor_position() {
+        if let Some(world_position) =
+            camera.viewport_to_world_2d(camera_global_transform, cursor_position)
+        {
+            for event in mouse_wheel_input_events.iter() {
+                let previous_scale_x = camera_transform.scale.x;
+                let previous_scale_y = camera_transform.scale.y;
 
-        if AlphaByScale::world().display(camera.scale.x) {
-            world_container_need_refresh.send(WorldPartContainerNeedRefresh);
-        // If world is not anymore displayed, remove all related to World
-        } else {
-            gateway.send(ClientMessage::Subscriptions(SubscriptionsMessage::SetArea(
-                None,
-            )));
-            gateway.send(ClientMessage::Subscriptions(
-                SubscriptionsMessage::SetCreatures(vec![]),
-            ));
+                camera_transform.scale -= event.y / 5.;
+                camera_transform.scale.x = camera_transform.scale.x.clamp(0.25, 16.);
+                camera_transform.scale.y = camera_transform.scale.y.clamp(0.25, 16.);
 
-            world_part.0.clear();
-            world_container_refreshed.send(WorldPartContainerRefreshed);
-        }
+                if true {
+                    // This is the position of cursor from the center of the screen
+                    let cursor_position_from_screen_center = Vec2::new(
+                        cursor_position.x - (window.width() / 2.),
+                        cursor_position.y - (window.height() / 2.),
+                    );
+                    // This is the offset between screen center and cursor in world 2d
+                    let world_offset_from_cursor_before = Vec2::new(
+                        cursor_position_from_screen_center.x * previous_scale_x,
+                        cursor_position_from_screen_center.y * previous_scale_y,
+                    );
+                    let world_offset_from_cursor_after = Vec2::new(
+                        cursor_position_from_screen_center.x * camera_transform.scale.x,
+                        cursor_position_from_screen_center.y * camera_transform.scale.y,
+                    );
 
-        if AlphaByScale::map().display(camera.scale.x) {
-            map_container_need_refresh.send(MapPartContainerNeedRefresh);
-        } else {
-            map_part.0.clear();
-            map_container_refreshed.send(MapPartContainerRefreshed);
+                    let decal = Vec2::new(
+                        world_offset_from_cursor_before.x - world_offset_from_cursor_after.x,
+                        world_offset_from_cursor_before.y - world_offset_from_cursor_after.y,
+                    );
+
+                    dbg!((world_offset_from_cursor_before, world_offset_from_cursor_after, decal));
+
+                    camera_transform.translation = Vec3::new(
+                        camera_transform.translation.x + decal.x,
+                        camera_transform.translation.y - decal.y,
+                        0.,
+                    );
+                }
+
+                if AlphaByScale::world().display(camera_transform.scale.x) {
+                    world_container_need_refresh.send(WorldPartContainerNeedRefresh);
+                // If world is not anymore displayed, remove all related to World
+                } else {
+                    gateway.send(ClientMessage::Subscriptions(SubscriptionsMessage::SetArea(
+                        None,
+                    )));
+                    gateway.send(ClientMessage::Subscriptions(
+                        SubscriptionsMessage::SetCreatures(vec![]),
+                    ));
+
+                    world_part.0.clear();
+                    world_container_refreshed.send(WorldPartContainerRefreshed);
+                }
+
+                if AlphaByScale::map().display(camera_transform.scale.x) {
+                    map_container_need_refresh.send(MapPartContainerNeedRefresh);
+                } else {
+                    map_part.0.clear();
+                    map_container_refreshed.send(MapPartContainerRefreshed);
+                }
+            }
         }
     }
 }
