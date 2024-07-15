@@ -112,7 +112,8 @@ impl Runner {
         let sleep_target = self.sleep_target_ns();
         let tick_duration = Instant::now() - tick_start;
         let need_sleep = sleep_target - (tick_duration.as_nanos() as u64).min(sleep_target);
-        self.lag += (tick_duration.as_nanos() as u64 - sleep_target).min(0);
+        self.lag +=
+            (tick_duration.as_nanos().max(sleep_target.into()) as u64 - sleep_target).min(0);
         let catchable_lag = self.lag.min(need_sleep);
         self.lag -= catchable_lag;
         thread::sleep(Duration::from_nanos(need_sleep - catchable_lag));
