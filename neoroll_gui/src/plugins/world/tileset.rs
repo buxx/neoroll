@@ -37,14 +37,15 @@ pub fn material_tile_name(material: &Material_) -> TileName {
     match material {
         Material_::Resource(Resource::Food) => TileName("Apple".to_string()),
         Material_::Resource(Resource::RawFlint) => TileName("RawFlint".to_string()),
+        Material_::Resource(Resource::Branches) => TileName("Branches".to_string()),
     }
 }
 
 pub fn structure_tile_name(structure: &Structure) -> TileName {
     match structure {
         Structure::Nothing => TileName("Nothing".to_string()),
-        Structure::BigLeafTree => TileName("BigLeafTree".to_string()),
-        Structure::FruitTree(filled) => match filled.0 {
+        Structure::BigLeafTree(_) => TileName("BigLeafTree".to_string()),
+        Structure::FruitTree(_, food_filled) => match food_filled.0 {
             0..=50 => TileName("BigLeafTree".to_string()),
             51..=128 => TileName("FruitTree1".to_string()),
             129..=255 => TileName("FruitTree2".to_string()),

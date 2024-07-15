@@ -16,5 +16,6 @@
         11: "../tiles/world/apple.ron",
         12: "../tiles/world/soil_flint.ron",
         13: "../tiles/world/raw_flint.ron",
+        14: "../tiles/world/branches.ron",
     }
 )

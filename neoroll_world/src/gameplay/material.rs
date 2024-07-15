@@ -12,8 +12,9 @@ impl Material {
     pub fn quantity_string(&self, quantity: &Quantity) -> String {
         let (unit, divide) = match self {
             Material::Resource(resource) => match resource {
-                Resource::Food => ("Kg", 1000),
-                Resource::RawFlint => ("u", 1),
+                Resource::Food => ("Kg", 1_000), // wrote in g
+                Resource::RawFlint => ("u", 1),  // wrote in u
+                Resource::Branches => ("m³", 1), // wrote in m³
             },
         };
 
@@ -33,6 +34,7 @@ impl Display for Material {
 pub enum Resource {
     Food,
     RawFlint,
+    Branches,
     // CarvedFlint,
 }
 
@@ -41,6 +43,7 @@ impl Resource {
         let factor = match self {
             Resource::Food => 1,
             Resource::RawFlint => 1000,
+            Resource::Branches => 1,
         };
         Weight(quantity.0 * factor)
     }
@@ -51,6 +54,7 @@ impl Display for Resource {
         match self {
             Resource::Food => f.write_str("Food"),
             Resource::RawFlint => f.write_str("Raw Flint"),
+            Resource::Branches => f.write_str("Branches"),
             // Resource::CarvedFlint => f.write_str("Carved Flint"),
         }
     }

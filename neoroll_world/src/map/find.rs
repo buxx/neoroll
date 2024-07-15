@@ -4,7 +4,7 @@ use strum::IntoEnumIterator;
 
 use crate::{
     entity::{floor::Floor, ground::Ground, structure::Structure, Filled},
-    gameplay::{material::Material, CollectType},
+    gameplay::{config::IntoCollect, material::Material, CollectType},
     space::{world::World, AbsoluteWorldPoint},
     utils::Direction,
 };
@@ -121,8 +121,9 @@ impl<'a> AroundTileFinder<'a> {
         if let Some(expected_collect) = &self.collect {
             if let Some(point_ground) = self.world.ground(point) {
                 if !point_ground
-                    .collectable(*expected_collect)
-                    .unwrap_or(&Filled(0))
+                    .collect(*expected_collect)
+                    .and_then(|c| Some(c.filled().clone()))
+                    .unwrap_or(Filled(0))
                     .is_empty()
                 {
                     return Some(*point);
@@ -131,8 +132,9 @@ impl<'a> AroundTileFinder<'a> {
 
             if let Some(point_floor) = self.world.floor(point) {
                 if !point_floor
-                    .collectable(*expected_collect)
-                    .unwrap_or(&Filled(0))
+                    .collect(*expected_collect)
+                    .and_then(|c| Some(c.filled().clone()))
+                    .unwrap_or(Filled(0))
                     .is_empty()
                 {
                     return Some(*point);
@@ -141,8 +143,9 @@ impl<'a> AroundTileFinder<'a> {
 
             if let Some(point_structure) = self.world.structure(point) {
                 if !point_structure
-                    .collectable(*expected_collect)
-                    .unwrap_or(&Filled(0))
+                    .collect(*expected_collect)
+                    .and_then(|c| Some(c.filled().clone()))
+                    .unwrap_or(Filled(0))
                     .is_empty()
                 {
                     return Some(*point);
@@ -229,7 +232,7 @@ mod test {
                 //
                 None,
                 None,
-                Some(Structure::FruitTree(Filled(255))),
+                Some(Structure::FruitTree(Filled(255), Filled(255))),
             ]),
             FilledLayer::new(vec![
                 vec![],

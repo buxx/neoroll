@@ -137,6 +137,7 @@ impl Default for AddTarget {
 pub enum AddKeepStockTargetMaterial {
     Food,
     RawFlint,
+    Branches,
 }
 
 impl Display for AddKeepStockTargetMaterial {
@@ -144,6 +145,7 @@ impl Display for AddKeepStockTargetMaterial {
         match self {
             AddKeepStockTargetMaterial::Food => f.write_str("Food"),
             AddKeepStockTargetMaterial::RawFlint => f.write_str("Raw Flint"),
+            AddKeepStockTargetMaterial::Branches => f.write_str("Branches"),
         }
     }
 }
@@ -159,6 +161,7 @@ impl From<AddKeepStockTargetMaterial> for Material {
         match value {
             AddKeepStockTargetMaterial::Food => Material::Resource(Resource::Food),
             AddKeepStockTargetMaterial::RawFlint => Material::Resource(Resource::RawFlint),
+            AddKeepStockTargetMaterial::Branches => Material::Resource(Resource::Branches),
         }
     }
 }

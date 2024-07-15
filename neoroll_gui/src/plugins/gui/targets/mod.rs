@@ -110,6 +110,11 @@ impl<'a> Painter<'a> {
                                     AddKeepStockTargetMaterial::RawFlint,
                                     &AddKeepStockTargetMaterial::RawFlint.to_string(),
                                 );
+                                ui.selectable_value(
+                                    material,
+                                    AddKeepStockTargetMaterial::Branches,
+                                    &AddKeepStockTargetMaterial::Branches.to_string(),
+                                );
                             });
 
                         if ui.button("Add").clicked() {

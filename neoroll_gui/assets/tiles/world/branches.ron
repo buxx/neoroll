@@ -1,0 +1,4 @@
+(
+    name: "Branches",
+    tile: Standard("tiles/world/branches.png")
+)

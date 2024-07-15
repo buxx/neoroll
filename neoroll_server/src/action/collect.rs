@@ -1,6 +1,6 @@
 use neoroll_world::{
     entity::creature::{CreatureChange, CreatureId},
-    gameplay::{behavior::Behavior, material::Resource, progress::Progress},
+    gameplay::{behavior::Behavior, config::IntoCollect, material::Resource, progress::Progress},
     space::world::{FloorChange, GroundChange, StructureChange, WorldChange},
 };
 
@@ -57,14 +57,14 @@ impl CollectResource {
                 let world = state.world();
                 let creature = world.creatures().get(&self.creature_id).unwrap();
                 if let Some(structure) = &world.structure(creature.point()) {
-                    if let Some(material) = structure.collect_material(self.resource.into()) {
+                    if let Some(material) = structure.material(self.resource.into()) {
                         let (new_structure, collected_quantity) =
                             structure.reduced(self.resource.into());
                         if collected_quantity.0 > 0 {
                             changes.extend(vec![
                                 StateChange::World(WorldChange::Structure(
                                     *creature.point(),
-                                    StructureChange::Set(Some(new_structure)),
+                                    StructureChange::Set(Some(new_structure.clone())),
                                 )),
                                 StateChange::World(WorldChange::Creature(
                                     self.creature_id,
@@ -76,13 +76,13 @@ impl CollectResource {
                     }
                 }
                 if let Some(floor) = world.floor(creature.point()) {
-                    if let Some(material) = floor.collect_material(self.resource.into()) {
+                    if let Some(material) = floor.material(self.resource.into()) {
                         let (new_floor, collected_quantity) = floor.reduced(self.resource.into());
                         if collected_quantity.0 > 0 {
                             changes.extend(vec![
                                 StateChange::World(WorldChange::Floor(
                                     *creature.point(),
-                                    FloorChange::Set(new_floor),
+                                    FloorChange::Set(new_floor.clone()),
                                 )),
                                 StateChange::World(WorldChange::Creature(
                                     self.creature_id,
@@ -94,13 +94,13 @@ impl CollectResource {
                     }
                 }
                 if let Some(ground) = world.ground(creature.point()) {
-                    if let Some(material) = ground.collect_material(self.resource.into()) {
+                    if let Some(material) = ground.material(self.resource.into()) {
                         let (new_ground, collected_quantity) = ground.reduced(self.resource.into());
                         if collected_quantity.0 > 0 {
                             changes.extend(vec![
                                 StateChange::World(WorldChange::Ground(
                                     *creature.point(),
-                                    GroundChange::Set(new_ground),
+                                    GroundChange::Set(new_ground.clone()),
                                 )),
                                 StateChange::World(WorldChange::Creature(
                                     self.creature_id,

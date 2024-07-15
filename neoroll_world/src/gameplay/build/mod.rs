@@ -44,8 +44,8 @@ impl<'a> TryBuild<'a> {
 
         if let Some(structure) = self.world.structure(point) {
             match structure {
-                Structure::BigLeafTree
-                | Structure::FruitTree(_)
+                Structure::BigLeafTree(_)
+                | Structure::FruitTree(_, _)
                 | Structure::Campfire
                 | Structure::Storage => {
                     return Err(TryBuildError::StructureAlreadyExist(structure.clone()))

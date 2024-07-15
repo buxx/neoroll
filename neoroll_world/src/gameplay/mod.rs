@@ -1,7 +1,7 @@
+pub mod config;
 pub mod material;
 pub mod target;
 use std::{
-    fmt::Display,
     iter::Sum,
     ops::{Add, AddAssign, Mul},
 };
@@ -21,6 +21,7 @@ pub mod tribe;
 pub enum CollectType {
     Food,
     RawFlint,
+    Branches,
 }
 
 impl From<Resource> for CollectType {
@@ -28,11 +29,12 @@ impl From<Resource> for CollectType {
         match value {
             Resource::Food => Self::Food,
             Resource::RawFlint => Self::RawFlint,
+            Resource::Branches => Self::Branches,
         }
     }
 }
 
-/// All in game things have same unit
+// FIXME BS NOW: into enum for grams, mc, unit, etc ?
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Default)]
 pub struct Quantity(pub u64);
 

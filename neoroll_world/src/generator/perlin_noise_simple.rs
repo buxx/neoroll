@@ -93,7 +93,7 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
                                 Floor::Nothing,
                             ][WalkerTableBuilder::new(&[60, 20, 20]).build().next()]
                             .clone();
-                            let structure = [Some(Structure::BigLeafTree), None]
+                            let structure = [Some(Structure::BigLeafTree(Filled::full())), None]
                                 [WalkerTableBuilder::new(&[10, 90]).build().next()]
                             .clone();
                             let ground = [Ground::Soil, Ground::SoilFlint(Filled::full())]
@@ -103,8 +103,8 @@ impl WorldGenerator for PerlinNoiseSimpleGenerator {
                         }
                         TileLike::Forest => {
                             let structure = [
-                                Some(Structure::BigLeafTree),
-                                Some(Structure::FruitTree(Filled::full())),
+                                Some(Structure::BigLeafTree(Filled::full())),
+                                Some(Structure::FruitTree(Filled::full(), Filled::full())),
                                 None,
                             ][WalkerTableBuilder::new(&[60, 20, 20]).build().next()]
                             .clone();

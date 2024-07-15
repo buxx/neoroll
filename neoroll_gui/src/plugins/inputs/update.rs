@@ -117,8 +117,6 @@ pub fn update_wheel(
                         world_offset_from_cursor_before.y - world_offset_from_cursor_after.y,
                     );
 
-                    dbg!((world_offset_from_cursor_before, world_offset_from_cursor_after, decal));
-
                     camera_transform.translation = Vec3::new(
                         camera_transform.translation.x + decal.x,
                         camera_transform.translation.y - decal.y,

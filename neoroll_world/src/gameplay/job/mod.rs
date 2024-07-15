@@ -24,6 +24,7 @@ impl From<&Material> for Job {
         match value {
             Material::Resource(Resource::Food) => Job::SearchResource(Resource::Food),
             Material::Resource(Resource::RawFlint) => Job::SearchResource(Resource::RawFlint),
+            Material::Resource(Resource::Branches) => Job::SearchResource(Resource::Branches),
         }
     }
 }
@@ -35,6 +36,7 @@ impl Job {
             Job::SearchResource(resource) => match resource {
                 Resource::Food => vec![],
                 Resource::RawFlint => vec![],
+                Resource::Branches => vec![],
             },
         }
     }

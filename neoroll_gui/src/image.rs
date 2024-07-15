@@ -14,6 +14,7 @@ pub enum Illustration {
     CurvedFlint1,
     FreshWater1,
     RawFlint1,
+    Branches,
 }
 
 impl Illustration {
@@ -40,6 +41,7 @@ impl Illustration {
             Illustration::CurvedFlint1 => include_image!("../../data/images/CurvedFlint1.png"),
             Illustration::FreshWater1 => include_image!("../../data/images/FreshWater1.png"),
             Illustration::RawFlint1 => include_image!("../../data/images/RawFlint1.png"),
+            Illustration::Branches => include_image!("../../data/images/branches.png"),
         }
     }
 }

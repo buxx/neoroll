@@ -13,8 +13,8 @@ impl IntoIllustration for Structure {
     fn illustration(&self) -> Option<Illustration> {
         match self {
             Structure::Nothing => None,
-            Structure::BigLeafTree => Some(Illustration::ArtocarpusAltilis),
-            Structure::FruitTree(_) => Some(Illustration::ApricotTree),
+            Structure::BigLeafTree(_) => Some(Illustration::ArtocarpusAltilis),
+            Structure::FruitTree(_, _) => Some(Illustration::ApricotTree),
             Structure::Campfire => Some(Illustration::Campfire),
             Structure::Storage => None,
         }
@@ -47,6 +47,7 @@ impl IntoIllustration for Material {
             Material::Resource(resource) => match resource {
                 Resource::Food => Some(Illustration::Fruits1),
                 Resource::RawFlint => Some(Illustration::RawFlint1),
+                Resource::Branches => Some(Illustration::Branches),
             },
         }
     }

@@ -11,6 +11,7 @@ use crate::{
         structure::Structure,
     },
     gameplay::{
+        config::IntoCollect,
         material::Material,
         tribe::{structure::StructureOwn, TribeId},
         CollectType, Quantity,
@@ -221,15 +222,15 @@ impl World {
     pub fn can_collect(&self, point: &AbsoluteWorldPoint, collect_type: CollectType) -> bool {
         self.structure(point)
             .as_ref()
-            .and_then(|s| s.collectable(collect_type).map(|f| !f.is_empty()))
+            .and_then(|s| s.collect(collect_type).map(|c| !c.filled().is_empty()))
             .unwrap_or(false)
             || self
                 .floor(point)
-                .and_then(|s| s.collectable(collect_type).map(|f| !f.is_empty()))
+                .and_then(|s| s.collect(collect_type).map(|c| !c.filled().is_empty()))
                 .unwrap_or(false)
             || self
                 .ground(point)
-                .and_then(|s| s.collectable(collect_type).map(|f| !f.is_empty()))
+                .and_then(|s| s.collect(collect_type).map(|c| !c.filled().is_empty()))
                 .unwrap_or(false)
     }
 

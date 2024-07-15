@@ -48,6 +48,10 @@ impl Target {
                     Material::Resource(Resource::RawFlint),
                     TargetQuantity::Fixed(Quantity(100)),
                 ),
+                Material::Resource(Resource::Branches) => Target::KeepStock(
+                    Material::Resource(Resource::Branches),
+                    TargetQuantity::Fixed(Quantity(5)),
+                ),
             },
         }
     }
@@ -65,6 +69,7 @@ impl Target {
             Target::KeepStock(material, _) => match material {
                 Material::Resource(Resource::Food) => Quantity(4000),
                 Material::Resource(Resource::RawFlint) => Quantity(30),
+                Material::Resource(Resource::Branches) => Quantity(1),
             },
         }
     }

@@ -1,7 +1,7 @@
 use weighted_rand::builder::{NewBuilder, WalkerTableBuilder};
 
 use crate::{
-    entity::{floor::Floor, ground::Ground, structure::Structure},
+    entity::{floor::Floor, ground::Ground, structure::Structure, Filled},
     space::{
         layer::{CompositeLayer, FilledLayer, Layers},
         world::World,
@@ -28,7 +28,7 @@ impl DummyWorldGenerator {
     }
 
     fn structure(&self) -> Option<Structure> {
-        let choices = [Some(Structure::BigLeafTree), None];
+        let choices = [Some(Structure::BigLeafTree(Filled::full())), None];
         let index_weights = [80, 20];
         choices[WalkerTableBuilder::new(&index_weights).build().next()].clone()
     }
